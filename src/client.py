@@ -14,7 +14,6 @@ def init_client_socket(serverIP, serverPort):
         clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Connect to the server socket with the [IP, Port number] combination
         clientSocket.connect((serverIP, serverPort)) 
-        print(f'Connected to server on [{serverIP, serverPort}] successfully!')
         return clientSocket
     except ConnectionRefusedError:
         print('Connection refused.')
@@ -45,17 +44,22 @@ def get_and_send_user_input_msg(clientSocket, clientName):
 def send_msg_to_channel(clientSocket, clientName, msg):
     # Send message with current time to the channel
     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    msg = f'[{date_now} {clientName}:{msg}]'
+    msg = f'[{date_now} {clientName}: {msg}]'
     clientSocket.send(msg.encode())
     
     
-def check_if_connection_is_alive(clientSocket):
-    try:
-        clientSocket.sendall(b'Is this connection alive?')
-        return True
-    except Exception as e:
-        print(e)
-        return False
+def check_if_init_connection_is_alive(clientSocket):
+    msg = clientSocket.recv(1024)
+    print(f'Init msg from server: {msg.decode()}.')
+    
+    if msg.decode() == '1':
+        print('Connected to server successfully!')
+    elif msg.decode() == '0':
+        print('Connection refused by server: max client count reached.')
+    else:
+        print('Unhandled msg sent from server.')
+        
+    return msg.decode() == '1'
 
 
 if __name__ == '__main__':
@@ -64,7 +68,7 @@ if __name__ == '__main__':
     
     clientSocket = init_client_socket(SERVER_HOST, SERVER_PORT)
 
-    if not check_if_connection_is_alive(clientSocket):
+    if not check_if_init_connection_is_alive(clientSocket):
         exit()
         
     # Use thread t1 to receive message
