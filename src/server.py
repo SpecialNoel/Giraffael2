@@ -28,34 +28,35 @@ def handle_one_client(conn, address, clientSockets):
             # Close connection with this client
             conn.close()
             clientSockets.remove(conn)
-            print(f'Error: {e}. Removed {address} from client sockets.')
+            print(f'Error: {e}. Removed {address} from client socket list.')
         else:
             # Broadcast received message to all clients
+            print(f'Message from {address}:', msg.decode())
             for socket in clientSockets:
                 socket.send(msg)
 
 
-def accept_a_connection(serverSocket, clientSockets, MAX_CLIENT_COUNT):
-    # Refuse connection established from client if reached max client count
-    if (len(clientSockets) >= MAX_CLIENT_COUNT):
-        print(f'Reached max number of clients: {MAX_CLIENT_COUNT}.')
-        (conn, address) = serverSocket.accept()
-        conn.send(b'');
-        conn.close()
-        return False
-    
+def accept_a_connection(serverSocket, clientSockets, max_client_count):
     # Accept the connection
     (conn, address) = serverSocket.accept()
+    
+    # Refuse the connection if reached max client count already
+    if len(clientSockets) >= max_client_count:
+        print(f'Max client count [{max_client_count}] reached.'
+             ,f'Refused connection from {address}')
+        conn.send(b'0') # refuse this connection by sending an string of 0
+        conn.close()
+        return
+         
     clientSockets.add(conn)
+    conn.send(b'1') # accept this connection by sending an string of 1
     print(f'Accepted connection request from Client on [{address}].')
     
     # Start a new thread that handles this client only
     t = Thread(target=handle_one_client, args=(conn,address,clientSockets,))
     t.daemon = True # Daemon thread to make it ends when the main thread ends
     t.start()
-    
-    return True
-     
+         
         
 if __name__=='__main__':
     MAX_CLIENT_COUNT = 1
@@ -69,15 +70,10 @@ if __name__=='__main__':
     serverSocket.listen(MAX_CLIENT_COUNT)
     print(f'Server socket on [{SERVER_IP}: {SERVER_PORT}] started listening.')
     print(f'MAX {MAX_CLIENT_COUNT} Clients.\n')
-    
-    isAcceptingClient = True
-    
+        
     while True:
         # Start accepting connections established by clients
-        if isAcceptingClient:
-            isAcceptingClient = accept_a_connection(serverSocket, 
-                                                    clientSockets, 
-                                                    MAX_CLIENT_COUNT)
+        accept_a_connection(serverSocket, clientSockets, MAX_CLIENT_COUNT)
         
         # If the last connected client disconnects, stop accepting more.
         if not len(clientSockets):
