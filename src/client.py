@@ -4,7 +4,6 @@
 # Note: must be executed when the server is alive.
 
 import socket
-from datetime import datetime
 from threading import Thread
 
 
@@ -23,28 +22,37 @@ def init_client_socket(serverIP, serverPort):
 def recv_msg_from_channel(clientSocket):
     # Receive message from other clients in the channel
     while True:
+        if not is_connection_alive(clientSocket):
+            break
+        
         msg = clientSocket.recv(1024)
-        # Received a message with length 0 (only possible from server)
+        # Received a message of string 0 (only possible from server)
         # This means that the server wants to close the connection
         #   established by this client b/c of max num of clients reached
         if len(msg) == 0: break 
-        print('\n' + msg.decode())
+        print(msg.decode() + '\n')
 
     
-def get_and_send_user_input_msg(clientSocket, clientName):
-    print('\nType a message to send to the channel, or\nType q to disconnect.')
+def get_and_send_user_input_msg(clientSocket):
+    ruleSent = False
+
     while True:
+        if not ruleSent: 
+            ruleSent = True
+            print('\nType a message to send to the channel, ',
+                  'or\nType q to disconnect.\n')
+            
         msg = input()
+        send_msg_to_channel(clientSocket, msg)
         if msg.lower() == 'q':
-            print('\nDisconnected from the channel.')
+            print('Disconnected from the channel.\n')
             break
-        send_msg_to_channel(clientSocket, clientName, msg)
 
 
-def send_msg_to_channel(clientSocket, clientName, msg):
-    # Send message with current time to the channel
-    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    msg = f'[{date_now} {clientName}: {msg}]'
+def send_msg_to_channel(clientSocket, msg):
+    # Send message to the channel
+    if not is_connection_alive(clientSocket):
+        exit()
     clientSocket.send(msg.encode())
     
     
@@ -52,14 +60,24 @@ def check_if_init_connection_is_alive(clientSocket):
     msg = clientSocket.recv(1024)
     print(f'Init msg from server: {msg.decode()}.')
     
-    if msg.decode() == '1':
-        print('Connected to server successfully!')
-    elif msg.decode() == '0':
+    if msg.decode() == '-1':
         print('Connection refused by server: max client count reached.')
     else:
-        print('Unhandled msg sent from server.')
-        
-    return msg.decode() == '1'
+        print('Connected to server successfully!')
+    
+    return msg.decode() != '-1'
+
+
+def is_connection_alive(clientSocket):
+    try:
+        clientSocket.send(b'')
+        return True
+    except (BrokenPipeError, 
+            ConnectionResetError, 
+            ConnectionAbortedError) as e:
+        print(f'Error: {e}. ',
+              f'Connection with server is no longer alive.')
+        return False
 
 
 if __name__ == '__main__':
@@ -72,14 +90,14 @@ if __name__ == '__main__':
         exit()
         
     # Use thread t1 to receive message
-    clientName = input('Enter your username: ')
+    #clientName = input('Enter your username: ')
     t1 = Thread(target=recv_msg_from_channel, args=(clientSocket,))
     t1.daemon = True
     t1.start()
 
     # Use thread t2 to send message
     t2 = Thread(target=get_and_send_user_input_msg, 
-                args=(clientSocket,clientName,))
+                args=(clientSocket,))
     t2.daemon = True
     t2.start()
     
