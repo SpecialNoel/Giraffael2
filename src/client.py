@@ -3,6 +3,10 @@
 # To run this script: python3 client.py
 # Note: must be executed when the server is alive.
 
+
+# Note:
+# 'client' is essentially only a socket in client.py
+
 import socket
 from threading import Thread
 
@@ -43,20 +47,32 @@ def get_and_send_user_input_msg(client):
                   'or\nType q to disconnect.\n')
             
         msg = input()
-        send_msg_to_channel(client, msg)
+        send_msg_to_server(client, msg)
         if msg.lower() == 'q':
             print('Disconnected from the channel.\n')
             break
 
 
-def send_msg_to_channel(client, msg):
+def send_msg_to_server(client, msg):
     # Send message to the channel
     if not is_connection_alive(client):
         exit()
     client.send(msg.encode())
     
     
-def check_if_init_connection_is_alive(client):
+def send_username_to_server(client):
+    print('Type in your username: ')
+    msg = input()
+    send_msg_to_server(client, msg)
+    
+
+def send_room_code_to_server(client):
+    print('Type in the room code: ')
+    msg = input()
+    send_msg_to_server(client, msg)
+    
+    
+def check_if_server_reached_max_client_capacity(client):
     msg = client.recv(1024)
     print(f'Init msg from server: {msg.decode()}.')
     
@@ -85,9 +101,12 @@ if __name__ == '__main__':
     SERVER_PORT = 5001
     
     client = init_client_socket(SERVER_HOST, SERVER_PORT)
-
-    if not check_if_init_connection_is_alive(client):
+    
+    if not check_if_server_reached_max_client_capacity(client):
         exit()
+    
+    send_username_to_server(client)
+    send_room_code_to_server(client)
         
     # Use thread t1 to receive message
     #clientName = input('Enter your username: ')
