@@ -105,8 +105,8 @@ if __name__ == '__main__':
     if not check_if_server_reached_max_client_capacity(client):
         exit()
     
-    send_username_to_server(client)
     send_room_code_to_server(client)
+    send_username_to_server(client)
         
     # Use thread t1 to receive message
     #clientName = input('Enter your username: ')
