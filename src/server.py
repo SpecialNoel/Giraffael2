@@ -17,11 +17,13 @@
 #   2) a room name, and
 #   3) a list of Client_Obj
 
+import secrets
 import socket
-from datetime import datetime
-from threading import Thread
+import string
 from client_obj import Client_Obj
+from datetime import datetime
 from room import Room
+from threading import Thread
 
 
 def init_server(serverIP, serverPort):
@@ -59,48 +61,78 @@ def remove_a_client_from_clients_by_socket(client, clients):
     
 def handle_client_disconnect_request(client, 
                                      clients, 
+                                     roomCode,
                                      maxClientCount):
     print(f'Client on [{client.getpeername()}] disconnected.')
     clients = remove_a_client_from_clients_by_socket(client, clients)
     client.close()
-    print(f'Connected clients: [{len(clients)}/{maxClientCount}]\n')
+    print(f'Connected clients: [{len(clients)}/{maxClientCount}]')
+    room = [r for r in rooms if r.get_room_code() == roomCode][0]
+    print_room_status(room)
     return
     
     
-def handle_client_username_message(client):
-    # Add restrictions here to make client input only desired username
-    msg = client.recv(10)
+def handle_client_username_message(client, maxUsernameLength):
+    msg = client.recv(maxUsernameLength)
     username = msg.decode()
     return username
-    
 
-def handle_client_room_code_message(client):
-    # Add restrictions here to make client input only desired room code
-    msg = client.recv(6)
+
+def check_username_validness(username, maxUsernameLength):
+    # Check if the length of the username is in bound
+    if len(username) <= 0 or len(username) > maxUsernameLength:
+        return False 
+    
+    # Check if every character in username is either a letter or a digit
+    charPools = string.ascii_letters + string.digits
+    for char in username:
+        if char not in charPools: 
+            return False
+    return True
+
+
+def handle_client_room_code_message(client, roomCodeLength):
+    msg = client.recv(roomCodeLength)
     roomCode = msg.decode()
     return roomCode
 
 
-def check_room_code_validness(roomCode):
-    # TO-DO: Check if room code is valid here
-    return True
-    
+def check_room_code_validness(roomCode, roomCodes):
+    # Check if the received room code exists in roomCodes
+    return roomCode in roomCodes
+
+
+def get_client_response_on_creating_room(client):
+    # 'C' for create room
+    # 'E' for enter room
+    msg = client.recv(1)
+    decodedMsg = msg.decode()
+    if decodedMsg != 'C' or decodedMsg != 'E':
+        client.send(b'Error: Client response should only be <C> or <E>.')
+        raise ValueError('Error: Client response should only be <C> or <E>.')
+    return msg.decode() == 'C'
+
+
+def generate_an_unique_room_code(roomCodeLength, roomCodes):
+    # Generate an unique room code with roomCodeLength characters
+    # Each character is either a letter (upper or lower) or a digit
+    charPools = string.ascii_letters + string.digits
+    roomCode = ''.join(secrets.choice(charPools) 
+                       for _ in range(roomCodeLength))
+    while roomCode in roomCodes:
+        roomCode = ''.join(secrets.choice(charPools) 
+                           for _ in range(roomCodeLength))
+    roomCodes.append(roomCode)
+    return roomCode
+
 
 def create_room(roomCode, rooms):
-    if not check_room_code_validness(roomCode): 
-        print(f'Room code: {roomCode} is not valid')
-        return
-        
     room = Room(roomCode)
-    rooms.append(room)
+    rooms.append(room) 
     return
 
 
 def enter_room(clientObj, roomCode, rooms):
-    if not check_room_code_validness(roomCode): 
-        print(f'Room code: {roomCode} is not valid')
-        return
-    
     room = [r for r in rooms if r.get_room_code() == roomCode][0]
     room.add_client_to_client_list(clientObj)
     return
@@ -133,14 +165,16 @@ def handle_one_client(clientObj, clients, rooms, maxClientCount):
             # Disconnect from this connection if msg is only 'q'
             decodedMsg = msg.decode()
             print(f'Message from {client.getpeername()}:', decodedMsg)
+            
+            roomCode = clientObj.get_room_code()
             if decodedMsg.lower() == 'q':
                 handle_client_disconnect_request(client, 
-                                                 clients, 
+                                                 clients,
+                                                 roomCode,
                                                  maxClientCount)
                 break
             
             clientSocketsToBeRemoved = []
-            roomCode = clientObj.get_room_code()
             room = [r for r in rooms if r.get_room_code() == roomCode][0]
             # Broadcast received message to all clients within the same room
             for clientObject in room.get_client_list():
@@ -176,18 +210,20 @@ def handle_one_client(clientObj, clients, rooms, maxClientCount):
             clients = remove_a_client_from_clients_by_socket(client, 
                                                              clients)
             client.close()
-            print(f'Connected clients: ',
-                  f'[{len(clients)}/{maxClientCount}]\n')
+            print(f'Connected clients: [{len(clients)}/{maxClientCount}]')
+            room = [r for r in rooms if r.get_room_code() == roomCode][0]
+            print_room_status(room)
             break
 
 
-def accept_a_connection(server, clients, rooms, maxClientCount):
+def accept_a_connection(server, clients, rooms, maxClientCount, 
+                        roomCodeLength, maxUsernameLength, roomCodes):
     # Accept the connection established by a client
     try:
         (conn, address) = server.accept()
     except (KeyboardInterrupt) as e:
         # server received the [ctrl+c] command while waiting for connection
-        print(f'Error: {e}. Disconnected with all clients and exiting now.')        
+        print(f'Error: {e}. Disconnected with all clients and exiting now.')
         for clientObj in clients:
             socket = clientObj.get_socket()
             socket.close()
@@ -205,18 +241,32 @@ def accept_a_connection(server, clients, rooms, maxClientCount):
     msg = str(len(clients))
     conn.send(msg.encode()) # accept connection by sending len(clients)
     
+    # Wait for client to either create or enter room
+    clientWantsToCreateRoom = get_client_response_on_creating_room(conn)
+    
+    # Client wants to create a new room
+    if clientWantsToCreateRoom:
+        # Generate an unique room code for this client
+        roomCode = generate_an_unique_room_code(roomCodeLength, roomCodes) 
+    else:
+        # Wait for client to send the room code
+        roomCode = handle_client_room_code_message(conn, roomCodeLength)
+        if not check_room_code_validness(roomCode, roomCodes): 
+            conn.send(b'Error: Room code does not exist.')
+            raise ValueError(f'Error: Room code: {roomCode} does not exist.')
+
     # Wait for client to send valid username
-    username = handle_client_username_message(conn)
-    # Wait for client to enter room code
-    roomCode = handle_client_room_code_message(conn)
+    username = handle_client_username_message(conn, maxUsernameLength)
+    if not check_username_validness(username, maxUsernameLength):
+        conn.send(b'Error: Username is invalid.')
+        raise ValueError(f'Error: Username {username} is invalid.')
     
     # Create a client obj for this client
     clientObj = Client_Obj(conn, username, roomCode)
     clients.append(clientObj)
-        
-    # If the received room code does not exists, 
-    #   create a new Room with that room code
-    if not check_room_exist_with_room_code(roomCode, rooms):
+    
+    # Create the room if the client wants to do so
+    if clientWantsToCreateRoom:
         create_room(roomCode, rooms)
     
     # Make the client enter the Room
@@ -224,7 +274,7 @@ def accept_a_connection(server, clients, rooms, maxClientCount):
         
     print(f'Accepted connection request from Client on [{address}].')
     print(f'With Username: [{username}], room code: [{roomCode}].')
-    print(f'Total connected clients: [{len(clients)}/{maxClientCount}]')
+    print(f'Connected clients: [{len(clients)}/{maxClientCount}]')
     room = [r for r in rooms if r.get_room_code() == roomCode][0]
     print_room_status(room)
 
@@ -241,10 +291,14 @@ if __name__=='__main__':
     MAX_CLIENT_COUNT = 5
     SERVER_IP = '127.0.0.1'
     SERVER_PORT = 5001
+    # Source: https://www.oberlin.edu/cit/bulletins/passwords-matter
+    ROOM_CODE_LENGTH = 11 # cost about 10 months to crack
+    MAX_USERNAME_LENGTH = 16
     
     server = init_server(SERVER_IP, SERVER_PORT) # server socket
     clients = [] # a list of 'Client_Obj's
     rooms = [] # a dictionary of 'Room's
+    roomCodes = set() # a set of room codes
     
     # Start listening for connection
     server.listen(MAX_CLIENT_COUNT)
@@ -254,7 +308,8 @@ if __name__=='__main__':
         
     while True:
         # Start accepting connections established by clients
-        accept_a_connection(server, clients, rooms, MAX_CLIENT_COUNT)
+        accept_a_connection(server, clients, rooms, MAX_CLIENT_COUNT, 
+                            ROOM_CODE_LENGTH, MAX_USERNAME_LENGTH, roomCodes)
             
     server.close()
     print('Server socket closed.')
