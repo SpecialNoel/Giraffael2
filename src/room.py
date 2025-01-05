@@ -20,3 +20,10 @@ class Room:
         
     def add_client_to_client_list(self, clientSocket):
         self.__clientList.append(clientSocket)
+        
+    def remove_client_from_client_list(self, clientSocket):
+        address = clientSocket.getpeername()
+        for clientObj in self.__clientList:
+            if clientObj.get_socket().getpeername() == address:
+                self.__clientList.remove(clientObj)
+                break
