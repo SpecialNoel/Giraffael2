@@ -1,13 +1,17 @@
 # client_obj.py
 
 class Client_Obj:
-    def __init__(self, socket, username, roomCode):
+    def __init__(self, socket, address, username, roomCode):
         self.__socket = socket # Unmodifiable, unique
+        self.__address = address # Unmodifiable, unique
         self.__username = username
         self.__roomCode = roomCode
         
     def get_socket(self):
         return self.__socket
+    
+    def get_address(self):
+        return self.__address
     
     def get_username(self):
         return self.__username
