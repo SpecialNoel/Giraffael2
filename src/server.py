@@ -10,8 +10,9 @@
 # 1. Every 'client' instance references to a socket in server.py
 # 2. Each 'Client_Obj' instance contains:
 #   1) a socket, 
-#   2) an username, and 
-#   3) a room code
+#   2) address of the socket
+#   3) an username, and 
+#   4) a room code
 # 3. Each 'Room' instance contains:
 #   1) a room code,
 #   2) a room name, and
@@ -53,7 +54,7 @@ def is_client_alive(client):
 def remove_a_client_from_clients_by_socket(client, clients):
     address = client.getpeername()
     for clientObj in clients:
-        if clientObj.get_socket().getpeername() == address:
+        if clientObj.get_address() == address:
             clients.remove(clientObj)
             break
     return clients
@@ -66,6 +67,7 @@ def remove_a_client_from_room_by_socket(client, room):
     
 def handle_client_disconnect_request(client, 
                                      clients, 
+                                     address,
                                      rooms,
                                      roomCode,
                                      maxClientCount,
@@ -79,7 +81,7 @@ def handle_client_disconnect_request(client,
     
     # Remove client from the room
     room = [r for r in rooms if r.get_room_code() == roomCode][0]
-    room = remove_a_client_from_room_by_socket(client, room)
+    room = remove_a_client_from_room_by_socket(address, room)
     print_room_status(room)
     
     # Remove the room code from roomCodes if its corresponding room is empty
@@ -124,6 +126,7 @@ def check_room_code_validness(roomCode, roomCodes):
 
 
 def handle_client_room_code_message(client, roomCodeLength, roomCodes):
+    client.send(b'Please enter the room code.')
     msg = client.recv(roomCodeLength)
     roomCode = msg.decode()
     
@@ -195,7 +198,7 @@ def print_room_status(room):
           f'{len(room.get_client_list())}')
     for idx, clientObj in enumerate(room.get_client_list()):
         print(f'Client {idx+1}: [{clientObj.get_username()},',
-              f'{clientObj.get_socket().getpeername()}]')
+              f'{clientObj.get_address()}]')
     print('') 
     return
 
@@ -204,7 +207,7 @@ def get_message_from_client(client):
     # Receive message from one client
     msg = client.recv(1024)
     print(f'Message from {client.getpeername()}:', msg.decode())
-    return
+    return msg
 
 
 def handle_client_normal_message(client, decodedMsg, clients, 
@@ -233,32 +236,32 @@ def handle_client_normal_message(client, decodedMsg, clients,
     return
 
 
-def close_connection_with_client_when_error(e, client, clients, 
+def close_connection_with_client_when_error(e, client, clients, address,
                                             maxClientCount, rooms, 
                                             roomCode):
     print(f'Error: {e}. Removed {client.getpeername()}', 
             ' from client socket list.')
-    handle_client_disconnect_request(client, clients, rooms,
+    handle_client_disconnect_request(client, clients, address, rooms,
                                      roomCode, maxClientCount, roomCodes)
     return
 
 
 def handle_one_client(clientObj, clients, rooms, maxClientCount, roomCodes):
     client = clientObj.get_socket()
+    address = clientObj.get_address()
+    roomCode = clientObj.get_room_code()
     while True:
         try:
             msg = get_message_from_client(client) # Buffer size: 1024
-            decodedMsg = msg.decode()
             
-            roomCode = clientObj.get_room_code()
             # Disconnect from this connection if msg is empty
-            if len(decodedMsg) == 0:
-                print(f'Client on [{client.getpeername()}] disconnected.')
-                handle_client_disconnect_request(client, clients, rooms,
-                                                 roomCode, maxClientCount,
-                                                 roomCodes)
+            if not msg:
+                handle_client_disconnect_request(client, clients, address, 
+                                                 rooms, roomCode, 
+                                                 maxClientCount, roomCodes)
                 break
             else:
+                decodedMsg = msg.decode()
                 handle_client_normal_message(client, decodedMsg, clients, 
                                              rooms, roomCode)
         except (BrokenPipeError, 
@@ -266,8 +269,8 @@ def handle_one_client(clientObj, clients, rooms, maxClientCount, roomCodes):
                 ConnectionAbortedError) as e:
             # Close connection with this client
             close_connection_with_client_when_error(e, client, clients, 
-                                                    maxClientCount, rooms, 
-                                                    roomCode)
+                                                    address, maxClientCount, 
+                                                    rooms, roomCode)
             break
 
 
@@ -316,6 +319,7 @@ def try_accept_a_connection(server, clients):
         print(f'Error: {e}. Disconnected with all clients and exiting now.')
         for clientObj in clients:
             socket = clientObj.get_socket()
+            # handle server actively disconnect all clients' connection here (by sending an empty string to socket)
             socket.close()
         clients.clear()
         exit()
@@ -351,7 +355,7 @@ def accept_a_connection(server, clients, rooms, maxClientCount,
     username = handle_client_username_message(conn, maxUsernameLength)
     
     # Create a client obj for this client
-    clientObj = Client_Obj(conn, username, roomCode)
+    clientObj = Client_Obj(conn, address, username, roomCode)
     clients.append(clientObj)
     
     # Create the room if the client chose to do so
@@ -374,7 +378,7 @@ if __name__=='__main__':
     SERVER_IP = '127.0.0.1'
     SERVER_PORT = 5001
     # Source: https://www.oberlin.edu/cit/bulletins/passwords-matter
-    ROOM_CODE_LENGTH = 11 # cost about 10 months to crack
+    ROOM_CODE_LENGTH = 11 # takes about 10 months to crack
     MAX_USERNAME_LENGTH = 16
     
     server = init_server(SERVER_IP, SERVER_PORT) # server socket
