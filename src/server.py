@@ -24,7 +24,7 @@ import string
 from client_obj import Client_Obj
 from datetime import datetime
 from room import Room
-from threading import Thread
+from threading import Thread, Event
 
 
 def init_server(serverIP, serverPort):
@@ -246,11 +246,12 @@ def close_connection_with_client_when_error(e, client, clients, address,
     return
 
 
-def handle_one_client(clientObj, clients, rooms, maxClientCount, roomCodes):
+def handle_one_client(clientObj, clients, rooms, maxClientCount, roomCodes,
+                      shutdownEvent):
     client = clientObj.get_socket()
     address = clientObj.get_address()
     roomCode = clientObj.get_room_code()
-    while True:
+    while not shutdownEvent.is_set():
         try:
             msg = get_message_from_client(client) # Buffer size: 1024
             
@@ -275,13 +276,16 @@ def handle_one_client(clientObj, clients, rooms, maxClientCount, roomCodes):
 
 
 def start_handling_one_client(clientObj, clients, rooms, 
-                              maxClientCount, roomCodes):
+                              maxClientCount, roomCodes, shutdownEvent,
+                              threads):
     t = Thread(target=handle_one_client, args=(clientObj,
                                                clients,
                                                rooms,
                                                maxClientCount,
-                                               roomCodes))
+                                               roomCodes,
+                                               shutdownEvent))
     t.daemon = False # Set daemon thread: ends when the main thread ends
+    threads.append(t)
     t.start()
     return
 
@@ -310,67 +314,66 @@ def test_reach_max_client_count(clients, maxClientCount, conn, address):
     return False
 
 
-def try_accept_a_connection(server, clients):
+def accept_a_connection(server, clients, rooms, maxClientCount, 
+                        roomCodeLength, maxUsernameLength,
+                        roomCodes, shutdownEvent, threads):
     try:
-        (conn, address) = server.accept()
-        return conn, address
-    except (KeyboardInterrupt) as e:
+        # Accept the connection established by a client
+        conn, address = server.accept()
+        
+        # If reached max client count before this client: 
+        #   disconnect, then acknowledge the client about the disconnection
+        # Otherwise, acknowledge the client about the successful connection
+        if test_reach_max_client_count(clients, maxClientCount, conn, address):
+            return
+        
+        # Wait for client to either create or enter room
+        clientWantsToCreateRoom = get_client_response_on_creating_room(conn)
+        
+        # Client wants to create a new room
+        if clientWantsToCreateRoom:
+            # Generate an unique room code for this client
+            roomCode = generate_an_unique_room_code(roomCodeLength, roomCodes)
+            # Send the generated room code to the client
+            conn.send(roomCode.encode())
+            print(f'Sent room code [{roomCode}] to client [{address}].')
+        else:
+            # Wait for client to send valid room code
+            roomCode = handle_client_room_code_message(conn, roomCodeLength, 
+                                                    roomCodes)
+
+        # Wait for client to send valid username
+        username = handle_client_username_message(conn, maxUsernameLength)
+        
+        # Create a client obj for this client
+        clientObj = Client_Obj(conn, address, username, roomCode)
+        clients.append(clientObj)
+        
+        # Create the room if the client chose to do so
+        if clientWantsToCreateRoom:
+            create_room(roomCode, rooms)
+
+        # Make the client enter the Room
+        enter_room(clientObj, roomCode, rooms)
+        print_info_when_client_enter_room(address, username, roomCode, 
+                                        clients, maxClientCount)
+
+        # Start a new thread to handle this client
+        start_handling_one_client(clientObj, clients, rooms, 
+                                maxClientCount, roomCodes, shutdownEvent,
+                                threads)
+        return True
+    except KeyboardInterrupt as e:
         # server received the [ctrl+c] command while waiting for connection
         print(f'Error: {e}. Disconnected with all clients and exiting now.')
+        shutdownEvent.set()
         for clientObj in clients:
             socket = clientObj.get_socket()
-            # handle server actively disconnect all clients' connection here (by sending an empty string to socket)
+            # Send an empty string to the client as a notification
+            socket.send(b'')
             socket.close()
         clients.clear()
-        exit()
-
-
-def accept_a_connection(server, clients, rooms, maxClientCount, 
-                        roomCodeLength, maxUsernameLength, roomCodes):
-    # Accept the connection established by a client
-    conn, address = try_accept_a_connection(server, clients)
-    
-    # If reached max client count before this client: 
-    #   disconnect, then acknowledge the client about the disconnection
-    # Otherwise, acknowledge the client about the successful connection
-    if test_reach_max_client_count(clients, maxClientCount, conn, address):
-        return
-    
-    # Wait for client to either create or enter room
-    clientWantsToCreateRoom = get_client_response_on_creating_room(conn)
-    
-    # Client wants to create a new room
-    if clientWantsToCreateRoom:
-        # Generate an unique room code for this client
-        roomCode = generate_an_unique_room_code(roomCodeLength, roomCodes)
-        # Send the generated room code to the client
-        conn.send(roomCode.encode())
-        print(f'Sent room code [{roomCode}] to client [{address}].')
-    else:
-        # Wait for client to send valid room code
-        roomCode = handle_client_room_code_message(conn, roomCodeLength, 
-                                                   roomCodes)
-
-    # Wait for client to send valid username
-    username = handle_client_username_message(conn, maxUsernameLength)
-    
-    # Create a client obj for this client
-    clientObj = Client_Obj(conn, address, username, roomCode)
-    clients.append(clientObj)
-    
-    # Create the room if the client chose to do so
-    if clientWantsToCreateRoom:
-        create_room(roomCode, rooms)
-    
-    # Make the client enter the Room
-    enter_room(clientObj, roomCode, rooms)
-    print_info_when_client_enter_room(address, username, roomCode, 
-                                      clients, maxClientCount)
-
-    # Start a new thread to handle this client
-    start_handling_one_client(clientObj, clients, rooms, 
-                              maxClientCount, roomCodes)
-    return
+        return False
 
   
 if __name__=='__main__':
@@ -386,6 +389,9 @@ if __name__=='__main__':
     rooms = [] # a dictionary of 'Room's
     roomCodes = set() # a set of room codes
     
+    shutdownEvent = Event() # threading.Event()
+    threads = [] # all threads that handle each client
+    
     # Start listening for connection
     server.listen(MAX_CLIENT_COUNT)
     print(f'Server socket on [{SERVER_IP}: {SERVER_PORT}] started listening.')
@@ -394,9 +400,13 @@ if __name__=='__main__':
 
     while True:
         # Start accepting connections established by clients
-        accept_a_connection(server, clients, rooms, MAX_CLIENT_COUNT, 
-                            ROOM_CODE_LENGTH, MAX_USERNAME_LENGTH, roomCodes)
+        if not accept_a_connection(server, clients, rooms, MAX_CLIENT_COUNT, 
+                            ROOM_CODE_LENGTH, MAX_USERNAME_LENGTH, 
+                            roomCodes, shutdownEvent, threads):
+            break
             
+    for t in threads:
+        t.join()
     server.close()
     print('Server socket closed.')
     exit()
