@@ -19,7 +19,7 @@ def init_client_socket(serverIP, serverPort):
         client.connect((serverIP, serverPort)) 
         return client
     except ConnectionRefusedError:
-        print('Connection refused.')
+        print('Connection refused. Server is not on yet.')
         return None
 
 
@@ -33,6 +33,7 @@ def recv_msg_from_channel(client, shutdownEvent):
             #   established by this client b/c of max num of clients reached
             if not msg:
                 print('Server has closed the connection.')
+                shutdownEvent.set()
                 break
             print(msg.decode() + '\n')
         except Exception as e:
@@ -157,8 +158,8 @@ if __name__ == '__main__':
     t2.daemon = True
     t2.start()
     
-    t2.join()
     t1.join()
+    t2.join()
 
     #client.close()
     print('Client socket closed.')
