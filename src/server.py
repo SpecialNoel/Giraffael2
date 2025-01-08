@@ -125,11 +125,19 @@ def check_room_code_validness(roomCode, roomCodes):
     return roomCode in roomCodes
 
 
-def handle_client_room_code_message(client, roomCodeLength, roomCodes):
+def handle_client_room_code_message(client, address, roomCodeLength, roomCodes):
+    createRoomInstead = False
+    
     client.send(b'Please enter the room code.')
     msg = client.recv(roomCodeLength)
     roomCode = msg.decode()
     
+    if msg.upper() == 'C':
+        createRoomInstead = True
+        return createRoomInstead, genrate_and_send_room_code(client, address, 
+                                                             roomCodeLength, 
+                                                             roomCodes)
+        
     while not check_room_code_validness(roomCode, roomCodes):
         msgToClient = 'Error: Room code does not exist.'
         msgToClient += '\nPlease try again.'
@@ -140,7 +148,7 @@ def handle_client_room_code_message(client, roomCodeLength, roomCodes):
     
     # Need to acknowledge client about valid room code here
     client.send(b'VALID_ROOM_CODE')
-    return roomCode
+    return createRoomInstead, roomCode
 
 
 def get_client_response_on_creating_room(client):
@@ -171,6 +179,15 @@ def generate_an_unique_room_code(roomCodeLength, roomCodes):
         roomCode = ''.join(secrets.choice(charPools) 
                            for _ in range(roomCodeLength))
     roomCodes.add(roomCode)
+    return roomCode
+
+
+def genrate_and_send_room_code(conn, address, roomCodeLength, roomCodes):
+    # Generate an unique room code for this client
+    roomCode = generate_an_unique_room_code(roomCodeLength, roomCodes)
+    # Send the generated room code to the client
+    conn.send(roomCode.encode())
+    print(f'Sent room code [{roomCode}] to client [{address}].')
     return roomCode
 
 
@@ -332,15 +349,16 @@ def accept_a_connection(server, clients, rooms, maxClientCount,
         
         # Client wants to create a new room
         if clientWantsToCreateRoom:
-            # Generate an unique room code for this client
-            roomCode = generate_an_unique_room_code(roomCodeLength, roomCodes)
-            # Send the generated room code to the client
-            conn.send(roomCode.encode())
-            print(f'Sent room code [{roomCode}] to client [{address}].')
+            roomCode = genrate_and_send_room_code(conn, address, 
+                                                  roomCodeLength, roomCodes)
         else:
             # Wait for client to send valid room code
-            roomCode = handle_client_room_code_message(conn, roomCodeLength, 
-                                                    roomCodes)
+            createRoomInstead, roomCode = handle_client_room_code_message(
+                                                       conn, address, 
+                                                       roomCodeLength, 
+                                                       roomCodes)
+            if createRoomInstead: 
+                clientWantsToCreateRoom = True
 
         # Wait for client to send valid username
         username = handle_client_username_message(conn, maxUsernameLength)
