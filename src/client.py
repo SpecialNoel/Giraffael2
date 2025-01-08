@@ -135,6 +135,8 @@ if __name__ == '__main__':
         print(f'msg: {msg}, response from server: {responseOnRoomCode}')
         if msg.upper() == 'E':
             msg, responseOnRoomCode = send_room_code_to_server(client)
+            if msg.upper() == 'C':
+                break
             if responseOnRoomCode == 'VALID_ROOM_CODE':
                 responseOnRoomCode = msg
                 break
