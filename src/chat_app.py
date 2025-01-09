@@ -3,7 +3,7 @@
 from server import Server
 
 class Chat_App:
-    def __init__():
+    def __init__(self):
         server = Server()
         server.run_server()
     
