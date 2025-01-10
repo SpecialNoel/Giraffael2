@@ -123,8 +123,8 @@ class Server:
         username = msg.decode()
         
         while not self.check_username_validness(username):
-            msgToClient = 'Error: Username is invalid.'
-            msgToClient += '\nPlease try again.'
+            msgToClient = 'Error: Username is invalid. '
+            msgToClient += 'Please try again.'
             client.send(msgToClient.encode())
             print(f'Error: Username {username} is invalid.')
             msg = client.recv(self.MAX_USERNAME_LENGTH)
@@ -143,18 +143,20 @@ class Server:
     def handle_client_room_code_message(self, client, address):
         createRoomInstead = False
 
-        client.send(b'Please enter the room code.')
+        msg = 'Please enter the room code, OR '
+        msg += 'type c to create room.'
+        client.send(msg.encode())
         msg = client.recv(self.ROOM_CODE_LENGTH)
         roomCode = msg.decode()
-
-        if msg.upper() == 'C':
-            createRoomInstead = True
-            return createRoomInstead, self.genrate_and_send_room_code(client, 
-                                                                      address)
-
+        
         while not self.check_room_code_validness(roomCode):
-            msgToClient = 'Error: Room code does not exist.'
-            msgToClient += '\nPlease try again.'
+            if roomCode.upper() == 'C':
+                createRoomInstead = True
+                return (createRoomInstead, 
+                        self.generate_and_send_room_code(client, address))
+            
+            msgToClient = 'Error: Room code does not exist. '
+            msgToClient += 'Please try again.'
             client.send(msgToClient.encode())
             print(f'Error: Room code: {roomCode} does not exist.')
             msg = client.recv(self.ROOM_CODE_LENGTH)
@@ -174,8 +176,8 @@ class Server:
         # Repeat this step if client responds with invalid message
         while upperedDecodedMsg != 'C':
             if upperedDecodedMsg == 'E': return False
-            msgToClient = 'Error: Client response should only be <C> or <E>.'
-            msgToClient += '\nPlease try again.'
+            msgToClient = 'Error: Client response should only be <C> or <E>. '
+            msgToClient += 'Please try again.'
             client.send(msgToClient.encode())
             print(f'Error: Client response on creating room: ',
                   f'{upperedDecodedMsg}.')
@@ -196,7 +198,7 @@ class Server:
         return roomCode
 
 
-    def genrate_and_send_room_code(self, conn, address):
+    def generate_and_send_room_code(self, conn, address):
         # Generate an unique room code for this client
         roomCode = self.generate_an_unique_room_code()
         # Send the generated room code to the client
@@ -350,7 +352,7 @@ class Server:
             
             # Client wants to create a new room
             if wantCreateRoom:
-                roomCode = self.genrate_and_send_room_code(conn, address)
+                roomCode = self.generate_and_send_room_code(conn, address)
             else:
                 # Wait for client to send valid room code
                 createInstead, roomCode = self.handle_client_room_code_message(
