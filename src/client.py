@@ -8,6 +8,7 @@
 
 import socket
 from threading import Thread, Event
+from message import rstrip_message
 
 
 class Client:
@@ -37,7 +38,7 @@ class Client:
         # Receive message from other clients in the channel
         while not self.shutdownEvent.is_set():
             try:
-                msg = self.client.recv(1024)
+                msg = rstrip_message(self.client.recv(1024))
                 # Received a message of string 0 (only possible from server)
                 # This means that the server wants to close this connection
                 #   b/c of max clients count reached in server
@@ -49,7 +50,7 @@ class Client:
             except Exception as e:
                 print(f'Error [{e}] occurred when receiving message.')
                 break
-        self.client.close()
+        self.client.close() # will be detected by server's 'recv()'
         print('Client receiver thread stopped.')
         return
 
@@ -62,12 +63,12 @@ class Client:
                 ruleSent = True
                 print('\nType a message to send to the channel, ',
                     'or\nPress [Enter/Return] key to disconnect.\n')
-                
-            msg = input()
-            if msg == '':
+            
+            msg = rstrip_message(input())
+            if not msg:
                 print('Disconnected from the channel.\n')
                 self.shutdownEvent.set()
-                self.client.close()
+                self.client.close() # will be detected by server's 'recv()'
                 break
             else:
                 self.client.send(msg.encode())
@@ -76,11 +77,11 @@ class Client:
 
 
     def recv_user_input_and_send_to_server(self):
-        msg = input()
+        msg = rstrip_message(input())
         
         while msg == '':
             print('Empty message detected. Please type your message:')
-            msg = input()
+            msg = rstrip_message(input())
         
         self.client.send(msg.encode())
         response = self.client.recv(1024)
@@ -106,7 +107,7 @@ class Client:
 
         
     def check_if_server_reached_max_client_capacity(self):
-        msg = self.client.recv(1024)
+        msg = rstrip_message(self.client.recv(1024))
         print(f'Init msg from server: {msg.decode()}.')
         
         if msg.decode() == '-1':
