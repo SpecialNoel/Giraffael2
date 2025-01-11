@@ -22,6 +22,7 @@ import socket
 import string
 from client_obj import Client_Obj
 from datetime import datetime
+from message import rstrip_message
 from room import Room
 from threading import Thread, Event
 
@@ -126,7 +127,7 @@ class Server:
         
         
     def handle_client_username_message(self, client):
-        msg = client.recv(self.MAX_USERNAME_LENGTH)
+        msg = rstrip_message(client.recv(self.MAX_USERNAME_LENGTH))
         username = msg.decode()
         
         while not self.check_username_validness(username):
@@ -134,7 +135,7 @@ class Server:
             msgToClient += 'Please try again.'
             client.send(msgToClient.encode())
             print(f'Error: Username {username} is invalid.')
-            msg = client.recv(self.MAX_USERNAME_LENGTH)
+            msg = rstrip_message(client.recv(self.MAX_USERNAME_LENGTH))
             username = msg.decode()
             
         # Need to acknowledge client about valid username here
@@ -153,7 +154,7 @@ class Server:
         msg = 'Please enter the room code, OR '
         msg += 'type c to create room.'
         client.send(msg.encode())
-        msg = client.recv(self.ROOM_CODE_LENGTH)
+        msg = rstrip_message(client.recv(self.ROOM_CODE_LENGTH))
         roomCode = msg.decode()
         
         while not self.check_room_code_validness(roomCode):
@@ -166,7 +167,7 @@ class Server:
             msgToClient += 'Please try again.'
             client.send(msgToClient.encode())
             print(f'Error: Room code: {roomCode} does not exist.')
-            msg = client.recv(self.ROOM_CODE_LENGTH)
+            msg = rstrip_message(client.recv(self.ROOM_CODE_LENGTH))
             roomCode = msg.decode()
 
         # Need to acknowledge client about valid room code here
@@ -177,7 +178,7 @@ class Server:
     def get_client_response_on_creating_room(self, client):
         # 'C' for create room
         # 'E' for enter room
-        msg = client.recv(2)
+        msg = rstrip_message(client.recv(2))
         upperedDecodedMsg = msg.decode().upper()
         
         # Repeat this step if client responds with invalid message
@@ -188,7 +189,7 @@ class Server:
             client.send(msgToClient.encode())
             print(f'Error: Client response on creating room: ',
                   f'{upperedDecodedMsg}.')
-            msg = client.recv(1024)
+            msg = rstrip_message(client.recv(1024))
             upperedDecodedMsg = msg.decode().upper()
         return True
 
@@ -245,7 +246,7 @@ class Server:
 
     def get_message_from_client(self, client):
         # Receive message from one client
-        msg = client.recv(1024)
+        msg = rstrip_message(client.recv(1024))
         print(f'Message from {client.getpeername()}:', msg.decode())
         return msg
 
