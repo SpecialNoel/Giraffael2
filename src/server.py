@@ -5,7 +5,6 @@
 # Credit: 
 #   https://thepythoncode.com/article/make-a-chat-room-application-in-python
 
-
 # Note: 
 # 1. Every 'client' instance references to a socket in server.py
 # 2. Each 'Client_Obj' instance contains:
@@ -31,6 +30,7 @@ class Server:
     def __init__(self):
         self.MAX_CLIENT_COUNT = 3
         self.SERVER_IP = '127.0.0.1'
+        #self.SERVER_IP = self.get_server_ip()
         self.SERVER_PORT = 5001
         # Source: https://www.oberlin.edu/cit/bulletins/passwords-matter
         self.ROOM_CODE_LENGTH = 11 # takes about 10 months to crack
@@ -46,6 +46,12 @@ class Server:
         
         # All Digits, Upper and Lower-case letters
         self.charPools = string.ascii_letters + string.digits
+        
+    
+    def get_server_ip(self):
+        # This returns the private address of server device
+        ip = socket.gethostbyname(socket.gethostname())
+        return ip
         
 
     def init_server(self):
@@ -103,7 +109,7 @@ class Server:
         # Remove room code from roomCodes if its corresponding room is empty
         if len(room.get_client_list()) == 0:
             self.roomCodes.remove(roomCode)
-            print(f'Removed [{roomCode}] from room codes')
+            print(f'Removed [{roomCode}] from room codes\n')
         return
         
         

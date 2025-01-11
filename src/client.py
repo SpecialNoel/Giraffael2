@@ -3,7 +3,6 @@
 # To run this script: python3 client.py
 # Note: must be executed when the server is alive.
 
-
 # Note:
 # 'client' is essentially only a socket in client.py
 
@@ -21,7 +20,6 @@ class Client:
         self.shutdownEvent = Event() # threading.Event()
         self.ruleAboutRoomCodeSent = False
         
-
 
     def init_client_socket(self):
         try: 
@@ -79,6 +77,11 @@ class Client:
 
     def recv_user_input_and_send_to_server(self):
         msg = input()
+        
+        while msg == '':
+            print('Empty message detected. Please type your message:')
+            msg = input()
+        
         self.client.send(msg.encode())
         response = self.client.recv(1024)
         return msg, response.decode()
