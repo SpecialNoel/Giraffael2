@@ -22,6 +22,9 @@ import socket
 import string
 from client_obj import Client_Obj
 from datetime import datetime
+from file_transmission import (get_filepath, check_if_file_exists, 
+                               create_metadata, send_metadata, 
+                               recv_metadata, send_file, recv_file)
 from message import rstrip_message
 from room import Room
 from threading import Thread, Event
@@ -47,12 +50,22 @@ class Server:
         
         # All Digits, Upper and Lower-case letters
         self.charPools = string.ascii_letters + string.digits
+        self.CHUNK_SIZE = 1024
         
     
     def get_server_ip(self):
-        # This returns the private address of server device
-        ip = socket.gethostbyname(socket.gethostname())
-        return ip
+        try:
+            temp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            # Connect to a public IP address (8.8.8.8 is Google's DNS server)
+            temp_socket.connect(('8.8.8.8', 80))
+            # This returns the private address of server device
+            ip = temp_socket.getsockname()[0]
+            temp_socket.close()
+            return ip
+        except Exception as e:
+            print(f'Error occurred when getting server ip: {e}')
+            # Use localhost as server ip if getting error
+            return '127.0.0.1'
         
 
     def init_server(self):
@@ -189,7 +202,7 @@ class Server:
             client.send(msgToClient.encode())
             print(f'Error: Client response on creating room: ',
                   f'{upperedDecodedMsg}.')
-            msg = rstrip_message(client.recv(1024))
+            msg = rstrip_message(client.recv(self.CHUNK_SIZE))
             upperedDecodedMsg = msg.decode().upper()
         return True
 
@@ -246,12 +259,21 @@ class Server:
 
     def get_message_from_client(self, client):
         # Receive message from one client
-        msg = rstrip_message(client.recv(1024))
-        print(f'Message from {client.getpeername()}:', msg.decode())
+        msg = rstrip_message(client.recv(self.CHUNK_SIZE))
+        print(f'Message from {client.getpeername()}: {msg}')
         return msg
+    
+    
+    def recv_file_from_client(self, client):
+        filename, filesize = recv_metadata(client)
+        print(f'Filename: {filename}, filesize: {filesize}.')
+        if filename == None or filesize == None:
+            return
+        recv_file(filename, filesize, client, self.CHUNK_SIZE)
+        return
 
 
-    def handle_client_normal_message(self, client, decodedMsg, roomCode):
+    def handle_client_normal_message(self, client, msg, roomCode):
         clientSocketsToBeRemoved = []
         room = [r for r in self.rooms if r.get_room_code() == roomCode][0]
         # Broadcast received message to all clients within the same room
@@ -266,8 +288,10 @@ class Server:
             # Else, send received message to all clients in that room
             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             msgWithTime = f'[{date_now} {client.getpeername()}: '
-            msgWithTime += f'{decodedMsg}]'
-            socket.send(msgWithTime.encode())
+            #msgWithTime += f'{msg}]'
+            #socket.send(msgWithTime.encode())
+            msgWithTimeEncoded = msgWithTime.encode() + msg + b']'
+            socket.send(msgWithTimeEncoded)
             
         # Remove disconnected clients
         for socket in clientSocketsToBeRemoved:
@@ -297,10 +321,10 @@ class Server:
                     self.handle_client_disconnect_request(client, address, 
                                                           roomCode)
                     break
+                elif msg.lower() == 'file':
+                    self.recv_file_from_client(client)
                 else:
-                    decodedMsg = msg.decode()
-                    self.handle_client_normal_message(client, decodedMsg, 
-                                                      roomCode)
+                    self.handle_client_normal_message(client, msg, roomCode)
             except (BrokenPipeError, 
                     ConnectionResetError, 
                     ConnectionAbortedError) as e:
@@ -334,14 +358,6 @@ class Server:
         msg = str((len(self.clients)+1)) # num of current connected clients+1
         conn.send(msg.encode())
         return False
-    
-    
-    def start_handling_one_client(self, clientObj):
-        t = Thread(target=self.handle_one_client, args=(clientObj,))
-        t.daemon = False # Set daemon thread: ends when the main thread ends
-        self.threads.append(t)
-        t.start()
-        return
 
 
     def accept_a_connection(self, conn, address):        
@@ -418,6 +434,7 @@ class Server:
                 
         for t in self.threads:
             t.join()
+        print('All threads joined.')
         self.server.close()
         print('Server socket closed.')
         exit()
