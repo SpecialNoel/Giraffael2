@@ -7,8 +7,12 @@
 # 'client' is essentially only a socket in client.py
 
 import socket
+from file_transmission import (get_filepath, check_if_file_exists, 
+                               create_metadata, send_metadata, 
+                               recv_metadata, send_file, recv_file)
+from message import (rstrip_message, add_prefix_to_message, 
+                     separate_type_prefix_from_message)
 from threading import Thread, Event
-from message import rstrip_message
 
 
 class Client:
@@ -20,6 +24,8 @@ class Client:
         
         self.shutdownEvent = Event() # threading.Event()
         self.ruleAboutRoomCodeSent = False
+        self.filepath = ''
+        self.CHUNK_SIZE = 1024
         
 
     def init_client_socket(self):
@@ -38,7 +44,7 @@ class Client:
         # Receive message from other clients in the channel
         while not self.shutdownEvent.is_set():
             try:
-                msg = rstrip_message(self.client.recv(1024))
+                msg = rstrip_message(self.client.recv(self.CHUNK_SIZE))
                 # Received a message of string 0 (only possible from server)
                 # This means that the server wants to close this connection
                 #   b/c of max clients count reached in server
@@ -46,7 +52,15 @@ class Client:
                     print('Server has closed the connection.')
                     self.shutdownEvent.set()
                     break
-                print(msg.decode() + '\n')
+                typePrefix, msgContent = separate_type_prefix_from_message(msg)
+                if typePrefix == None: 
+                    print('The message received does not have type prefix.')
+                    continue
+                if typePrefix.decode() == 'NOR':
+                    print(msgContent.decode() + '\n')
+                elif typePrefix.decode() == 'FIL':
+                    print(f'Received file content: {msgContent}\n')
+                
             except Exception as e:
                 print(f'Error [{e}] occurred when receiving message.')
                 break
@@ -63,6 +77,7 @@ class Client:
                 ruleSent = True
                 print('\nType a message to send to the channel, ',
                     'or\nPress [Enter/Return] key to disconnect.\n')
+                print('Type [file] to send a file.\n')
             
             msg = rstrip_message(input())
             if not msg:
@@ -70,7 +85,12 @@ class Client:
                 self.shutdownEvent.set()
                 self.client.close() # will be detected by server's 'recv()'
                 break
+            elif msg.lower() == 'file':
+                print('Type in filename of the file you want to send:\n')
+                filename = rstrip_message(input())
+                self.send_file_to_server(filename)
             else:
+                msg = add_prefix_to_message(msg, 'FIL')
                 self.client.send(msg.encode())
         print('Client sender thread stopped.')
         return
@@ -84,7 +104,7 @@ class Client:
             msg = rstrip_message(input())
         
         self.client.send(msg.encode())
-        response = self.client.recv(1024)
+        response = self.client.recv(self.CHUNK_SIZE)
         return msg, response.decode()
 
         
@@ -104,10 +124,21 @@ class Client:
     def send_room_code_to_server(self):
         print('Type in the room code to enter an existing room.\n')
         return self.recv_user_input_and_send_to_server()
+    
+    
+    def send_file_to_server(self, filename):
+        self.filepath = get_filepath(filename)
+        if not check_if_file_exists(self.filepath):
+            return
+        
+        filename, filesize = create_metadata(self.filepath)
+        send_metadata(filename, filesize, self.client)
+        send_file(self.filepath, self.client, self.CHUNK_SIZE)
+        return
 
         
     def check_if_server_reached_max_client_capacity(self):
-        msg = rstrip_message(self.client.recv(1024))
+        msg = rstrip_message(self.client.recv(self.CHUNK_SIZE))
         print(f'Init msg from server: {msg.decode()}.')
         
         if msg.decode() == '-1':
