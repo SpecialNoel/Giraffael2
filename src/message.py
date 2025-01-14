@@ -1,41 +1,51 @@
 # message.py
 
-# Functions here are used to argument messages transmitted
-#   between clients and server.
+'''
+Functions here are used to argument messages transmitted
+  between clients and server.
+
+************************************************
+* Note: all 'message' instances mentioned here * 
+*       refer to bytes-object, not string.     *
+************************************************
+'''
 
 
-# Return a copy of the message with trailing spaces or new line chars removed.
-# Mainly used for removing the new line character at the end of the message.
-def rstrip_message(message): # message is a string or a bytes
+def rstrip_message(message):
+    '''
+    Used for removing the new line character at the end of the message.
+
+    @param message: a bytes-object
+    @return: a copy of the message with trailing spaces or new line chars removed
+    '''
     return message.rstrip()
 
 
-# Used to add a prefix to the message to indicate its usage.
-# Note: this only applies to messages sent over the channel 
-#   (i.e. already inside a room.)
-# Type prefixes:
-#   Normal: NOR
-#   File:   FIL
-# Format: type_prefix|message_content
-def add_prefix_to_message(message, typePrefix): # message is a string or a bytes
-    if isinstance(message, str):
-        return (typePrefix+'|') + message
-    elif isinstance(message, bytes):
-        return (typePrefix+'|').encode() + message
-    else:
-        print('Message is neither a string nor a bytes-object.')
-        return message
+def add_prefix_to_message(message, typePrefix):
+    '''
+    Used to add a type prefix to the message to indicate its usage.
+    
+    Type prefixes:
+    0: Normal message (exchanged in channel/chatroom; metadata is included here)
+    1: File content   (not decode-able)
+    2: RoomCode       (exchanged during room code step)
+    3: Username       (exchanged during username step)
+
+    @param message: a bytes-object
+    @param typePrefix: an integer
+    @return: message with typePrefix appended to the front
+    '''
+    return (typePrefix.to_bytes(1, byteorder='big')).encode() + message
 
 
-# Used to obtain the message without the prefix indicating its usage
-def separate_type_prefix_from_message(message): # message is a string or a bytes
-    if isinstance(message, str):
-        typePrefix, messageContent = message.split('|', 1)
-        return typePrefix, messageContent
-    elif isinstance(message, bytes):
-        typePrefix = message[:3] # first 3 chars
-        messageContent = message[4:] # the rest chars, starting from the 5th
-        return typePrefix, messageContent
-    print('Message is neither a string nor a bytes-object.')
-    return None, message
+def separate_type_prefix_and_content_from_message(message):
+    '''
+    Used to obtain type prefix and message content of the message.
+
+    @param message: a bytes-object
+    @return: typePrefix, messageContent
+    '''
+    typePrefix = message[0] # first char
+    messageContent = message[1:] # the rest chars, starting from the 2nd
+    return typePrefix, messageContent
     
