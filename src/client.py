@@ -1,16 +1,18 @@
 # client.py
 
-# To run this script: python3 client.py
-# Note: must be executed when the server is alive.
+'''
+To run this script: python3 client.py
+Note: must be executed when the server is alive.
 
-# Note:
-# 'client' is essentially only a socket in client.py
+Note: 'client' is essentially only a socket in client.py
+'''
+
 
 import socket
 from file_transmission import (get_filepath, check_if_file_exists, 
                                create_metadata, send_metadata, 
                                recv_metadata, send_file, recv_file)
-from message import (rstrip_message, add_prefix_to_message, 
+from message import (rstrip_message, add_prefix_to_message,
                      separate_type_prefix_from_message)
 from threading import Thread, Event
 
@@ -26,7 +28,8 @@ class Client:
         self.ruleAboutRoomCodeSent = False
         self.filepath = ''
         self.CHUNK_SIZE = 1024
-        
+        # Each type prefix has a size of 1 byte
+
 
     def init_client_socket(self):
         try: 
@@ -44,7 +47,7 @@ class Client:
         # Receive message from other clients in the channel
         while not self.shutdownEvent.is_set():
             try:
-                msg = rstrip_message(self.client.recv(self.CHUNK_SIZE))
+                msg = self.client.recv(self.CHUNK_SIZE)
                 # Received a message of string 0 (only possible from server)
                 # This means that the server wants to close this connection
                 #   b/c of max clients count reached in server
@@ -52,15 +55,12 @@ class Client:
                     print('Server has closed the connection.')
                     self.shutdownEvent.set()
                     break
-                typePrefix, msgContent = separate_type_prefix_from_message(msg)
-                if typePrefix == None: 
-                    print('The message received does not have type prefix.')
-                    continue
-                if typePrefix.decode() == 'NOR':
-                    print(msgContent.decode() + '\n')
-                elif typePrefix.decode() == 'FIL':
-                    print(f'Received file content: {msgContent}\n')
                 
+                typePrefix, msgContent = separate_type_prefix_from_message(msg)
+                if typePrefix == 0: # Normal message
+                    msg = rstrip_message(msg)
+                    print(msg.decode() + '\n')
+                # [TO-DO] handle file-receiving from server here
             except Exception as e:
                 print(f'Error [{e}] occurred when receiving message.')
                 break
@@ -90,7 +90,7 @@ class Client:
                 filename = rstrip_message(input())
                 self.send_file_to_server(filename)
             else:
-                msg = add_prefix_to_message(msg, 'FIL')
+                msg = rstrip_message(msg)
                 self.client.send(msg.encode())
         print('Client sender thread stopped.')
         return
@@ -124,6 +124,30 @@ class Client:
     def send_room_code_to_server(self):
         print('Type in the room code to enter an existing room.\n')
         return self.recv_user_input_and_send_to_server()
+    
+    
+    def recv_file_from_server(self):
+        # Receive metadata of the file from server
+        filename, filesize = recv_metadata(client)
+        print(f'Filename: {filename}, filesize: {filesize}.')
+        if filename == None or filesize == None:
+            return
+        recv_file(filename, filesize, client, self.CHUNK_SIZE)
+    
+        # Repeat receiving file content chunk from server until finished
+        print(f'Received file with filename: {filename}')
+        filepath_prefix = 'received_files/'
+        filename = filepath_prefix + filename
+        print(f'Stored in filepath: {filename}')
+    
+        received_len = 0
+        while received_len < filesize:
+            data = socket.recv(self.CHUNK_SIZE)
+            if not data:
+                break
+            print(data)
+            received_len += len(data)
+        return
     
     
     def send_file_to_server(self, filename):
