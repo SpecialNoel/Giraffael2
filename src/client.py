@@ -27,7 +27,9 @@ class Client:
         self.shutdownEvent = Event() # threading.Event()
         self.ruleAboutRoomCodeSent = False
         self.filepath = ''
-        self.CHUNK_SIZE = 1024
+        self.TYPE_PREFIX_SIZE = 1
+        self.MSG_CONTENT_SIZE = 1024
+        self.CHUNK_SIZE = self.TYPE_PREFIX_SIZE + self.MSG_CONTENT_SIZE
         # Each type prefix has a size of 1 byte
 
 
