@@ -23,9 +23,10 @@ import string
 from client_obj import Client_Obj
 from datetime import datetime
 from file_transmission import (get_filepath, check_if_file_exists, 
-                               create_metadata, send_metadata, 
-                               recv_metadata, send_file, recv_file)
-from message import rstrip_message
+                              create_metadata, send_metadata, 
+                              send_file, recv_file)
+from message import (rstrip_message, add_prefix_to_message,
+                     separate_type_prefix_and_content_from_message)
 from room import Room
 from threading import Thread, Event
 
@@ -36,6 +37,7 @@ class Server:
         self.SERVER_IP = '127.0.0.1'
         #self.SERVER_IP = self.get_server_ip()
         self.SERVER_PORT = 5001
+        
         # Source: https://www.oberlin.edu/cit/bulletins/passwords-matter
         self.ROOM_CODE_LENGTH = 11 # takes about 10 months to crack
         self.MAX_USERNAME_LENGTH = 16
@@ -50,8 +52,10 @@ class Server:
         
         # All Digits, Upper and Lower-case letters
         self.charPools = string.ascii_letters + string.digits
-        self.CHUNK_SIZE = 1024
-        
+        self.TYPE_PREFIX_SIZE = 1
+        self.MSG_CONTENT_SIZE = 1024
+        self.CHUNK_SIZE = self.TYPE_PREFIX_SIZE + self.MSG_CONTENT_SIZE        
+    
     
     def get_server_ip(self):
         try:
@@ -255,25 +259,30 @@ class Server:
                   f'{clientObj.get_address()}]')
         print('')
         return
-
-
-    def get_message_from_client(self, client):
-        # Receive message from one client
-        msg = rstrip_message(client.recv(self.CHUNK_SIZE))
-        print(f'Message from {client.getpeername()}: {msg}')
-        return msg
     
     
-    def recv_file_from_client(self, client):
-        filename, filesize = recv_metadata(client)
-        print(f'Filename: {filename}, filesize: {filesize}.')
-        if filename == None or filesize == None:
+    def recv_file_from_client(self, client, msgContent):
+        metadata = msgContent.decode()
+        print(f'Metadata:  {metadata}')
+        
+        # msgContent is metadata of the file
+        # Split the metadata of the file received from client
+        if metadata.split('|')[0] == metadata:
+            print('Invalid message format for splitting metadata, sent from client.')
             return
-        recv_file(filename, filesize, client, self.CHUNK_SIZE)
+        
+        filename = metadata.split('|')[0]
+        filesize = int(metadata.split('|')[1])
+        print(f'Filename: {filename}, filesize: {filesize}.\n')
+        recv_file(filename, filesize, client, self.MSG_CONTENT_SIZE)
+        
         return
 
 
     def handle_client_normal_message(self, client, msg, roomCode):
+        '''
+        msg is a string
+        '''
         clientSocketsToBeRemoved = []
         room = [r for r in self.rooms if r.get_room_code() == roomCode][0]
         # Broadcast received message to all clients within the same room
@@ -288,9 +297,9 @@ class Server:
             # Else, send received message to all clients in that room
             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             msgWithTime = f'[{date_now} {client.getpeername()}: '
-            #msgWithTime += f'{msg}]'
-            #socket.send(msgWithTime.encode())
-            msgWithTimeEncoded = msgWithTime.encode() + msg + b']'
+            msgWithTime += f'{msg}]'
+            print(msgWithTime+'\n')
+            msgWithTimeEncoded = add_prefix_to_message(msgWithTime.encode(), 0)
             socket.send(msgWithTimeEncoded)
             
         # Remove disconnected clients
@@ -314,17 +323,33 @@ class Server:
         roomCode = clientObj.get_room_code()
         while not self.shutdownEvent.is_set():
             try:
-                msg = self.get_message_from_client(client) # Buffer size: 1024
-                
+                msg = client.recv(self.CHUNK_SIZE) # 1025 bytes
+                typePrefix, msgContent = separate_type_prefix_and_content_from_message(msg)
+                print(f'msg: {msg}')
+                print(f'Type Prefix: {typePrefix}')
+                print(f'Content: {msgContent}')
+                prefix = int.from_bytes(typePrefix, byteorder='big')
+                print(f'Prefix: {prefix}')
+
                 # Disconnect from this connection if msg is empty
                 if not msg:
                     self.handle_client_disconnect_request(client, address, 
                                                           roomCode)
                     break
-                elif msg.lower() == 'file':
-                    self.recv_file_from_client(client)
-                else:
-                    self.handle_client_normal_message(client, msg, roomCode)
+                match prefix:
+                    case 0:
+                        # Print normal message to clients in the same room as the client
+                        msgContent = rstrip_message(msgContent.decode())
+                        self.handle_client_normal_message(client, msgContent, roomCode)
+                    case 1:
+                        # msg a request with type prefix 1
+                        print(f'client [{address}] is transferring a file.\n')
+                        # Receive metadata
+                        msg = client.recv(self.CHUNK_SIZE)
+                        typePrefix, msgContent = separate_type_prefix_and_content_from_message(msg)
+                        self.recv_file_from_client(client, msgContent)
+                    case _: 
+                        print(f'Received invalid prefix: {typePrefix}.')
             except (BrokenPipeError, 
                     ConnectionResetError, 
                     ConnectionAbortedError) as e:
