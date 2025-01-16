@@ -10,10 +10,10 @@ Note: 'client' is essentially only a socket in client.py
 
 import socket
 from file_transmission import (get_filepath, check_if_file_exists, 
-                               create_metadata, send_metadata, 
-                               recv_metadata, send_file, recv_file)
+                              create_metadata, send_metadata, 
+                              send_file, recv_file)
 from message import (rstrip_message, add_prefix_to_message,
-                     separate_type_prefix_from_message)
+                     separate_type_prefix_and_content_from_message)
 from threading import Thread, Event
 
 
@@ -27,10 +27,10 @@ class Client:
         self.shutdownEvent = Event() # threading.Event()
         self.ruleAboutRoomCodeSent = False
         self.filepath = ''
+        
         self.TYPE_PREFIX_SIZE = 1
         self.MSG_CONTENT_SIZE = 1024
         self.CHUNK_SIZE = self.TYPE_PREFIX_SIZE + self.MSG_CONTENT_SIZE
-        # Each type prefix has a size of 1 byte
 
 
     def init_client_socket(self):
@@ -49,20 +49,26 @@ class Client:
         # Receive message from other clients in the channel
         while not self.shutdownEvent.is_set():
             try:
-                msg = self.client.recv(self.CHUNK_SIZE)
-                # Received a message of string 0 (only possible from server)
-                # This means that the server wants to close this connection
-                #   b/c of max clients count reached in server
+                msg = self.client.recv(self.CHUNK_SIZE) # 1025 bytes
+                
                 if not msg:
                     print('Server has closed the connection.')
                     self.shutdownEvent.set()
                     break
                 
-                typePrefix, msgContent = separate_type_prefix_from_message(msg)
-                if typePrefix == 0: # Normal message
-                    msg = rstrip_message(msg)
-                    print(msg.decode() + '\n')
-                # [TO-DO] handle file-receiving from server here
+                typePrefix, msgContent = separate_type_prefix_and_content_from_message(msg)
+                prefix = int.from_bytes(typePrefix, byteorder='big')
+                print(f'Prefix: {prefix}')
+
+                match prefix:
+                    case 0: # normal message
+                        msgContent = rstrip_message(msgContent)
+                        print(msgContent.decode() + '\n')
+                    case 1: # file content
+                        # msgContent is metadata of the file
+                        self.recv_file_from_server(msgContent.decode())
+                    case _:
+                        print(f'Received invalid prefix: {typePrefix}.')
             except Exception as e:
                 print(f'Error [{e}] occurred when receiving message.')
                 break
@@ -90,10 +96,11 @@ class Client:
             elif msg.lower() == 'file':
                 print('Type in filename of the file you want to send:\n')
                 filename = rstrip_message(input())
+                self.client.send(add_prefix_to_message('file'.encode(), 1))
                 self.send_file_to_server(filename)
             else:
-                msg = rstrip_message(msg)
-                self.client.send(msg.encode())
+                msgWithPrefix = add_prefix_to_message(msg.encode(), 0)
+                self.client.send(msgWithPrefix)
         print('Client sender thread stopped.')
         return
 
@@ -105,6 +112,8 @@ class Client:
             print('Empty message detected. Please type your message:')
             msg = rstrip_message(input())
         
+        # Msg here does not have type prefix, since it should only 
+        #   handles room code and username.
         self.client.send(msg.encode())
         response = self.client.recv(self.CHUNK_SIZE)
         return msg, response.decode()
@@ -128,27 +137,17 @@ class Client:
         return self.recv_user_input_and_send_to_server()
     
     
-    def recv_file_from_server(self):
-        # Receive metadata of the file from server
-        filename, filesize = recv_metadata(client)
-        print(f'Filename: {filename}, filesize: {filesize}.')
-        if filename == None or filesize == None:
+    def recv_file_from_server(self, msgContent):
+        # msgContent is metadata of the file
+        # Split the metadata of the file received from server
+        if msgContent.split('|')[0] == msgContent:
+            print('Invalid message format for splitting metadata, sent from server.')
             return
-        recv_file(filename, filesize, client, self.CHUNK_SIZE)
-    
-        # Repeat receiving file content chunk from server until finished
-        print(f'Received file with filename: {filename}')
-        filepath_prefix = 'received_files/'
-        filename = filepath_prefix + filename
-        print(f'Stored in filepath: {filename}')
-    
-        received_len = 0
-        while received_len < filesize:
-            data = socket.recv(self.CHUNK_SIZE)
-            if not data:
-                break
-            print(data)
-            received_len += len(data)
+        
+        filename = msgContent.split('|')[0]
+        filesize = msgContent.split('|')[1]
+        print(f'Filename: {filename}, filesize: {filesize}.')
+        recv_file(filename, filesize, self.client, self.MSG_CONTENT_SIZE)
         return
     
     
@@ -158,13 +157,18 @@ class Client:
             return
         
         filename, filesize = create_metadata(self.filepath)
-        send_metadata(filename, filesize, self.client)
-        send_file(self.filepath, self.client, self.CHUNK_SIZE)
+        print(f'Filename: {filename}, filesize: {filesize}.\n')
+        msg = f'{filename}|{filesize}'
+        msgWithPrefix = add_prefix_to_message(msg.encode(), 1)
+        self.client.send(msgWithPrefix)        
+        
+        send_file(self.filepath, self.client, self.MSG_CONTENT_SIZE)
+        
         return
 
         
     def check_if_server_reached_max_client_capacity(self):
-        msg = rstrip_message(self.client.recv(self.CHUNK_SIZE))
+        msg = rstrip_message(self.client.recv(self.MSG_CONTENT_SIZE))
         print(f'Init msg from server: {msg.decode()}.')
         
         if msg.decode() == '-1':
