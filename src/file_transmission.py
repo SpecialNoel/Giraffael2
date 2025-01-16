@@ -57,20 +57,6 @@ def send_metadata(filename, filesize, socket):
     return
 
 
-def recv_metadata(socket):
-    '''
-    Used by the recipient to receive the metadata of a file from the sender.
-    
-    @param socket: the socket used to receive the metadata; the receiver socket
-    @return: filename, filesize
-    '''
-    msg = socket.recv(1024)
-    if not msg:
-        return None, None
-    filename, filesize = msg.split('|')
-    return filename, filesize
-
-
 def send_file(filepath, socket, chunk_size):
     '''
     Used by the sender to send the file to the recipient.
@@ -98,7 +84,6 @@ def recv_file(filename, filesize, socket, chunk_size):
     @chunk_size: number of bytes to receive from the sender each time
     @return: None
     '''
-    print(f'Received file with filename: {filename}')
     filepath_prefix = 'received_files/'
     filename = filepath_prefix + filename
     print(f'Stored in filepath: {filename}')
