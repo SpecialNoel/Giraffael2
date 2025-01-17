@@ -4,7 +4,7 @@ class Room:
     def __init__(self, roomCode, roomName='New Room'):
         self.__roomCode = roomCode # unmodifiable, unique
         self.__roomName = roomName
-        self.__clientList = [] # each element is a client object
+        self.__clientList = [] # each element is a client_obj
     
     def get_room_code(self):
         return self.__roomCode
