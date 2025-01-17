@@ -9,10 +9,10 @@ Note: 'client' is essentially only a socket in client.py
 
 
 import socket
-from file_transmission import (get_filepath, check_if_file_exists, 
+from general.file_transmission import (get_filepath, check_if_file_exists, 
                               create_metadata, check_metadata_format, 
                               split_metadata, send_file, recv_file)
-from message import (rstrip_message, add_prefix,
+from general.message import (rstrip_message, add_prefix,
                      get_prefix_and_content)
 from threading import Thread, Event
 
@@ -156,9 +156,11 @@ class Client:
     def send_file_to_server(self, filename):
         # Create filepath from filename
         filepath = get_filepath(filename)
-        if not check_if_file_exists(filepath):
-            return
-        
+        while not check_if_file_exists(filepath):
+            print('\nType in filename of the file you want to send:\n')
+            filename = rstrip_message(input())
+            filepath = get_filepath(filename)
+    
         # Create and send metadata to server
         filename, filesize = create_metadata(filepath)
         msg = f'{filename}|{filesize}'

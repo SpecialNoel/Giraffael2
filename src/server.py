@@ -10,14 +10,14 @@ Note: Every 'client' instance references to a socket in server.py
 import secrets
 import socket
 import string
-from client_obj import Client_Obj
+from general.client_obj import Client_Obj
 from datetime import datetime
-from file_transmission import (get_filepath, check_if_file_exists, 
+from general.file_transmission import (get_filepath, check_if_file_exists, 
                               create_metadata, check_metadata_format, 
                               split_metadata, send_file, recv_file)
-from message import (rstrip_message, add_prefix,
+from general.message import (rstrip_message, add_prefix,
                      get_prefix_and_content)
-from room import Room
+from general.room import Room
 from threading import Thread, Event
 
 
