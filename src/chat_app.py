@@ -1,6 +1,6 @@
 # To run this script: python3 chat_app.py
 
-from server import Server
+from server_only.server import Server
 
 class Chat_App:
     def __init__(self):
