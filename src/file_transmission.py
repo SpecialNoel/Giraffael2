@@ -16,6 +16,7 @@ def get_filepath(filename):
     @param filename: the string name of the file
     @return: filepath
     '''
+    print(f'Filepath: {Path.cwd() / filename}.')
     return Path.cwd() / filename
 
 
@@ -26,6 +27,7 @@ def check_if_file_exists(filepath):
     @param filepath: the filepath of the file
     @return: True if the filepath is a file; False otherwise 
     '''
+    print(f'File exists with filepath [{filepath}]: {os.path.isfile(filepath)}.')
     return os.path.isfile(filepath)
 
 
@@ -40,39 +42,48 @@ def create_metadata(filepath):
     '''
     filename = os.path.basename(filepath)
     filesize = os.path.getsize(filepath)
+    print(f'Filename: {filename}, filesize: {filesize}.\n')
     return filename, filesize
 
 
-def send_metadata(filename, filesize, socket):
-    '''
-    Used by the sender to send the metadata of a file to the recipient.
-
-    @param filename: the string name of the file
-    @param filesize: the size of the file
-    @param socket: the socket used to send the metadata; the sender socket
-    @return: None
-    '''
-    msg = f'{filename}|{filesize}'
-    socket.send(msg.encode())
-    return
+def check_metadata_format(msg):
+    if msg.split('|')[0] == msg:
+        print('Invalid metadata format.')
+        return False
+    print('Metadata format valid.')
+    return True
 
 
-def send_file(filepath, socket, chunk_size):
+def split_metadata(metadata):
+    filename = metadata.split('|')[0]
+    filesize = int(metadata.split('|')[1])
+    print(f'Filename: {filename}, filesize: {filesize}.')
+    return filename, filesize
+
+
+def send_file(filepath, filename, socket, chunk_size, recipient):
     '''
     Used by the sender to send the file to the recipient.
     
     @param filepath: the filepath of the file
     @param socket: the socket used to send the file; the sender socket
-    @chunk_size: number of bytes to send to the recipient each time
+    @param chunk_size: number of bytes to send to the recipient each time
+    @param recipient: either 'server' or address of a client; indicates the receiver side
     @return: None
     '''
-    with open(filepath, 'rb') as file:
-        while chunk := file.read(chunk_size):
-            socket.send(chunk)
+    try:
+        with open(filepath, 'rb') as file:
+            while chunk := file.read(chunk_size):
+                socket.send(chunk)
+        print(f'Successfully sent file [{filename}] to [{recipient}].\n')
+    except FileNotFoundError:
+        print(f'File with path [{filepath}] not found.')
+    except Exception as e:
+        print(f'Error occurred in send_file(): {e}.')
     return
 
 
-def recv_file(filename, filesize, socket, chunk_size):
+def recv_file(filename, filesize, socket, chunk_size, sender):
     '''
     Used by the recipient to receive the file from the sender.
     Received content will be stored in the "received_files" folder
@@ -81,19 +92,27 @@ def recv_file(filename, filesize, socket, chunk_size):
     @param filename: the string name of the file
     @param filesize: the size of the file
     @param socket: the socket used to receive the file; the receiver socket
-    @chunk_size: number of bytes to receive from the sender each time
+    @param chunk_size: number of bytes to receive from the sender each time
+    @param sender: either 'server' or address of a client; indicates the sender side
     @return: None
     '''
-    filepath_prefix = 'received_files/'
-    filename = filepath_prefix + filename
-    print(f'Stored in filepath: {filename}')
+    if sender == 'server':
+        print(f'Stored in filepath: {filename}')
+    else:
+        filepath_prefix = 'received_files/'
+        filename = filepath_prefix + filename
+        print(f'Stored in filepath: {filename}')
     
-    with open(filename, 'wb') as file:
-        received_len = 0
-        while received_len < filesize:
-            data = socket.recv(chunk_size)
-            if not data:
-                break
-            file.write(data)
-            received_len += len(data)
+    try:
+        with open(filename, 'wb') as file:
+            received_len = 0
+            while received_len < filesize:
+                data = socket.recv(chunk_size)
+                if not data:
+                    break
+                file.write(data)
+                received_len += len(data)
+        print(f'Successfully received file [{filename}] from [{sender}].\n')
+    except Exception as e: 
+        print(f'Error occurred in recv_file(): {e}.')
     return

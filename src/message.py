@@ -21,7 +21,7 @@ def rstrip_message(msg):
     return msg.rstrip()
 
 
-def add_prefix_to_message(msg, typePrefix):
+def add_prefix(msg, typePrefix):
     '''
     Used to add a type prefix to the message to indicate its usage.
     Note that this only applies when the client is already inside a room.
@@ -42,7 +42,7 @@ def add_prefix_to_message(msg, typePrefix):
     return (typePrefix.to_bytes(1, byteorder='big')) + msg
 
 
-def separate_type_prefix_and_content_from_message(msg):
+def get_prefix_and_content(msg):
     '''
     Used to obtain type prefix and message content of the message.
 
