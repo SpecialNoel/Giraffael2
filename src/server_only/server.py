@@ -1,5 +1,6 @@
 # server.py
 
+
 '''
 To run this script: python3 server.py
 
@@ -96,11 +97,10 @@ class Server:
                                  self.ROOM_CODE_LENGTH,
                                  self.MAX_USERNAME_LENGTH,
                                  self.MAX_CLIENT_COUNT))
-                t.daemon = False # Set daemon thread: ends when the main thread ends
+                t.daemon = False # thread ends when the main thread ends
                 self.threads.append(t)
                 t.start()
             except KeyboardInterrupt as e:
-                # Server received the [ctrl+c] command while waiting for connection
                 print(f'Error: {e}. ',
                        'Disconnected with all clients and exiting now.')
                 self.shutdownEvent.set()

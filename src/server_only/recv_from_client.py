@@ -132,7 +132,7 @@ def handle_client_normal_message(client, msg, clients, rooms, roomCode):
 def recv_file_from_client(client, msgContent, msgContentSize):
     # Obtain metadata
     metadata = msgContent.decode()
-    print(f'Metadata:  {metadata}.')
+    print(f'Metadata: {metadata}.')
     if not check_metadata_format(metadata):
         return
     
