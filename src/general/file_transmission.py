@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from general.message import rstrip_message, add_prefix
 
 '''
 Functions here are used by clients or server to transfer 
@@ -16,7 +17,6 @@ def get_filepath(filename):
     @param filename: the string name of the file
     @return: filepath
     '''
-    print(f'Filepath: {Path.cwd() / filename}.')
     return Path.cwd() / filename
 
 
@@ -27,8 +27,44 @@ def check_if_file_exists(filepath):
     @param filepath: the filepath of the file
     @return: True if the filepath is a file; False otherwise 
     '''
-    print(f'File exists with filepath [{filepath}]: {os.path.isfile(filepath)}.')
-    return os.path.isfile(filepath)
+    try:
+        directory = os.path.dirname(filepath)
+        if not directory:
+            directory = '.'
+        if not os.path.exists(directory):
+            print("Invalid filepath: directory does not exist.")
+            return False
+        if not os.access(directory, os.W_OK):
+            print("Invalid filepath: directory is not writable.")
+            return False
+        if not os.path.basename(filepath):
+            print("Invalid filepath: filename is missing.")
+            return False
+        if not os.path.splitext(filepath)[1]:
+            print("Invalid filepath: filename does not have an extension.")
+            return False
+        if os.path.isfile(filepath):
+            print(f'Filepath [{filepath}] exits.')
+        else:
+            print(f'Filepath [{filepath}] does not exists.')
+        return os.path.isfile(filepath)
+    except Exception as e:
+        print(f"Error validating filepath: {e}")
+        print(f'Filepath [{filepath}] exits: {os.path.isfile(filepath)}.')
+        return os.path.isfile(filepath)
+
+
+def get_valid_filepath(filename):    
+    filepath = get_filepath(filename)
+    while not check_if_file_exists(filepath):
+        print('\nType in filename of the file you want to send:')
+        print('OR, type <exit> to stop sending file.\n')
+        filename = rstrip_message(input())
+        # Client does not want to send the file anymore
+        if filename.lower() == 'exit':
+            return None        
+        filepath = get_filepath(filename)
+    return filepath
 
 
 def create_metadata(filepath):
@@ -44,6 +80,12 @@ def create_metadata(filepath):
     filesize = os.path.getsize(filepath)
     print(f'Filename: {filename}, filesize: {filesize}.\n')
     return filename, filesize
+
+
+def send_metadata(socket, filename, filesize):
+    msg = f'{filename}|{filesize}'
+    msgWithPrefix = add_prefix(msg.encode(), 1)
+    socket.send(msgWithPrefix)
 
 
 def check_metadata_format(msg):
