@@ -1,22 +1,16 @@
 # send_to_server.py
 
 
-from general.file_transmission import (check_if_directory_exists,
+from general.file_transmission import (display_rule,
+                                      check_if_directory_exists,
                                       get_valid_filepath,
                                       check_if_filename_is_valid,
                                       create_metadata, send_metadata,
-                                      send_file)
+                                      split_metadata, send_file, recv_file)
 from general.message import rstrip_message, add_prefix
 
 
-def display_rule():
-    print('\nInput message to send to the chatroom, ',
-            'or\nInput [send] to send a file.')
-    print('Press [Enter/Return] key to disconnect.\n')
-    return
-
-
-def send_msg_to_server(client, shutdownEvent, msgContentSize):
+def send_msg_to_server(client, shutdownEvent, msgContentSize, chunkSize):
         # Sent rules to the client console
         display_rule()
 
@@ -33,7 +27,7 @@ def send_msg_to_server(client, shutdownEvent, msgContentSize):
             elif msg.lower() == 'send': # Client wants to send a file to server
                 handle_send_file_request(client, msgContentSize)
             elif msg.lower() == 'recv': # Client wants to recv a file to server
-                handle_recv_file_request(client, msgContentSize)
+                handle_recv_file_request(client)
             else: # Client wants to send a normal message to server
                 msgWithPrefix = add_prefix(msg.encode(), 0)
                 client.send(msgWithPrefix)
@@ -78,7 +72,7 @@ def send_file_to_server(client, filepath, msgContentSize):
     return
 
 
-def handle_recv_file_request(client, msgContentSize, chunkSize):
+def handle_recv_file_request(client):
     # Step1: prompt client where to store the file
     print('Type in filepath where you want to store the file.')
     print('OR, type <exit> to stop receiving file.\n')
@@ -126,23 +120,8 @@ def handle_recv_file_request(client, msgContentSize, chunkSize):
     
     # Step3: start receiving metadata and file chunks if file exists on server
     # Inform server that this client wants to receive a file
+    client.send(add_prefix(filepath.encode(), 2))
     client.send(add_prefix(filename.encode(), 2))
-    
-    # Receive server response for whether server has that file or not
-    # If server has it, response should be 'file_exists'
-    # Otherwise, response should be 'file_not_found'
-    response = client.recv(chunkSize)
-    if response.decode() == 'file_exists':
-        # [TO-DO] Receive metadata from server
-        # [TO-DO] Receive file from server, and store it on client desired location
-        # Note: recv_file for client should be different
-        print()
-    elif response.decode() == 'file_not_found':
-        print('Stopped receiving file.')
-        display_rule()
-    else:
-        print(f'Received invalid response from server: {response} ',
-              f'when receiving file.')
     return
     
     

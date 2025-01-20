@@ -58,13 +58,14 @@ class Client:
             
         # Use thread t1 to receive message from server
         t1 = Thread(target=recv_msg_from_server, 
-                    args=(self.client, self.shutdownEvent, self.CHUNK_SIZE))
+                    args=(self.client, self.shutdownEvent, 
+                          self.MSG_CONTENT_SIZE, self.CHUNK_SIZE))
         t1.daemon = True
         t1.start()
         # Use thread t2 to send message to server
         t2 = Thread(target=send_msg_to_server, 
                     args=(self.client, self.shutdownEvent, 
-                          self.MSG_CONTENT_SIZE))
+                          self.MSG_CONTENT_SIZE, self.CHUNK_SIZE))
         t2.daemon = True
         t2.start()
     
