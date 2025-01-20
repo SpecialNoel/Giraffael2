@@ -28,12 +28,13 @@ def add_prefix(msg, typePrefix):
     
     Type prefixes:
     0: Normal message (exchanged in channel/chatroom; metadata is included here)
-    1: File content   (not decode-able)
+    1: File-upload   (not decode-able)
+    2: File-download (not decode-able)
     
     Note that we don't take care of the room code nor the username here, since
       they were handled BEFORE the client enters/creates a room.
-    2: RoomCode       (exchanged during room code step)
-    3: Username       (exchanged during username step)
+    * RoomCode       (exchanged during room code step)
+    * Username       (exchanged during username step)
 
     @param msg: a bytes-object
     @param typePrefix: an integer
