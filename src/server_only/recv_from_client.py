@@ -139,8 +139,9 @@ def recv_file_from_client(client, msgContent, msgContentSize):
     
     # Split the metadata of the file received from client
     filename, filesize = split_metadata(metadata)
+    filepath = 'received_files'
 
     # Receive the whole file from client
-    recv_file(filename, filesize, client, 
+    recv_file(filename, filepath, filesize, client, 
              msgContentSize, client.getpeername())
     return

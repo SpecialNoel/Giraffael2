@@ -10,6 +10,15 @@ Functions here are used by clients or server to transfer
 '''
 
 
+def display_rule():
+    print('\nInput message to send to the chatroom,',
+            'or\nInput [send] to send a file to server,',
+            'or\nInput [recv] to receive a file from server.')
+          
+    print('Press [Enter/Return] key to disconnect.\n')
+    return
+
+
 def get_filepath(filename):
     '''
     Used by the sender to get the filepath of a file from the current directory.
@@ -20,23 +29,34 @@ def get_filepath(filename):
     return Path.cwd() / filename
 
 
+def find_file_in_directory(filename, target_dir, start_dir='.'):
+    for root, dirs, files in os.walk(start_dir):
+        if os.path.basename(root) == target_dir and filename in files:
+            return os.path.join(root, filename)
+    return None
+
+
 def check_if_directory_exists(filepath):
     directory = os.path.dirname(filepath)
     if not directory:
         directory = '.'
     if not os.path.exists(directory):
-        print("Invalid filepath: directory does not exist.")
+        print('Invalid filepath: directory does not exist.')
         return False
     if not os.access(directory, os.W_OK):
-        print("Invalid filepath: directory is not writable.")
+        print('Invalid filepath: directory is not writable.')
         return False
     print(f'Directory [{directory}] exists.')
     return True
 
 
 def check_if_filename_is_valid(filename):
-    if not os.path.splitext(filename)[1]:
-        print("Invalid filename: filename does not have an extension.")
+    try:
+        # Attempt to create a Path object
+        Path(filename)
+        return True
+    except Exception as e:
+        print(f'Invalid filename: {e}.')
         return False
     
     
@@ -56,11 +76,11 @@ def check_if_file_exists(filepath):
         if not check_if_directory_exists(filepath):
             return False
         if not os.path.basename(filepath):
-            print("Invalid filepath: filename is missing.")
+            print('Invalid filepath: filename is missing.')
             return False
         return check_if_filepath_exists(filepath)
     except Exception as e:
-        print(f"Error validating filepath: {e}")
+        print(f'Error validating filepath: {e}')
         return check_if_filepath_exists(filepath)
 
 
@@ -94,6 +114,7 @@ def send_metadata(socket, filename, filesize):
     msg = f'{filename}|{filesize}'
     msgWithPrefix = add_prefix(msg.encode(), 1)
     socket.send(msgWithPrefix)
+    return
 
 
 def check_metadata_format(msg):
@@ -133,10 +154,10 @@ def send_file(filepath, filename, socket, chunk_size, recipient):
     return
 
 
-def recv_file(filename, filesize, socket, chunk_size, sender):
+def recv_file(filename, filepath, filesize, socket, chunk_size, sender):
     '''
     Used by the recipient to receive the file from the sender.
-    Received content will be stored in the "received_files" folder
+    Received content will be stored in the 'received_files' folder
       with the same filename as the received filename.
     
     @param filename: the string name of the file
@@ -146,15 +167,9 @@ def recv_file(filename, filesize, socket, chunk_size, sender):
     @param sender: either 'server' or address of a client; indicates the sender side
     @return: None
     '''
-    if sender == 'server':
-        print(f'Stored in filepath: {filename}')
-    else:
-        filepath_prefix = 'received_files/'
-        filename = filepath_prefix + filename
-        print(f'Stored in filepath: {filename}')
-    
     try:
-        with open(filename, 'wb') as file:
+        fullFilepath = filepath + '/' + filename
+        with open(fullFilepath, 'wb') as file:
             received_len = 0
             while received_len < filesize:
                 data = socket.recv(chunk_size)
@@ -163,6 +178,7 @@ def recv_file(filename, filesize, socket, chunk_size, sender):
                 file.write(data)
                 received_len += len(data)
         print(f'Successfully received file [{filename}] from [{sender}].\n')
+        print(f'The file is Stored in filepath: {fullFilepath}.\n')
     except Exception as e: 
         print(f'Error occurred in recv_file(): {e}.')
     return
