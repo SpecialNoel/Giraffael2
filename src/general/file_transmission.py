@@ -20,6 +20,31 @@ def get_filepath(filename):
     return Path.cwd() / filename
 
 
+def check_if_directory_exists(filepath):
+    directory = os.path.dirname(filepath)
+    if not directory:
+        directory = '.'
+    if not os.path.exists(directory):
+        print("Invalid filepath: directory does not exist.")
+        return False
+    if not os.access(directory, os.W_OK):
+        print("Invalid filepath: directory is not writable.")
+        return False
+    print(f'Directory [{directory}] exists.')
+    return True
+
+
+def check_if_filename_is_valid(filename):
+    if not os.path.splitext(filename)[1]:
+        print("Invalid filename: filename does not have an extension.")
+        return False
+    
+    
+def check_if_filepath_exists(filepath):
+    print(f'Filepath [{filepath}] exists: {os.path.isfile(filepath)}.')
+    return os.path.isfile(filepath)
+
+
 def check_if_file_exists(filepath):
     '''
     Used by the sender to check if the file exists or not.
@@ -28,42 +53,25 @@ def check_if_file_exists(filepath):
     @return: True if the filepath is a file; False otherwise 
     '''
     try:
-        directory = os.path.dirname(filepath)
-        if not directory:
-            directory = '.'
-        if not os.path.exists(directory):
-            print("Invalid filepath: directory does not exist.")
-            return False
-        if not os.access(directory, os.W_OK):
-            print("Invalid filepath: directory is not writable.")
+        if not check_if_directory_exists(filepath):
             return False
         if not os.path.basename(filepath):
             print("Invalid filepath: filename is missing.")
             return False
-        if not os.path.splitext(filepath)[1]:
-            print("Invalid filepath: filename does not have an extension.")
-            return False
-        if os.path.isfile(filepath):
-            print(f'Filepath [{filepath}] exits.')
-        else:
-            print(f'Filepath [{filepath}] does not exists.')
-        return os.path.isfile(filepath)
+        return check_if_filepath_exists(filepath)
     except Exception as e:
         print(f"Error validating filepath: {e}")
-        print(f'Filepath [{filepath}] exits: {os.path.isfile(filepath)}.')
-        return os.path.isfile(filepath)
+        return check_if_filepath_exists(filepath)
 
 
-def get_valid_filepath(filename):    
-    filepath = get_filepath(filename)
+def get_valid_filepath(filepath):    
     while not check_if_file_exists(filepath):
         print('\nType in filename of the file you want to send:')
         print('OR, type <exit> to stop sending file.\n')
-        filename = rstrip_message(input())
+        filepath = rstrip_message(input())
         # Client does not want to send the file anymore
-        if filename.lower() == 'exit':
+        if filepath.lower() == 'exit':
             return None        
-        filepath = get_filepath(filename)
     return filepath
 
 
@@ -92,7 +100,7 @@ def check_metadata_format(msg):
     if msg.split('|')[0] == msg:
         print('Invalid metadata format.')
         return False
-    print('Metadata format valid.')
+    print('Metadata format is valid.')
     return True
 
 

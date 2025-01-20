@@ -40,7 +40,7 @@ class Server:
         self.CHUNK_SIZE = self.TYPE_PREFIX_SIZE + self.MSG_CONTENT_SIZE  
         
         
-    def get_server_ip():
+    def get_server_ip(self):
         try:
             # Using UDP connection
             temp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
