@@ -1,10 +1,11 @@
 # delete_received_files.sh
 
-# To run this script: ./delete_received_files.sh 
+# To run this script: ./utilities/delete_received_files.sh 
 # Note: Have to cd to the src folder for this to work
 
 # Specify the directory where files should be deleted
 TARGET_DIR="./received_files"
+#TARGET_DIR="./test_files"
 
 echo "Target directory is: $TARGET_DIR"
 
