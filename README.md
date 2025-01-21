@@ -1,4 +1,4 @@
-# Giraffael2
+# :giraffe: Giraffael2 :giraffe:
 
 Version 2.0 of Project Giraffael.
 
