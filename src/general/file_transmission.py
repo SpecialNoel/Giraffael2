@@ -38,15 +38,15 @@ def find_file_in_directory(filename, target_dir, start_dir='.'):
 
 def check_if_directory_exists(filepath):
     directory = os.path.dirname(filepath)
-    if not directory:
-        directory = '.'
-    if not os.path.exists(directory):
+    if not filepath:
+        filepath = '.'
+    if not os.path.exists(filepath):
         print('Invalid filepath: directory does not exist.')
         return False
-    if not os.access(directory, os.W_OK):
+    if not os.access(filepath, os.W_OK):
         print('Invalid filepath: directory is not writable.')
         return False
-    print(f'Directory [{directory}] exists.')
+    print(f'Filepath [{filepath}] exists.')
     return True
 
 
@@ -168,7 +168,8 @@ def recv_file(filename, filepath, filesize, socket, chunk_size, sender):
     @return: None
     '''
     try:
-        fullFilepath = filepath + '/' + filename
+        filepath = filepath if filepath[-1] == '/' else filepath + '/'
+        fullFilepath = filepath + filename
         with open(fullFilepath, 'wb') as file:
             received_len = 0
             while received_len < filesize:
