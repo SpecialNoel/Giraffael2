@@ -1,19 +1,16 @@
 # recv_from_client.py
 
-
 from datetime import datetime
-from general.file_transmission import (check_metadata_format,
-                                      split_metadata, recv_file)
-from general.message import rstrip_message, add_prefix
-from server_only.room_code_operations import generate_and_send_room_code
-from server_only.remove_client import remove_client_from_clients
+from general.file_transmission import (check_metadata_format, display_rule,
+                                      recv_file, split_metadata)
+from general.message import add_prefix, rstrip_message
 from server_only.check_client_alive import check_client_alive
-
+from server_only.remove_client import remove_client_from_clients
+from server_only.room_code_operations import generate_and_send_room_code
 
 def check_room_code_validness(roomCode, roomCodes):
     # Check if the received room code exists in roomCodes
     return roomCode in roomCodes
-
 
 def check_username_validness(username, charPools, maxUsernameLength):
     # Check if the length of the username is in bound
@@ -26,7 +23,6 @@ def check_username_validness(username, charPools, maxUsernameLength):
             return False
     return True
     
-
 def get_client_response_on_creating_room(client):
     # Obtain response from client about create or enter room
     # 'C' for create room
@@ -43,14 +39,14 @@ def get_client_response_on_creating_room(client):
         client.send(msgToClient.encode())
         
         print(f'Error: Client response on creating room: ',
-                f'{response}.')
+              f'[{response}].')
         msg = rstrip_message(client.recv(2))
         response = msg.decode().upper()
     # Client chooses to create room
     return True
     
-
-def handle_client_room_code_message(client, address, roomCodes, roomCodeLength):
+def handle_client_room_code_message(client, address, roomCodes, 
+                                    roomCodeLength):
     createRoomInstead = False
 
     # Obtain room code from client
@@ -78,8 +74,8 @@ def handle_client_room_code_message(client, address, roomCodes, roomCodeLength):
     client.send(b'VALID_ROOM_CODE')
     return createRoomInstead, roomCode
 
-
-def handle_client_username_message(client, charPools, msgContentSize, maxUsernameLength):
+def handle_client_username_message(client, charPools, msgContentSize, 
+                                   maxUsernameLength):
     # Obtain username from client
     msg = rstrip_message(client.recv(msgContentSize))
     username = msg.decode()
@@ -87,7 +83,7 @@ def handle_client_username_message(client, charPools, msgContentSize, maxUsernam
     # Repeat until username sent by client is valid
     while not check_username_validness(username, charPools, maxUsernameLength):
         msgToClient = 'Error: Username is invalid. Please try again.\n'
-        msgToClient += f'Username max length: {maxUsernameLength}\n'
+        msgToClient += f'Username max length: [{maxUsernameLength}]\n'
         msgToClient += 'Username can be a combination of lower, upper '
         msgToClient += 'cased letters and/or digits.\n'
         client.send(msgToClient.encode())
@@ -99,7 +95,6 @@ def handle_client_username_message(client, charPools, msgContentSize, maxUsernam
     # Acknowledge client about username being valid
     client.send(b'VALID_USERNAME')
     return username
-
 
 def handle_client_normal_message(client, msg, clients, rooms, roomCode):        
     # A list used to remove disconnected client sockets
@@ -128,12 +123,11 @@ def handle_client_normal_message(client, msg, clients, rooms, roomCode):
         socket.close()
     return
 
-
 def recv_file_from_client(client, msgContent, msgContentSize):
     # Obtain metadata
-    print(f'Received msg: {msgContent}')
+    print(f'Received msg: [{msgContent}]')
     metadata = msgContent.decode()
-    print(f'Metadata: {metadata}.')
+    print(f'Metadata: [{metadata}].')
     if not check_metadata_format(metadata):
         return
     
@@ -144,4 +138,6 @@ def recv_file_from_client(client, msgContent, msgContentSize):
     # Receive the whole file from client
     recv_file(filename, filepath, filesize, client, 
              msgContentSize, client.getpeername())
+    
+    display_rule()
     return
