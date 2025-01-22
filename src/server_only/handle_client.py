@@ -1,14 +1,11 @@
 # handle_client.py
 
-
-from general.message import rstrip_message, add_prefix, get_prefix_and_content
-from general.file_transmission import (find_file_in_directory, create_metadata,
-                                      send_metadata)
+from general.file_transmission import find_file_in_directory
+from general.message import add_prefix, get_prefix_and_content, rstrip_message
 from server_only.remove_client import handle_client_disconnect_request
 from server_only.recv_from_client import (handle_client_normal_message,
                                           recv_file_from_client)
 from server_only.send_to_client import send_file_to_client
-
 
 def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
                       rooms, roomCodes, maxClientCount, msgContentSize):
@@ -20,11 +17,11 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
         try:
             msg = client.recv(chunkSize) # 1025 bytes
             typePrefix, msgContent = get_prefix_and_content(msg)
-            print(f'msg: {msg}')
-            print(f'Type Prefix: {typePrefix}')
-            print(f'Content: {msgContent}')
+            print(f'msg: [{msg}]')
+            print(f'Type Prefix: [{typePrefix}]')
+            print(f'Content: [{msgContent}]')
             prefix = int.from_bytes(typePrefix, byteorder='big')
-            print(f'Prefix: {prefix}')
+            print(f'Prefix: [{prefix}]')
 
             # Empty message -> client closed connection
             if not msg:
@@ -55,7 +52,7 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
                     # msgContent is the filepath client wants to store
                     #   the file on their machine
                     clientFilepath = rstrip_message(msgContent.decode())
-                    print(f'clientFilepath:{clientFilepath}')
+                    print(f'clientFilepath: [{clientFilepath}]')
                     
                     # Inform the client to get ready to receive server response
                     client.send(add_prefix(clientFilepath.encode(), 1))
@@ -81,8 +78,8 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
                 ConnectionResetError, 
                 ConnectionAbortedError) as e:
             # Close connection with this client
-            print(f'Error: {e}. ',
-                    f'Removed [{address}] from client socket list.')
+            print(f'Error: [{e}]. ',
+                  f'Removed [{address}] from client socket list.')
             handle_client_disconnect_request(client, address, roomCode)
             break
     return

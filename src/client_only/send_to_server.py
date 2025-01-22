@@ -1,16 +1,13 @@
 # send_to_server.py
 
-
-from general.file_transmission import (display_rule,
-                                      check_if_directory_exists,
-                                      get_valid_filepath,
+from general.file_transmission import (check_if_directory_exists,
                                       check_if_filename_is_valid,
-                                      create_metadata, send_metadata,
-                                      split_metadata, send_file, recv_file)
-from general.message import rstrip_message, add_prefix
+                                      create_metadata, display_rule, 
+                                      get_valid_filepath,
+                                      send_file, send_metadata)
+from general.message import add_prefix, rstrip_message
 
-
-def send_msg_to_server(client, shutdownEvent, msgContentSize, chunkSize):
+def send_msg_to_server(client, shutdownEvent, msgContentSize):
         # Sent rules to the client console
         display_rule()
 
@@ -33,9 +30,20 @@ def send_msg_to_server(client, shutdownEvent, msgContentSize, chunkSize):
                 client.send(msgWithPrefix)
         print('Client sender thread stopped.')
         return
-    
-    
+
 def handle_send_file_request(client, msgContentSize):
+    def send_file_to_server(client, filepath, msgContentSize):
+        # Create and send metadata to server
+        filename, filesize = create_metadata(filepath)
+        send_metadata(client, filename, filesize)
+        
+        # Send the whole file to server
+        send_file(filepath, filename, client, 
+                msgContentSize, 'server')
+        
+        display_rule()
+        return
+    
     print('Type in filepath of the file you want to send.')
     print('OR, type <exit> to stop sending file.\n')
     filepath = rstrip_message(input())
@@ -59,71 +67,82 @@ def handle_send_file_request(client, msgContentSize):
     # Send the file to server
     send_file_to_server(client, filepath, msgContentSize)
     return
-    
-    
-def send_file_to_server(client, filepath, msgContentSize):
-    # Create and send metadata to server
-    filename, filesize = create_metadata(filepath)
-    send_metadata(client, filename, filesize)
-    
-    # Send the whole file to server
-    send_file(filepath, filename, client, 
-             msgContentSize, 'server')
-    return
-
 
 def handle_recv_file_request(client):
-    # Step1: prompt client where to store the file
-    print('Type in filepath where you want to store the file.')
-    print('OR, type <exit> to stop receiving file.\n')
-    filepath = rstrip_message(input())
-    
-    # Client does not want to receive the file anymore
-    if filepath.lower() == 'exit':
-        print('Stopped receiving file.')
-        display_rule()
-        return
-    
-    # Validate the filepath
-    while not check_if_directory_exists(filepath):
+    def get_client_filepath():
         print('Type in filepath where you want to store the file.')
         print('OR, type <exit> to stop receiving file.\n')
-        
         filepath = rstrip_message(input())
+        
         # Client does not want to receive the file anymore
         if filepath.lower() == 'exit':
             print('Stopped receiving file.')
             display_rule()
-            return
+            return None
+        return filepath
+        
+    def validate_client_filepath(filepath):
+        while not check_if_directory_exists(filepath):
+            print('Type in filepath where you want to store the file.')
+            print('OR, type <exit> to stop receiving file.\n')
+            
+            filepath = rstrip_message(input())
+            # Client does not want to receive the file anymore
+            if filepath.lower() == 'exit':
+                print('Stopped receiving file.')
+                display_rule()
+                return None
+        return filepath
     
-    # Step2: prompt client which file to receive/download
-    print('Type in name of the file you want to receive.')
-    print('OR, type <exit> to stop receiving file.\n')
-    filename = rstrip_message(input())
-    
-    # Client does not want to receive the file anymore
-    if filename.lower() == 'exit':
-        print('Stopped receiving file.')
-        display_rule()
-        return
-    
-    while not check_if_filename_is_valid(filename):
+    def get_client_filename():
         print('Type in name of the file you want to receive.')
         print('OR, type <exit> to stop receiving file.\n')
-        
         filename = rstrip_message(input())
+        
         # Client does not want to receive the file anymore
         if filename.lower() == 'exit':
             print('Stopped receiving file.')
             display_rule()
-            return
+            return None
+        return filename
+    
+    def validate_client_filename(filename):
+        while not check_if_filename_is_valid(filename):
+            print('Type in name of the file you want to receive.')
+            print('OR, type <exit> to stop receiving file.\n')
+            
+            filename = rstrip_message(input())
+            # Client does not want to receive the file anymore
+            if filename.lower() == 'exit':
+                print('Stopped receiving file.')
+                display_rule()
+                return None
+        return filename
+        
+    # Step1: prompt client where to store the file
+    filepath = get_client_filepath()
+    if filepath == None:
+        return
+    
+    # Validate the filepath    
+    filepath = validate_client_filepath(filepath)
+    if filepath == None:
+        return
+    
+    # Step2: prompt client which file to receive/download
+    filename = get_client_filename()
+    if filename == None:
+        return
+     
+    filename = validate_client_filename(filename)
+    if filename == None:
+        return
     
     # Step3: start receiving metadata and file chunks if file exists on server
     # Inform server that this client wants to receive a file
     client.send(add_prefix(filepath.encode(), 2))
     client.send(add_prefix(filename.encode(), 2))
     return
-    
     
 def recv_user_input():
     msg = rstrip_message(input())
@@ -133,27 +152,23 @@ def recv_user_input():
         msg = rstrip_message(input())
     return msg
 
-
-def send_user_input(client, msg, chunkSize):    
+def send_user_input(client, msg, msgContentSize):    
     # Msg here does not have type prefix, since this function 
     #   should only handles cases of room code and username.
     client.send(msg.encode())
-    response = client.recv(chunkSize)
+    response = client.recv(msgContentSize)
     return msg, response.decode()
-
-    
-def send_username(client, chunkSize):
+ 
+def send_username(client, msgContentSize):
     print('Input your username:')
     username = recv_user_input()
-    return send_user_input(client, username, chunkSize)
+    return send_user_input(client, username, msgContentSize)
     
-
-def send_decision_on_room(client, chunkSize):
+def send_decision_on_room(client, msgContentSize):
     msg = recv_user_input()
-    return send_user_input(client, msg, chunkSize)
+    return send_user_input(client, msg, msgContentSize)
 
-
-def send_room_code(client, chunkSize):
+def send_room_code(client, msgContentSize):
     print('Input room code here:\n')
     roomCode = recv_user_input()
-    return send_user_input(client, roomCode, chunkSize)
+    return send_user_input(client, roomCode, msgContentSize)

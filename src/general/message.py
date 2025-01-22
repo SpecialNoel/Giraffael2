@@ -10,16 +10,15 @@ Functions here are used to argument messages transmitted
 ************************************************
 '''
 
-
 def rstrip_message(msg):
     '''
     Used for removing the new line character at the end of the message.
 
     @param msg: a bytes-object
-    @return: a copy of the message with trailing spaces or new line chars removed
+    @return: a copy of the message with trailing spaces 
+             or new line chars removed
     '''
     return msg.rstrip()
-
 
 def add_prefix(msg, typePrefix):
     '''
@@ -27,7 +26,8 @@ def add_prefix(msg, typePrefix):
     Note that this only applies when the client is already inside a room.
     
     Type prefixes:
-    0: Normal message (exchanged in channel/chatroom; metadata is included here)
+    0: Normal message (exchanged in channel/chatroom; 
+                       metadata is included here)
     1: File-upload   (not decode-able)
     2: File-download (not decode-able)
     
@@ -41,7 +41,6 @@ def add_prefix(msg, typePrefix):
     @return: message with typePrefix appended to the front
     '''
     return (typePrefix.to_bytes(1, byteorder='big')) + msg
-
 
 def get_prefix_and_content(msg):
     '''

@@ -1,18 +1,15 @@
 # server.py
 
-
 '''
 To run this script: python3 server.py
 
 Note: Every 'client' instance references to a socket in server.py
 '''
 
-
 import socket
 import string
 from server_only.accept_connection import accept_a_connection
 from threading import Thread, Event
-
 
 class Server:
     def __init__(self):
@@ -39,7 +36,6 @@ class Server:
         self.MSG_CONTENT_SIZE = 1024
         self.CHUNK_SIZE = self.TYPE_PREFIX_SIZE + self.MSG_CONTENT_SIZE  
         
-        
     def get_server_ip(self):
         try:
             # Using UDP connection
@@ -51,11 +47,10 @@ class Server:
             temp_socket.close()
             return ip
         except Exception as e:
-            print(f'Error occurred when getting server ip: {e}')
+            print(f'Error occurred when getting server ip: [{e}]')
             # Use localhost as server ip if getting error
             return '127.0.0.1'
     
-
     def init_server(self):
         # Setup server that uses TCP connection
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -63,8 +58,7 @@ class Server:
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # Bind the [IP, Port number] combination to the server
         self.server.bind((self.SERVER_IP, self.SERVER_PORT))
-        return      
-
+        return
 
     def run_server(self): 
         # Set up server socket     
@@ -74,7 +68,7 @@ class Server:
         self.server.listen(self.MAX_CLIENT_COUNT)
         print(f'Server socket on [{self.SERVER_IP}: {self.SERVER_PORT}] ',
               f'started listening.')
-        print(f'MAX: {self.MAX_CLIENT_COUNT} clients.')
+        print(f'MAX: [{self.MAX_CLIENT_COUNT}] clients.')
         print(f'All connected clients: ',
               f'[{len(self.clients)}/{self.MAX_CLIENT_COUNT}]\n')
 
@@ -101,7 +95,7 @@ class Server:
                 self.threads.append(t)
                 t.start()
             except KeyboardInterrupt as e:
-                print(f'Error: {e}. ',
+                print(f'Error: [{e}]. ',
                        'Disconnected with all clients and exiting now.')
                 self.shutdownEvent.set()
                 
@@ -122,7 +116,6 @@ class Server:
         print('Server socket closed.')
         exit()
     
-
 if __name__=='__main__':
     server = Server()
     server.run_server()

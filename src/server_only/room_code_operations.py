@@ -1,8 +1,6 @@
 # room_code_operations.py
 
-
 import secrets
-
 
 def generate_room_code(charPools, roomCodes, roomCodeLength):
     # Generate an unique room code with roomCodeLength characters
@@ -14,7 +12,6 @@ def generate_room_code(charPools, roomCodes, roomCodeLength):
                     for _ in range(roomCodeLength))
     roomCodes.add(roomCode)
     return roomCode
-
 
 def generate_and_send_room_code(conn, address, charPools, roomCodes, 
                                 roomCodeLength):

@@ -7,15 +7,13 @@ Note: must be executed when the server is alive.
 Note: 'client' is essentially only a socket in client.py
 '''
 
-
 import socket
-from recv_from_server import recv_msg_from_server
-from send_to_server import send_msg_to_server
 from check_server_capacity import check_server_capacity
 from handle_room_decision import handle_room_decision
 from handle_username import handle_username
-from threading import Thread, Event
-
+from recv_from_server import recv_msg_from_server
+from send_to_server import send_msg_to_server
+from threading import Event, Thread
 
 class Client:
     def __init__(self):
@@ -31,7 +29,6 @@ class Client:
         self.MSG_CONTENT_SIZE = 1024
         self.CHUNK_SIZE = self.TYPE_PREFIX_SIZE + self.MSG_CONTENT_SIZE
 
-
     def init_client_socket(self):
         try: 
             # TCP connection
@@ -43,7 +40,6 @@ class Client:
             print('Connection refused. Server is not on yet.')
             return None
 
-        
     def run_client(self):
         # Prevent connection if client socket is not initialized correctly
         if self.client == None:
@@ -53,8 +49,8 @@ class Client:
             print('Connection failed: server reached max client capacity.')
             exit()
             
-        handle_room_decision(self.client, self.CHUNK_SIZE)
-        handle_username(self.client, self.CHUNK_SIZE)
+        handle_room_decision(self.client, self.MSG_CONTENT_SIZE)
+        handle_username(self.client, self.MSG_CONTENT_SIZE)
             
         # Use thread t1 to receive message from server
         t1 = Thread(target=recv_msg_from_server, 
@@ -65,7 +61,7 @@ class Client:
         # Use thread t2 to send message to server
         t2 = Thread(target=send_msg_to_server, 
                     args=(self.client, self.shutdownEvent, 
-                          self.MSG_CONTENT_SIZE, self.CHUNK_SIZE))
+                          self.MSG_CONTENT_SIZE))
         t2.daemon = True
         t2.start()
     
@@ -75,7 +71,6 @@ class Client:
         print('All threads joined.')
         print('Client socket closed.')
         exit()
-        
 
 if __name__ == '__main__':
     client = Client()

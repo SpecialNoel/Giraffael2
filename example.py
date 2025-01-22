@@ -1,3 +1,5 @@
+# example.py
+
 from openai import OpenAI
 client = OpenAI()
 
