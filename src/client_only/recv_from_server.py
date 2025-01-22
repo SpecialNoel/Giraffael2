@@ -1,15 +1,13 @@
 # recv_from_server.py
 
-
 # Used to import files from the 'general' folder
 import sys
 from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1]
 sys.path.append(str(src_folder))
 
-from general.file_transmission import display_rule, split_metadata, recv_file
-from general.message import rstrip_message, get_prefix_and_content
-
+from general.file_transmission import display_rule, recv_file, split_metadata
+from general.message import get_prefix_and_content, rstrip_message
 
 def recv_msg_from_server(client, shutdownEvent, msgContentSize, chunkSize):
     # Receive message from server
@@ -31,13 +29,13 @@ def recv_msg_from_server(client, shutdownEvent, msgContentSize, chunkSize):
                     msgContent = rstrip_message(msgContent)
                     print(msgContent.decode() + '\n')
                 case 1: # file-download request initiated by client
-                    print(f'type prefix:{typePrefix}')
-                    print(f'msgContent:{msgContent}')
+                    print(f'type prefix: [{typePrefix}]')
+                    print(f'msgContent: [{msgContent}]')
                     filepath = rstrip_message(msgContent).decode()
-                    print(f'filepath:{filepath}')
-                    recv_file_from_server(client, filepath, msgContentSize, chunkSize)
+                    print(f'filepath: [{filepath}]')
+                    recv_file_from_server(client, filepath, msgContentSize)
                 case _: # invalid prefix
-                    print(f'Received invalid prefix: {typePrefix}.')
+                    print(f'Received invalid prefix: [{typePrefix}].')
         except Exception as e:
             print(f'Error [{e}] occurred when receiving message.')
             break
@@ -45,22 +43,24 @@ def recv_msg_from_server(client, shutdownEvent, msgContentSize, chunkSize):
     print('Client receiver thread stopped.')
     return
 
-
-def recv_file_from_server(client, filepath, msgContentSize, chunkSize):
+def recv_file_from_server(client, filepath, msgContentSize):
     # Receive server response for whether server has that file or not
     # If server has it, response should be 'file_exists'
     # Otherwise, response should be 'file_not_found'
-    response = client.recv(chunkSize)
+    response = client.recv(msgContentSize)
     if response.decode() == 'file_exists':
         # Receive metadata from server
         metadata = client.recv(msgContentSize).decode()
         filename, filesize = split_metadata(metadata)
         
         # Receive file from server, and store it on client desired location
-        recv_file(filename, filepath, filesize, client, chunkSize, 'server')
+        recv_file(filename, filepath, filesize, client, msgContentSize,
+                 'server')
+        
+        display_rule()
     elif response.decode() == 'file_not_found':
         print('Stopped receiving file.')
         display_rule()
     else:
-        print(f'Received invalid response from server: {response} ',
+        print(f'Received invalid response from server: [{response}] ',
               f'when receiving file.')

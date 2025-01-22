@@ -10,6 +10,6 @@ def check_client_alive(client):
             ConnectionResetError, 
             ConnectionAbortedError) as e:
         # Otherwise, client has already disconnected.
-        print(f'Error: {e}. ',
-                f'Connection with {client} is no longer alive.')
+        print(f'Error: [{e}]. ',
+              f'Connection with [{client}] is no longer alive.')
         return False
