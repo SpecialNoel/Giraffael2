@@ -1,6 +1,7 @@
 # room_code_operations.py
 
 import secrets
+from general.message import send_msg_with_prefix
 
 def generate_room_code(charPools, roomCodes, roomCodeLength):
     # Generate an unique room code with roomCodeLength characters
@@ -18,6 +19,6 @@ def generate_and_send_room_code(conn, address, charPools, roomCodes,
     # Generate an unique room code for this client
     roomCode = generate_room_code(charPools, roomCodes, roomCodeLength)
     # Send the generated room code to the client
-    conn.send(roomCode.encode())
+    send_msg_with_prefix(conn, roomCode, 0)
     print(f'Sent room code [{roomCode}] to client [{address}].')
     return roomCode
