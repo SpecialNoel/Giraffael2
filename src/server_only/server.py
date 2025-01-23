@@ -32,9 +32,7 @@ class Server:
         
         # Char pools, containing all Digits, Upper and Lower-case letters
         self.charPools = string.ascii_letters + string.digits
-        self.TYPE_PREFIX_SIZE = 1
-        self.MSG_CONTENT_SIZE = 1024
-        self.CHUNK_SIZE = self.TYPE_PREFIX_SIZE + self.MSG_CONTENT_SIZE  
+        self.CHUNK_SIZE = 1025
         
     def get_server_ip(self):
         try:
@@ -59,55 +57,47 @@ class Server:
         # Bind the [IP, Port number] combination to the server
         self.server.bind((self.SERVER_IP, self.SERVER_PORT))
         return
-
-    def run_server(self): 
-        # Set up server socket     
-        self.init_server()  
-        
-        # Start listening for connection from clients
+    
+    def start_listening(self):
         self.server.listen(self.MAX_CLIENT_COUNT)
         print(f'Server socket on [{self.SERVER_IP}: {self.SERVER_PORT}] ',
               f'started listening.')
         print(f'MAX: [{self.MAX_CLIENT_COUNT}] clients.')
         print(f'All connected clients: ',
               f'[{len(self.clients)}/{self.MAX_CLIENT_COUNT}]\n')
-
-        # Server should be always-on
-        while True:
-            try:
-                # Accept the connection established by a client
-                conn, address = self.server.accept()
-                
-                # Use a separate thread to accept and handle this client
-                t = Thread(target=accept_a_connection, 
-                           args=(conn, address, 
-                                 self.clients,
-                                 self.rooms,
-                                 self.roomCodes,
-                                 self.charPools,
-                                 self.shutdownEvent,
-                                 self.MSG_CONTENT_SIZE,
-                                 self.CHUNK_SIZE,
-                                 self.ROOM_CODE_LENGTH,
-                                 self.MAX_USERNAME_LENGTH,
-                                 self.MAX_CLIENT_COUNT))
-                t.daemon = False # thread ends when the main thread ends
-                self.threads.append(t)
-                t.start()
-            except KeyboardInterrupt as e:
-                print(f'Error: [{e}]. ',
-                       'Disconnected with all clients and exiting now.')
-                self.shutdownEvent.set()
-                
-                # Close connections with all clients
-                for clientObj in self.clients:
-                    socket = clientObj.get_socket()
-                    # Send an empty string to the client as an indicator
-                    socket.send(b'')
-                    socket.close()
-                self.clients.clear()
-                break
-                
+        return
+        
+    def start_accepting(self):
+        # Accept the connection established by a client
+        conn, address = self.server.accept()
+        
+        # Use a separate thread to accept and handle this client
+        t = Thread(target=accept_a_connection, 
+                   args=(conn, address, self.clients, self.rooms,
+                         self.roomCodes, self.charPools,
+                         self.shutdownEvent, self.CHUNK_SIZE,
+                         self.ROOM_CODE_LENGTH,
+                         self.MAX_USERNAME_LENGTH,
+                         self.MAX_CLIENT_COUNT))
+        t.daemon = False # thread ends when the main thread ends
+        self.threads.append(t)
+        t.start()
+        return
+        
+    def handle_keyboard_interrupt(self, e):
+        print(f'Error: [{e}]. Disconnected with all clients and exiting now.')
+        self.shutdownEvent.set()
+        
+        # Close connections with all clients
+        for clientObj in self.clients:
+            socket = clientObj.get_socket()
+            # Send an empty string to the client as an indicator
+            socket.send(b'')
+            socket.close()
+        self.clients.clear()
+        return
+    
+    def handle_end_server(self):
         # Wait until all threads converge
         for t in self.threads:
             t.join()
@@ -115,6 +105,25 @@ class Server:
         self.server.close()
         print('Server socket closed.')
         exit()
+        return
+        
+    def run_server(self): 
+        # Set up server socket     
+        self.init_server()  
+        
+        # Start listening for connection from clients
+        self.start_listening()
+
+        # Server should be always-on
+        while True:
+            try:
+                self.start_accepting()
+            except KeyboardInterrupt as e:
+                self.handle_keyboard_interrupt(e)
+                break
+                
+        self.handle_end_server()
+        return
     
 if __name__=='__main__':
     server = Server()

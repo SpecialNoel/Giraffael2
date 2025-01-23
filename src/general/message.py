@@ -20,21 +20,16 @@ def rstrip_message(msg):
     '''
     return msg.rstrip()
 
-def add_prefix(msg, typePrefix):
+def add_prefix(msg, typePrefix=0):
     '''
     Used to add a type prefix to the message to indicate its usage.
     Note that this only applies when the client is already inside a room.
     
     Type prefixes:
-    0: Normal message (exchanged in channel/chatroom; 
-                       metadata is included here)
-    1: File-upload   (not decode-able)
-    2: File-download (not decode-able)
-    
-    Note that we don't take care of the room code nor the username here, since
-      they were handled BEFORE the client enters/creates a room.
-    * RoomCode       (exchanged during room code step)
-    * Username       (exchanged during username step)
+    0: Operation message (room code, username, etc.)
+    1: Normal message    (decode-able)
+    2: File-upload       (not decode-able)
+    3: File-download     (not decode-able)
 
     @param msg: a bytes-object
     @param typePrefix: an integer
@@ -52,4 +47,12 @@ def get_prefix_and_content(msg):
     typePrefix = msg[:1] # first char
     msgContent = msg[1:] # the rest chars, starting from the 2nd
     return typePrefix, msgContent
+
+def recv_decoded_content(client, chunkSize):
+    msg = client.recv(chunkSize)
+    prefix, content = get_prefix_and_content(msg)
+    return rstrip_message(content).decode()
     
+def send_msg_with_prefix(client, msg, prefix):
+    client.send(add_prefix(msg.encode(), prefix))
+    return

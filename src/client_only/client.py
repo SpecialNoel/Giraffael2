@@ -25,9 +25,7 @@ class Client:
         self.shutdownEvent = Event() # threading.Event()
         self.ruleAboutRoomCodeSent = False
         
-        self.TYPE_PREFIX_SIZE = 1
-        self.MSG_CONTENT_SIZE = 1024
-        self.CHUNK_SIZE = self.TYPE_PREFIX_SIZE + self.MSG_CONTENT_SIZE
+        self.CHUNK_SIZE = 1025
 
     def init_client_socket(self):
         try: 
@@ -45,23 +43,23 @@ class Client:
         if self.client == None:
             exit()
         # Prevent connection if server reached max client capacity
-        if not check_server_capacity(self.client, self.MSG_CONTENT_SIZE):
+        if not check_server_capacity(self.client, self.CHUNK_SIZE):
             print('Connection failed: server reached max client capacity.')
             exit()
             
-        handle_room_decision(self.client, self.MSG_CONTENT_SIZE)
-        handle_username(self.client, self.MSG_CONTENT_SIZE)
+        handle_room_decision(self.client, self.CHUNK_SIZE)
+        handle_username(self.client, self.CHUNK_SIZE)
             
         # Use thread t1 to receive message from server
         t1 = Thread(target=recv_msg_from_server, 
                     args=(self.client, self.shutdownEvent, 
-                          self.MSG_CONTENT_SIZE, self.CHUNK_SIZE))
+                          self.CHUNK_SIZE))
         t1.daemon = True
         t1.start()
         # Use thread t2 to send message to server
         t2 = Thread(target=send_msg_to_server, 
                     args=(self.client, self.shutdownEvent, 
-                          self.MSG_CONTENT_SIZE))
+                          self.CHUNK_SIZE))
         t2.daemon = True
         t2.start()
     

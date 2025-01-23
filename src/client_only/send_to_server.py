@@ -4,10 +4,12 @@ from general.file_transmission import (check_if_directory_exists,
                                       check_if_filename_is_valid,
                                       create_metadata, display_rule, 
                                       get_valid_filepath,
-                                      send_file, send_metadata)
-from general.message import add_prefix, rstrip_message
+                                      send_file, send_filepath_and_filename,
+                                      send_metadata)
+from general.message import (rstrip_message, send_msg_with_prefix, 
+                             recv_decoded_content)
 
-def send_msg_to_server(client, shutdownEvent, msgContentSize):
+def send_msg_to_server(client, shutdownEvent, chunkSize):
         # Sent rules to the client console
         display_rule()
 
@@ -22,24 +24,23 @@ def send_msg_to_server(client, shutdownEvent, msgContentSize):
                 client.close() # will be detected by server's 'recv()'
                 break
             elif msg.lower() == 'send': # Client wants to send a file to server
-                handle_send_file_request(client, msgContentSize)
+                handle_send_file_request(client, chunkSize)
             elif msg.lower() == 'recv': # Client wants to recv a file to server
                 handle_recv_file_request(client)
             else: # Client wants to send a normal message to server
-                msgWithPrefix = add_prefix(msg.encode(), 0)
-                client.send(msgWithPrefix)
+                send_msg_with_prefix(client, msg, 1)
         print('Client sender thread stopped.')
         return
 
-def handle_send_file_request(client, msgContentSize):
-    def send_file_to_server(client, filepath, msgContentSize):
+def handle_send_file_request(client, chunkSize):
+    def send_file_to_server(client, filepath, chunkSize):
         # Create and send metadata to server
         filename, filesize = create_metadata(filepath)
         send_metadata(client, filename, filesize)
         
         # Send the whole file to server
         send_file(filepath, filename, client, 
-                msgContentSize, 'server')
+                chunkSize, 'server')
         
         display_rule()
         return
@@ -63,9 +64,9 @@ def handle_send_file_request(client, msgContentSize):
         return
     
     # Inform server that this client wants to send a file
-    client.send(add_prefix(''.encode(), 1))
+    send_msg_with_prefix(client, '', 2)
     # Send the file to server
-    send_file_to_server(client, filepath, msgContentSize)
+    send_file_to_server(client, filepath, chunkSize)
     return
 
 def handle_recv_file_request(client):
@@ -140,8 +141,7 @@ def handle_recv_file_request(client):
     
     # Step3: start receiving metadata and file chunks if file exists on server
     # Inform server that this client wants to receive a file
-    client.send(add_prefix(filepath.encode(), 2))
-    client.send(add_prefix(filename.encode(), 2))
+    send_filepath_and_filename(client, filepath, filename)
     return
     
 def recv_user_input():
@@ -152,23 +152,21 @@ def recv_user_input():
         msg = rstrip_message(input())
     return msg
 
-def send_user_input(client, msg, msgContentSize):    
-    # Msg here does not have type prefix, since this function 
-    #   should only handles cases of room code and username.
-    client.send(msg.encode())
-    response = client.recv(msgContentSize)
-    return msg, response.decode()
+def send_user_input(client, msg, chunkSize):    
+    send_msg_with_prefix(client, msg, 0)
+    response = recv_decoded_content(client, chunkSize)
+    return msg, response
  
-def send_username(client, msgContentSize):
+def send_username(client, chunkSize):
     print('Input your username:')
     username = recv_user_input()
-    return send_user_input(client, username, msgContentSize)
+    return send_user_input(client, username, chunkSize)
     
-def send_decision_on_room(client, msgContentSize):
+def send_decision_on_room(client, chunkSize):
     msg = recv_user_input()
-    return send_user_input(client, msg, msgContentSize)
+    return send_user_input(client, msg, chunkSize)
 
-def send_room_code(client, msgContentSize):
+def send_room_code(client, chunkSize):
     print('Input room code here:\n')
     roomCode = recv_user_input()
-    return send_user_input(client, roomCode, msgContentSize)
+    return send_user_input(client, roomCode, chunkSize)
