@@ -1,6 +1,7 @@
 # accept_connection.py
 
 from general.client_obj import Client_Obj
+from general.message import send_msg_with_prefix
 from server_only.handle_client import handle_one_client
 from server_only.recv_from_client import (get_client_response_on_creating_room,
                                           handle_client_room_code_message,
@@ -14,18 +15,16 @@ def test_reach_max_client_count(conn, address, clients, maxClientCount):
     if len(clients) >= maxClientCount:
         print(f'Max client count [{maxClientCount}] reached.',
               f'Refused connection from [{address}].\n')
-        conn.send(b'-1') # refuse this connection by sending '-1' to client
+        send_msg_with_prefix(conn, '-1', 0)
         conn.close()
         return True
     
     # Otherwise, acknowledge client with 'len(clients)+1'
-    msg = str((len(clients)+1)) # num of current connected clients+1
-    conn.send(msg.encode())
+    send_msg_with_prefix(conn, str((len(clients)+1)), 0)
     return False
 
 def accept_a_connection(conn, address, clients, rooms, roomCodes,
-                        charPools, shutdownEvent, msgContentSize, 
-                        chunkSize, roomCodeLength, 
+                        charPools, shutdownEvent, chunkSize, roomCodeLength,
                         maxUsernameLength, maxClientCount):
     # If reached max client count before this client: 
     #   disconnect, then acknowledge the client about the disconnection
@@ -34,7 +33,7 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
         return True
     
     # Wait for client to either create or enter room
-    wantCreateRoom = get_client_response_on_creating_room(conn)
+    wantCreateRoom = get_client_response_on_creating_room(conn, chunkSize)
     
     if wantCreateRoom:
         # Client chooses to create a new room
@@ -45,12 +44,13 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
         # Wait for client to send valid room code
         createInstead, roomCode = handle_client_room_code_message(
                                                 conn, address, roomCodes,
+                                                chunkSize, charPools, 
                                                 roomCodeLength)
         if createInstead: 
             wantCreateRoom = True
 
     # Wait for client to send valid username
-    username = handle_client_username_message(conn, charPools, msgContentSize,
+    username = handle_client_username_message(conn, charPools, chunkSize,
                                               maxUsernameLength)
     
     # Create a client obj for this client
@@ -68,5 +68,5 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
 
     # Start handling this client
     handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
-                      rooms, roomCodes, maxClientCount, msgContentSize)
+                      rooms, roomCodes, maxClientCount)
     return

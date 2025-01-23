@@ -1,9 +1,11 @@
 # recv_from_client.py
 
+import json
 from datetime import datetime
-from general.file_transmission import (check_metadata_format, display_rule,
+from general.file_transmission import (check_metadata_format,
                                       recv_file, split_metadata)
-from general.message import add_prefix, rstrip_message
+from general.message import (recv_decoded_content, 
+                             send_msg_with_prefix)
 from server_only.check_client_alive import check_client_alive
 from server_only.remove_client import remove_client_from_clients
 from server_only.room_code_operations import generate_and_send_room_code
@@ -23,62 +25,60 @@ def check_username_validness(username, charPools, maxUsernameLength):
             return False
     return True
     
-def get_client_response_on_creating_room(client):
+def get_client_response_on_creating_room(client, chunkSize):
     # Obtain response from client about create or enter room
     # 'C' for create room
     # 'E' for enter room
-    msg = rstrip_message(client.recv(2))
-    response = msg.decode().upper()
+    response = recv_decoded_content(client, chunkSize).upper()
     
     # Repeat until response from client is either 'C' or 'E'
     while response != 'C':
         # Client chooses to enter room
-        if response == 'E': return False
-        msgToClient = 'Error: Response should only be <C> or <E>. '
-        msgToClient += 'Please try again.'
-        client.send(msgToClient.encode())
+        if response == 'E': 
+            return False
         
-        print(f'Error: Client response on creating room: ',
-              f'[{response}].')
-        msg = rstrip_message(client.recv(2))
-        response = msg.decode().upper()
+        msgToClient = ('Error: Response should only be <C> or <E>. ' +
+                       'Please try again.')
+        send_msg_with_prefix(client, msgToClient, 0)
+        
+        print(f'Error: Client response on creating room: [{response}].')
+        response = recv_decoded_content(client, chunkSize).upper()
     # Client chooses to create room
     return True
     
 def handle_client_room_code_message(client, address, roomCodes, 
+                                    chunkSize, charPools, 
                                     roomCodeLength):
     createRoomInstead = False
 
     # Obtain room code from client
     msg = 'Please enter the room code, OR type <C> to create room.'
-    client.send(msg.encode())
-    msg = rstrip_message(client.recv(roomCodeLength))
-    roomCode = msg.decode()
-    
+    send_msg_with_prefix(client, msg, 0)
+    roomCode = recv_decoded_content(client, chunkSize).upper()
+
     # Repeat until room code sent by client is valid
     # OR, client chooses to create a room instead
     while not check_room_code_validness(roomCode, roomCodes):
         if roomCode.upper() == 'C':
             createRoomInstead = True
             return (createRoomInstead, 
-                    generate_and_send_room_code(client, address))
-        
-        msgToClient = 'Error: Room code not found. Please try again.'
-        client.send(msgToClient.encode())
+                    generate_and_send_room_code(client, address, 
+                                                charPools, roomCodes, 
+                                                roomCodeLength))
         
         print(f'Error: Room code: [{roomCode}] does not exist.')
-        msg = rstrip_message(client.recv(roomCodeLength))
-        roomCode = msg.decode()
+        msg = 'Error: Room code not found. Please try again.'
+        send_msg_with_prefix(client, msg, 0)
+        roomCode = recv_decoded_content(client, chunkSize).upper()
 
     # Need to acknowledge client about valid room code here
-    client.send(b'VALID_ROOM_CODE')
+    send_msg_with_prefix(client, 'VALID_ROOM_CODE', 0)
     return createRoomInstead, roomCode
 
-def handle_client_username_message(client, charPools, msgContentSize, 
+def handle_client_username_message(client, charPools, chunkSize, 
                                    maxUsernameLength):
     # Obtain username from client
-    msg = rstrip_message(client.recv(msgContentSize))
-    username = msg.decode()
+    username = recv_decoded_content(client, chunkSize)
     
     # Repeat until username sent by client is valid
     while not check_username_validness(username, charPools, maxUsernameLength):
@@ -86,14 +86,13 @@ def handle_client_username_message(client, charPools, msgContentSize,
         msgToClient += f'Username max length: [{maxUsernameLength}]\n'
         msgToClient += 'Username can be a combination of lower, upper '
         msgToClient += 'cased letters and/or digits.\n'
-        client.send(msgToClient.encode())
+        send_msg_with_prefix(client, msgToClient, 0)
         
         print(f'Error: Username [{username}] is invalid.')
-        msg = rstrip_message(client.recv(msgContentSize))
-        username = msg.decode()
-        
+        username = recv_decoded_content(client, chunkSize)
+
     # Acknowledge client about username being valid
-    client.send(b'VALID_USERNAME')
+    send_msg_with_prefix(client, 'VALID_USERNAME', 0)
     return username
 
 def handle_client_normal_message(client, msg, clients, rooms, roomCode):        
@@ -114,8 +113,7 @@ def handle_client_normal_message(client, msg, clients, rooms, roomCode):
         date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         msgWithTime = f'[{date_now} {client.getpeername()}: {msg}]'
         print(msgWithTime+'\n')
-        msgWithTimeWithPrefix = add_prefix(msgWithTime.encode(), 0)
-        socket.send(msgWithTimeWithPrefix)
+        send_msg_with_prefix(socket, msgWithTime, 1)
         
     # Remove disconnected clients
     for socket in clientSocketsToBeRemoved:
@@ -123,21 +121,19 @@ def handle_client_normal_message(client, msg, clients, rooms, roomCode):
         socket.close()
     return
 
-def recv_file_from_client(client, msgContent, msgContentSize):
+def recv_file_from_client(client, metadataBytes, chunkSize):
     # Obtain metadata
-    print(f'Received msg: [{msgContent}]')
-    metadata = msgContent.decode()
+    metadata_json = metadataBytes.decode('utf-8')
+    metadata = json.loads(metadata_json)
     print(f'Metadata: [{metadata}].')
     if not check_metadata_format(metadata):
         return
     
     # Split the metadata of the file received from client
-    filename, filesize = split_metadata(metadata)
+    filename, filesize = split_metadata(metadataBytes)
     filepath = 'received_files'
 
     # Receive the whole file from client
     recv_file(filename, filepath, filesize, client, 
-             msgContentSize, client.getpeername())
-    
-    display_rule()
+             chunkSize, client.getpeername())
     return

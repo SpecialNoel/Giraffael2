@@ -1,9 +1,10 @@
 # file_transmission.py
 
+import json
 import os
 from pathlib import Path
 
-from general.message import add_prefix, rstrip_message
+from general.message import add_prefix, rstrip_message, send_msg_with_prefix
 
 '''
 Functions here are used by clients or server to transfer 
@@ -48,6 +49,10 @@ def check_if_filename_is_valid(filename):
         print(f'Invalid filename: [{e}].')
         return False
     
+def check_if_filepath_exists(filepath):
+    print(f'Filepath [{filepath}] exists: [{os.path.isfile(filepath)}].')
+    return os.path.isfile(filepath)
+    
 def check_if_file_exists(filepath):
     '''
     Used by the sender to check if the file exists or not.
@@ -55,11 +60,6 @@ def check_if_file_exists(filepath):
     @param filepath: the filepath of the file
     @return: True if the filepath is a file; False otherwise 
     '''
-    
-    def check_if_filepath_exists(filepath):
-        print(f'Filepath [{filepath}] exists: [{os.path.isfile(filepath)}].')
-        return os.path.isfile(filepath)
-    
     try:
         if not check_if_directory_exists(filepath):
             return False
@@ -96,23 +96,56 @@ def create_metadata(filepath):
     return filename, filesize
 
 def send_metadata(socket, filename, filesize):
-    msg = f'{filename}|{filesize}'
-    msgWithPrefix = add_prefix(msg.encode(), 1)
-    socket.send(msgWithPrefix)
+    metadata = {
+        'filename': filename,
+        'filesize': filesize
+    }
+    metadata_json = json.dumps(metadata)
+    metadata_bytes = metadata_json.encode('utf-8')
+    socket.send(add_prefix(metadata_bytes, 2))
     return
 
-def check_metadata_format(msg):
-    if msg.split('|')[0] == msg:
-        print('Invalid metadata format.')
-        return False
-    print('Metadata format is valid.')
-    return True
+def send_filepath_and_filename(socket, filepath, filename):
+    pathAndName = {
+        'filepath': filepath,
+        'filename': filename
+    }
+    pathAndName_json = json.dumps(pathAndName)
+    pathAndName_bytes = pathAndName_json.encode('utf-8')
+    socket.send(add_prefix(pathAndName_bytes, 3))
+    return
 
-def split_metadata(metadata):
-    filename = metadata.split('|')[0]
-    filesize = int(metadata.split('|')[1])
+def check_metadata_format(metadata):
+    if len(metadata) == 2 and metadata['filename'] and metadata['filesize']:
+        print('Metadata format is valid.')
+        return True
+    print('Invalid metadata format.')
+    return False
+
+def split_metadata(metadataBytes):
+    metadata_json = metadataBytes.decode('utf-8')
+    metadata = json.loads(metadata_json)
+    filename = metadata['filename']
+    filesize = int(metadata['filesize'])
     print(f'Filename: [{filename}], filesize: [{filesize}].')
     return filename, filesize
+
+def get_filepath_without_duplication(filepath):
+    counter = 1
+    while check_if_filepath_exists(filepath):
+        # Filepath exists -> filename is duplicated on recipient's end
+        # Need to append a counter to the end of filename, 
+        #   but before extension, to solve duplication
+        filenameWithExt = os.path.basename(filepath)
+        filename, extension = os.path.splitext(filenameWithExt)
+        base, extension = os.path.splitext(filepath)
+        directory = os.path.dirname(filepath)
+        
+        filename = f'{filename}_{counter}{extension}'
+        filepath = os.path.join(directory, filename)
+        print(f'New filepath: {filepath}')
+        counter += 1
+    return filepath
 
 def send_file(filepath, filename, socket, chunk_size, recipient):
     '''
@@ -136,7 +169,7 @@ def send_file(filepath, filename, socket, chunk_size, recipient):
         print(f'Error occurred in send_file(): [{e}].')
     return
 
-def recv_file(filename, filepath, filesize, socket, msgContentSize, sender):
+def recv_file(filename, filepath, filesize, socket, chunkSize, sender):
     '''
     Used by the recipient to receive the file from the sender.
     Received content will be stored in the 'received_files' folder
@@ -145,24 +178,24 @@ def recv_file(filename, filepath, filesize, socket, msgContentSize, sender):
     @param filename: the string name of the file
     @param filesize: the size of the file
     @param socket: the socket used to receive the file; the receiver socket
-    @param msgContentSize: number of bytes to receive from the sender each time
+    @param chunkSize: number of bytes to receive from the sender each time
     @param sender: either 'server' or address of a client; 
                    indicates the sender side
     @return: None
     '''
     try:
-        filepath = filepath if filepath[-1] == '/' else filepath + '/'
-        fullFilepath = filepath + filename
-        with open(fullFilepath, 'wb') as file:
+        filepath = os.path.join(filepath, filename)
+        filepath = get_filepath_without_duplication(filepath)
+        with open(filepath, 'wb') as file:
             received_len = 0
             while received_len < filesize:
-                data = socket.recv(msgContentSize)
+                data = socket.recv(chunkSize)
                 if not data:
                     break
                 file.write(data)
                 received_len += len(data)
         print(f'Successfully received file [{filename}] from [{sender}].\n')
-        print(f'The file is Stored in filepath: [{fullFilepath}].\n')
+        print(f'The file is Stored in filepath: [{filepath}].\n')
     except Exception as e: 
         print(f'Error occurred in recv_file(): [{e}].')
     return
