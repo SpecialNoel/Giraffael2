@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 
-from general.message import add_prefix, rstrip_message, send_msg_with_prefix
+from general.message import add_prefix, rstrip_message
 
 '''
 Functions here are used by clients or server to transfer 
@@ -105,23 +105,23 @@ def send_metadata(socket, filename, filesize):
     socket.send(add_prefix(metadata_bytes, 2))
     return
 
-def send_filepath_and_filename(socket, filepath, filename):
-    pathAndName = {
-        'filepath': filepath,
+def send_directory_and_filename(socket, directory, filename):
+    dirAndName = {
+        'directory': directory,
         'filename': filename
     }
-    pathAndName_json = json.dumps(pathAndName)
-    pathAndName_bytes = pathAndName_json.encode('utf-8')
-    socket.send(add_prefix(pathAndName_bytes, 3))
+    dirAndName_json = json.dumps(dirAndName)
+    dirAndName_bytes = dirAndName_json.encode('utf-8')
+    socket.send(add_prefix(dirAndName_bytes, 3))
     return
 
-def get_filepath_and_filename(pathAndNameEncoded):
-    pathAndName_json = pathAndNameEncoded.decode('utf-8')
-    pathAneName = json.loads(pathAndName_json)
-    filepath = pathAneName['filepath']
-    filename = pathAneName['filename']
-    print(f'Filepath: [{filepath}], filename: [{filename}].')
-    return filepath, filename
+def get_directory_and_filename(dirAndNameEncoded):
+    dirAndName_json = dirAndNameEncoded.decode('utf-8')
+    dirAndName = json.loads(dirAndName_json)
+    directory = dirAndName['directory']
+    filename = dirAndName['filename']
+    print(f'Directory: [{directory}], filename: [{filename}].')
+    return directory, filename
 
 def check_metadata_format(metadata):
     if len(metadata) == 2 and metadata['filename'] and metadata['filesize']:
@@ -170,7 +170,7 @@ def send_file(filepath, filename, socket, chunk_size, recipient):
         with open(filepath, 'rb') as file:
             while chunk := file.read(chunk_size):
                 socket.send(chunk)
-        print(f'Successfully sent file [{filename}] to [{recipient}].\n')
+        print(f'Successfully sent file [{filename}] to [{recipient}].')
     except FileNotFoundError:
         print(f'File with path [{filepath}] not found.')
     except Exception as e:

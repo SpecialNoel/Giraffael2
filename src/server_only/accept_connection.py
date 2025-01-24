@@ -3,9 +3,9 @@
 from general.client_obj import Client_Obj
 from general.message import send_msg_with_prefix
 from server_only.handle_client import handle_one_client
-from server_only.recv_from_client import (get_client_response_on_creating_room,
-                                          handle_client_room_code_message,
-                                          handle_client_username_message)
+from server_only.recv_from_client import (recv_response_on_creating_room,
+                                          handle_room_code_message,
+                                          handle_username_message)
 from server_only.room_code_operations import generate_and_send_room_code
 from server_only.room_operations import (create_room, enter_room, 
                                          print_info_when_client_enter_room)
@@ -33,7 +33,7 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
         return True
     
     # Wait for client to either create or enter room
-    wantCreateRoom = get_client_response_on_creating_room(conn, chunkSize)
+    wantCreateRoom = recv_response_on_creating_room(conn, chunkSize)
     
     if wantCreateRoom:
         # Client chooses to create a new room
@@ -42,7 +42,7 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
     else:
         # Client chooses to enter an existing room
         # Wait for client to send valid room code
-        createInstead, roomCode = handle_client_room_code_message(
+        createInstead, roomCode = handle_room_code_message(
                                                 conn, address, roomCodes,
                                                 chunkSize, charPools, 
                                                 roomCodeLength)
@@ -50,7 +50,7 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
             wantCreateRoom = True
 
     # Wait for client to send valid username
-    username = handle_client_username_message(conn, charPools, chunkSize,
+    username = handle_username_message(conn, charPools, chunkSize,
                                               maxUsernameLength)
     
     # Create a client obj for this client
