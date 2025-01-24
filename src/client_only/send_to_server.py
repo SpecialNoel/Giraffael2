@@ -2,6 +2,7 @@
 
 from general.file_transmission import (check_if_directory_exists,
                                       check_if_filename_is_valid,
+                                      check_if_filesize_is_too_large,
                                       create_metadata, display_rule, 
                                       get_valid_filepath,
                                       send_file, send_directory_and_filename,
@@ -9,7 +10,7 @@ from general.file_transmission import (check_if_directory_exists,
 from general.message import (rstrip_message, send_msg_with_prefix, 
                              recv_decoded_content)
 
-def send_msg_to_server(client, shutdownEvent, chunkSize):
+def send_msg_to_server(client, shutdownEvent, chunkSize, maxFileSize):
         # Sent rules to the client console
         display_rule()
 
@@ -24,7 +25,7 @@ def send_msg_to_server(client, shutdownEvent, chunkSize):
                 client.close() # will be detected by server's 'recv()'
                 break
             elif msg.lower() == 'send': # Client wants to send a file to server
-                handle_send_file_request(client, chunkSize)
+                handle_send_file_request(client, chunkSize, maxFileSize)
             elif msg.lower() == 'recv': # Client wants to recv a file to server
                 handle_recv_file_request(client)
             else: # Client wants to send a normal message to server
@@ -32,10 +33,20 @@ def send_msg_to_server(client, shutdownEvent, chunkSize):
         print('Client sender thread stopped.')
         return
 
-def handle_send_file_request(client, chunkSize):
-    def send_file_to_server(client, filepath, chunkSize):
+def handle_send_file_request(client, chunkSize, maxFileSize):
+    def send_file_to_server(client, filepath, chunkSize, maxFileSize):
         # Create and send metadata to server
         filename, filesize = create_metadata(filepath)
+        
+        # Stop sending file if filesize is greater than MAX_FILE_SIZE
+        if check_if_filesize_is_too_large(filesize, maxFileSize):
+            print('Stopped sending file.')
+            display_rule()
+            return
+        
+        # Inform server that this client wants to send a file
+        send_msg_with_prefix(client, '', 2)
+        
         send_metadata(client, filename, filesize)
         
         # Send the whole file to server
@@ -63,10 +74,8 @@ def handle_send_file_request(client, chunkSize):
         display_rule()
         return
     
-    # Inform server that this client wants to send a file
-    send_msg_with_prefix(client, '', 2)
     # Send the file to server
-    send_file_to_server(client, filepath, chunkSize)
+    send_file_to_server(client, filepath, chunkSize, maxFileSize)
     return
 
 def handle_recv_file_request(client):

@@ -81,6 +81,17 @@ def get_valid_filepath(filepath):
             return None        
     return filepath
 
+def check_if_filesize_is_too_large(filesize, maxFileSize):
+    def check_valid_filesize(filesize, maxFileSize):
+        return filesize <= maxFileSize
+    
+    # If filesize is exceeded MAX_FILE_SIZE, stop sending the file
+    if not check_valid_filesize(filesize, maxFileSize):
+        print(f'Invalid filesize: File has a size of {filesize},',
+              f'which is larger than Maximum File Size: {maxFileSize}')
+        return True # filesize > MAX_FILE_SIZE
+    return False # filesize <= MAX_FILE_SIZE
+
 def create_metadata(filepath):
     '''
     Used by the sender to create the associate metadata of the file.

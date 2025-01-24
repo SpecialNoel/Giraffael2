@@ -26,6 +26,7 @@ class Client:
         self.ruleAboutRoomCodeSent = False
         
         self.CHUNK_SIZE = 1025
+        self.MAX_FILE_SIZE = 104857600 # in bytes; which is equivalent to 100MB
 
     def init_client_socket(self):
         try: 
@@ -53,13 +54,13 @@ class Client:
         # Use thread t1 to receive message from server
         t1 = Thread(target=recv_msg_from_server, 
                     args=(self.client, self.shutdownEvent, 
-                          self.CHUNK_SIZE))
+                          self.CHUNK_SIZE, self.MAX_FILE_SIZE))
         t1.daemon = True
         t1.start()
         # Use thread t2 to send message to server
         t2 = Thread(target=send_msg_to_server, 
                     args=(self.client, self.shutdownEvent, 
-                          self.CHUNK_SIZE))
+                          self.CHUNK_SIZE, self.MAX_FILE_SIZE))
         t2.daemon = True
         t2.start()
     

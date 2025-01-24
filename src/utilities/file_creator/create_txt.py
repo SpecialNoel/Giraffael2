@@ -2,5 +2,13 @@
 
 # .txt: text files
 
-with open("./test_files/example.txt", "w") as file:
-    file.write("Hello, this is a text file.")
+def create_file_with_zeros(filename, filesize):
+    """Creates a file with zeros and the specified size in megabytes."""
+    filesizeInBytes = filesize * 1024 * 1024
+    with open(filename, 'wb') as file:
+        file.write(b'\0' * filesizeInBytes) # Fill with null bytes (zeros)
+
+# Create a file of 101MB
+create_file_with_zeros('./test_files/large_example.txt', 101)
+
+print('Created example.txt')
