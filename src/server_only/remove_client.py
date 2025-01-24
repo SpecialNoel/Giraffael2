@@ -18,8 +18,8 @@ def remove_client_from_room(client, room):
     room.remove_client_from_client_list(client)
     return room
 
-def handle_client_disconnect_request(client, clients, address, rooms, 
-                                     roomCode, roomCodes, maxClientCount):
+def handle_disconnect_request(client, clients, address, rooms, 
+                              roomCode, roomCodes, maxClientCount):
     print(f'Client on [{client.getpeername()}] disconnected.')
     
     # Remove client from client list

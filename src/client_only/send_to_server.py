@@ -4,7 +4,7 @@ from general.file_transmission import (check_if_directory_exists,
                                       check_if_filename_is_valid,
                                       create_metadata, display_rule, 
                                       get_valid_filepath,
-                                      send_file, send_filepath_and_filename,
+                                      send_file, send_directory_and_filename,
                                       send_metadata)
 from general.message import (rstrip_message, send_msg_with_prefix, 
                              recv_decoded_content)
@@ -70,30 +70,30 @@ def handle_send_file_request(client, chunkSize):
     return
 
 def handle_recv_file_request(client):
-    def get_client_filepath():
-        print('Type in filepath where you want to store the file.')
+    def get_client_directory():
+        print('Type in directory where you want to store the file.')
         print('OR, type <exit> to stop receiving file.\n')
-        filepath = rstrip_message(input())
+        directory = rstrip_message(input())
         
         # Client does not want to receive the file anymore
-        if filepath.lower() == 'exit':
+        if directory.lower() == 'exit':
             print('Stopped receiving file.')
             display_rule()
             return None
-        return filepath
+        return directory
         
-    def validate_client_filepath(filepath):
-        while not check_if_directory_exists(filepath):
-            print('Type in filepath where you want to store the file.')
+    def validate_client_directory(directory):
+        while not check_if_directory_exists(directory):
+            print('Type in directory where you want to store the file.')
             print('OR, type <exit> to stop receiving file.\n')
             
-            filepath = rstrip_message(input())
+            directory = rstrip_message(input())
             # Client does not want to receive the file anymore
-            if filepath.lower() == 'exit':
+            if directory.lower() == 'exit':
                 print('Stopped receiving file.')
                 display_rule()
                 return None
-        return filepath
+        return directory
     
     def get_client_filename():
         print('Type in name of the file you want to receive.')
@@ -121,13 +121,13 @@ def handle_recv_file_request(client):
         return filename
         
     # Step1: prompt client where to store the file
-    filepath = get_client_filepath()
-    if filepath == None:
+    directory = get_client_directory()
+    if directory == None:
         return
     
-    # Validate the filepath    
-    filepath = validate_client_filepath(filepath)
-    if filepath == None:
+    # Validate the directory    
+    directory = validate_client_directory(directory)
+    if directory == None:
         return
     
     # Step2: prompt client which file to receive/download
@@ -141,7 +141,7 @@ def handle_recv_file_request(client):
     
     # Step3: start receiving metadata and file chunks if file exists on server
     # Inform server that this client wants to receive a file
-    send_filepath_and_filename(client, filepath, filename)
+    send_directory_and_filename(client, directory, filename)
     return
     
 def recv_user_input():
