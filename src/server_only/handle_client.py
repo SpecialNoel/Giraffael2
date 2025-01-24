@@ -7,7 +7,7 @@ from server_only.remove_client import handle_disconnect_request
 from server_only.handle_upload_request import handle_upload_request
 
 def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
-                      rooms, roomCodes, maxClientCount):
+                      rooms, roomCodes, maxClientCount, maxFileSize):
     client = clientObj.get_socket()
     address = clientObj.get_address()
     roomCode = clientObj.get_room_code()
@@ -38,10 +38,11 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
                     handle_normal_msg(client, msgContent, clients, 
                                                  rooms, roomCode)
                 case 2: # Received file-upload request
-                    handle_upload_request(client, address, chunkSize)
+                    handle_upload_request(client, address, 
+                                          chunkSize, maxFileSize)
                 case 3: # Received file-download request
                     handle_download_request(client, address, 
-                                           msgContent, chunkSize)
+                                           msgContent, chunkSize, maxFileSize)
                 case _: # Received invalid prefix
                     print(f'Received invalid prefix: {typePrefix}.')
         except (BrokenPipeError, 

@@ -6,11 +6,13 @@ from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1]
 sys.path.append(str(src_folder))
 
-from general.file_transmission import display_rule, recv_file, split_metadata
+from general.file_transmission import (check_if_filesize_is_too_large,
+                                      display_rule, recv_file, 
+                                      split_metadata,)
 from general.message import (get_prefix_and_content, rstrip_message, 
                              recv_decoded_content)
 
-def recv_msg_from_server(client, shutdownEvent, chunkSize):
+def recv_msg_from_server(client, shutdownEvent, chunkSize, maxFileSize):
     # Receive message from server
     while not shutdownEvent.is_set():
         try:
@@ -36,7 +38,8 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize):
                     print(f'msgContent: [{msgContent}]')
                     filepath = rstrip_message(msgContent).decode()
                     print(f'filepath: [{filepath}]')
-                    recv_file_from_server(client, filepath, chunkSize)
+                    recv_file_from_server(client, filepath, 
+                                         chunkSize, maxFileSize)
                 case _: # invalid prefix
                     print(f'Received invalid prefix: [{typePrefix}].')
         except Exception as e:
@@ -46,7 +49,7 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize):
     print('Client receiver thread stopped.')
     return
 
-def recv_file_from_server(client, filepath, chunkSize):
+def recv_file_from_server(client, filepath, chunkSize, maxFileSize):
     # Receive server response for whether server has that file or not
     # If server has it, response should be 'file_exists'
     # Otherwise, response should be 'file_not_found'
@@ -57,6 +60,12 @@ def recv_file_from_server(client, filepath, chunkSize):
         msg = client.recv(chunkSize)
         prefix, metadataBytes = get_prefix_and_content(msg)
         filename, filesize = split_metadata(metadataBytes)
+        
+        # Stop receiving file if filesize is greater than MAX_FILE_SIZE
+        if check_if_filesize_is_too_large(filesize, maxFileSize):
+            print('Stopped receiving file.')
+            display_rule()
+            return 
         
         # Receive file from server, and store it on client desired location
         recv_file(filename, filepath, filesize, client, chunkSize,

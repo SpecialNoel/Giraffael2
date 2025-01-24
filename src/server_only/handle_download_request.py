@@ -1,12 +1,14 @@
 # handle_download_request.py
 
-from general.file_transmission import (create_metadata,
+from general.file_transmission import (check_if_filesize_is_too_large,
+                                      create_metadata,
                                       find_file_in_directory, 
                                       get_directory_and_filename,
                                       send_file, send_metadata)
 from general.message import send_msg_with_prefix
 
-def handle_download_request(client, address, msgContent, chunkSize):
+def handle_download_request(client, address, msgContent, 
+                            chunkSize, maxFileSize):
     # Received file-download request
     print(f'client [{address}] is downloading a file.\n')
     
@@ -26,14 +28,20 @@ def handle_download_request(client, address, msgContent, chunkSize):
         # Filename does not exist in test_files folder
         send_msg_with_prefix(client, 'file_exists', 0)
         # Send file to client
-        send_file_to_client(client, filepath, chunkSize)
+        send_file_to_client(client, filepath, chunkSize, maxFileSize)
     return
 
-def send_file_to_client(client, filepath, chunkSize):
+def send_file_to_client(client, filepath, chunkSize, maxFileSize):
     # Create and send metadata to client
     filename, filesize = create_metadata(filepath)
+    
     send_metadata(client, filename, filesize)
-   
+    
+    # Stop sending file if filesize is greater than MAX_FILE_SIZE
+    if check_if_filesize_is_too_large(filesize, maxFileSize):
+        print('Stopped sending file.\n')
+        return
+       
     # Send the whole file to client
     send_file(filepath, filename, client, 
              chunkSize, client.getpeername())

@@ -25,7 +25,7 @@ def test_reach_max_client_count(conn, address, clients, maxClientCount):
 
 def accept_a_connection(conn, address, clients, rooms, roomCodes,
                         charPools, shutdownEvent, chunkSize, roomCodeLength,
-                        maxUsernameLength, maxClientCount):
+                        maxUsernameLength, maxClientCount, maxFileSize):
     # If reached max client count before this client: 
     #   disconnect, then acknowledge the client about the disconnection
     # Otherwise, acknowledge the client about the successful connection
@@ -68,5 +68,5 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
 
     # Start handling this client
     handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
-                      rooms, roomCodes, maxClientCount)
+                      rooms, roomCodes, maxClientCount, maxFileSize)
     return

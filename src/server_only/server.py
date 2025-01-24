@@ -33,7 +33,8 @@ class Server:
         # Char pools, containing all Digits, Upper and Lower-case letters
         self.charPools = string.ascii_letters + string.digits
         self.CHUNK_SIZE = 1025
-        
+        self.MAX_FILE_SIZE = 104857600 # in bytes; which is equivalent to 100MB
+
     def get_server_ip(self):
         try:
             # Using UDP connection
@@ -78,7 +79,8 @@ class Server:
                          self.shutdownEvent, self.CHUNK_SIZE,
                          self.ROOM_CODE_LENGTH,
                          self.MAX_USERNAME_LENGTH,
-                         self.MAX_CLIENT_COUNT))
+                         self.MAX_CLIENT_COUNT,
+                         self.MAX_FILE_SIZE))
         t.daemon = False # thread ends when the main thread ends
         self.threads.append(t)
         t.start()
