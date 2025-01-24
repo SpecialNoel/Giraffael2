@@ -51,9 +51,11 @@ def recv_file_from_server(client, filepath, chunkSize):
     # If server has it, response should be 'file_exists'
     # Otherwise, response should be 'file_not_found'
     response = recv_decoded_content(client, chunkSize)
+    print(f'Received response on file-download from server: {response}')
     if response == 'file_exists':
         # Receive metadata from server
-        metadataBytes = recv_decoded_content(client, chunkSize)
+        msg = client.recv(chunkSize)
+        prefix, metadataBytes = get_prefix_and_content(msg)
         filename, filesize = split_metadata(metadataBytes)
         
         # Receive file from server, and store it on client desired location

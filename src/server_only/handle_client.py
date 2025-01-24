@@ -1,8 +1,9 @@
 # handle_client.py
 
-from general.file_transmission import find_file_in_directory
+from general.file_transmission import (find_file_in_directory, 
+                                      get_filepath_and_filename)
 from general.message import (get_prefix_and_content, 
-                             rstrip_message, recv_decoded_content,
+                             rstrip_message,
                              send_msg_with_prefix)
 from server_only.remove_client import handle_client_disconnect_request
 from server_only.recv_from_client import (handle_client_normal_message,
@@ -57,16 +58,13 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
                     # Received file-download request
                     print(f'client [{address}] is downloading a file.\n')
                     
-                    # msgContent is the filepath client wants to store
-                    #   the file on their machine
-                    clientFilepath = rstrip_message(msgContent.decode())
+                    clientFilepath, filename = get_filepath_and_filename(msgContent)
                     print(f'clientFilepath: [{clientFilepath}]')
                     
                     # Inform the client to get ready to receive server response
                     send_msg_with_prefix(client, clientFilepath, 2)
-                                        
-                    # Receive filename from client
-                    filename = recv_decoded_content(client, chunkSize)
+
+                    # Try finding the requested file on server
                     filepath = find_file_in_directory(filename, 'test_files')
                     
                     if filepath == None:

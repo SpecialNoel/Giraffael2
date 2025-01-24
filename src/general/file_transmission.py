@@ -115,6 +115,14 @@ def send_filepath_and_filename(socket, filepath, filename):
     socket.send(add_prefix(pathAndName_bytes, 3))
     return
 
+def get_filepath_and_filename(pathAndNameEncoded):
+    pathAndName_json = pathAndNameEncoded.decode('utf-8')
+    pathAneName = json.loads(pathAndName_json)
+    filepath = pathAneName['filepath']
+    filename = pathAneName['filename']
+    print(f'Filepath: [{filepath}], filename: [{filename}].')
+    return filepath, filename
+
 def check_metadata_format(metadata):
     if len(metadata) == 2 and metadata['filename'] and metadata['filesize']:
         print('Metadata format is valid.')
@@ -195,7 +203,7 @@ def recv_file(filename, filepath, filesize, socket, chunkSize, sender):
                 file.write(data)
                 received_len += len(data)
         print(f'Successfully received file [{filename}] from [{sender}].\n')
-        print(f'The file is Stored in filepath: [{filepath}].\n')
+        print(f'The file is Stored in filepath: [{filepath}].')
     except Exception as e: 
         print(f'Error occurred in recv_file(): [{e}].')
     return
