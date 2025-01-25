@@ -34,6 +34,10 @@ class Server:
         self.charPools = string.ascii_letters + string.digits
         self.CHUNK_SIZE = 1025
         self.MAX_FILE_SIZE = 104857600 # in bytes; which is equivalent to 100MB
+        self.extList = ['.txt',  '.md',   '.json', '.xml', '.csv',
+                '.docx', '.xlsx', '.pdf',  '.py',  '.html',
+                '.css',  '.cpp',  '.java', '.tar.gz',
+                '.png',  '.jpg',  '.gif',  '.mp3', '.mp4', '.db']
 
     def get_server_ip(self):
         try:
@@ -80,7 +84,7 @@ class Server:
                          self.ROOM_CODE_LENGTH,
                          self.MAX_USERNAME_LENGTH,
                          self.MAX_CLIENT_COUNT,
-                         self.MAX_FILE_SIZE))
+                         self.MAX_FILE_SIZE, self.extList))
         t.daemon = False # thread ends when the main thread ends
         self.threads.append(t)
         t.start()

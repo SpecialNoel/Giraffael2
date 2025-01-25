@@ -8,7 +8,7 @@ def create_file_with_zeros(filename, filesize):
     with open(filename, 'wb') as file:
         file.write(b'\0' * filesizeInBytes) # Fill with null bytes (zeros)
 
-# Create a file of 101MB
-create_file_with_zeros('./test_files/large_example.txt', 101)
+# Create a file of given size (in MB)
+create_file_with_zeros('./test_files/large_example.txt', 10)
 
 print('Created example.txt')
