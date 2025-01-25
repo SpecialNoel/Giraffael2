@@ -42,6 +42,9 @@ class Client:
         except ConnectionRefusedError:
             print('Connection refused. Server is not on yet.')
             return None
+        except Exception as e:
+            print(f'Unhandled error in init_client_socket(): [{e}]')
+            return None
 
     def run_client(self):
         # Prevent connection if client socket is not initialized correctly

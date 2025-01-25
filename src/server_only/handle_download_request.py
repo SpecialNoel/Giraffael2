@@ -1,5 +1,6 @@
 # handle_download_request.py
 
+import time
 from general.file_transmission import (check_if_filesize_is_valid,
                                       create_metadata,
                                       find_file_in_directory, 
@@ -49,6 +50,11 @@ def send_file_to_client(client, filepath, chunkSize, maxFileSize, extList):
     if not check_if_filename_has_valid_extension(extension, extList):
         print('Stopped sending file.')
         return 
+    
+    # Wait for 1 second before sending the whole file
+    # This is needed to solve problem where client receives both 
+    #   the metadata and the file itself from only one recv(chunkSize)
+    time.sleep(1)
        
     # Send the whole file to client
     send_file(filepath, filename, client, 
