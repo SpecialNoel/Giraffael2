@@ -13,53 +13,43 @@ from general.file_transmission import (check_if_filesize_is_valid,
                                       check_if_filename_has_valid_extension)
 from general.message import (get_prefix_and_content, rstrip_message, 
                              recv_decoded_content)
-from threading import Thread
 
-def recv_from_server(client, shutdownEvent, chunkSize, 
-                     maxFileSize, extList):
+def recv_msg_from_server(client, shutdownEvent, chunkSize, 
+                         maxFileSize, extList):
     # Receive message from server
     while not shutdownEvent.is_set():
         try:
             msg = client.recv(chunkSize) # 1025 bytes
-    
+            
             # Empty message received -> server closed connection
             if not msg:
                 print('Server has closed the connection.')
                 shutdownEvent.set()
-                return
+                break
             
-            t = Thread(target=recv_msg_from_server_thread,
-                       args=(client, msg, chunkSize, 
-                             maxFileSize, extList,))
-            t.daemon = False # thread ends when the main thread ends
-            t.start()
+            typePrefix, msgContent = get_prefix_and_content(msg)
+            prefix = int.from_bytes(typePrefix, byteorder='big')
+
+            match prefix:
+                case 0: # operation message
+                    print()
+                case 1: # normal message
+                    msgContent = rstrip_message(msgContent)
+                    print(msgContent.decode() + '\n')
+                case 2: # file-download request initiated by client
+                    print(f'type prefix: [{typePrefix}]')
+                    print(f'msgContent: [{msgContent}]')
+                    filepath = rstrip_message(msgContent).decode()
+                    print(f'filepath: [{filepath}]')
+                    recv_file_from_server(client, filepath, 
+                                         chunkSize, maxFileSize, extList)
+                case _: # invalid prefix
+                    print(f'Received invalid prefix: [{typePrefix}].')
         except Exception as e:
             print(f'Error [{e}] occurred when receiving message.')
             break
     client.close() # will be detected by server's 'recv()'
     print('Client receiver thread stopped.')
-    return
-
-def recv_msg_from_server_thread(client, msg, chunkSize, 
-                                maxFileSize, extList):        
-    typePrefix, msgContent = get_prefix_and_content(msg)
-    prefix = int.from_bytes(typePrefix, byteorder='big')
-
-    match prefix:
-        case 0: # operation message
-            print()
-        case 1: # normal message
-            msgContent = rstrip_message(msgContent)
-            print(msgContent.decode() + '\n')
-        case 2: # file-download request initiated by client
-            print(f'type prefix: [{typePrefix}]')
-            print(f'msgContent: [{msgContent}]')
-            filepath = rstrip_message(msgContent).decode()
-            print(f'filepath: [{filepath}]')
-            recv_file_from_server(client, filepath, 
-                                 chunkSize, maxFileSize, extList)
-        case _: # invalid prefix
-            print(f'Received invalid prefix: [{typePrefix}].')
     return
 
 def recv_file_from_server(client, filepath, chunkSize, maxFileSize, extList):

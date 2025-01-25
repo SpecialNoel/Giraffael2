@@ -48,7 +48,7 @@ def handle_room_code_message(client, address, roomCodes,
     # Obtain room code from client
     msg = 'Please enter the room code, OR type <C> to create room.'
     send_msg_with_prefix(client, msg, 0)
-    roomCode = recv_decoded_content(client, chunkSize)
+    roomCode = recv_decoded_content(client, chunkSize).upper()
 
     # Repeat until room code sent by client is valid
     # OR, client chooses to create a room instead
@@ -63,7 +63,7 @@ def handle_room_code_message(client, address, roomCodes,
         print(f'Error: Room code: [{roomCode}] does not exist.')
         msg = 'Error: Room code not found. Please try again.'
         send_msg_with_prefix(client, msg, 0)
-        roomCode = recv_decoded_content(client, chunkSize)
+        roomCode = recv_decoded_content(client, chunkSize).upper()
 
     # Need to acknowledge client about valid room code here
     send_msg_with_prefix(client, 'VALID_ROOM_CODE', 0)
