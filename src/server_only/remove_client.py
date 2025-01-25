@@ -19,16 +19,11 @@ def remove_client_from_room(client, room):
     return room
 
 def handle_disconnect_request(client, clients, address, rooms, 
-                              roomCode, roomCodes, maxClientCount,
-                              handleClientEvent):
-    handleClientEvent.set()
-    
-    print(f'Client on [{address}] disconnected.\n')
+                              roomCode, roomCodes, maxClientCount):
+    print(f'Client on [{client.getpeername()}] disconnected.')
     
     # Remove client from client list
     remove_client_from_clients(client, clients)
-    
-    # Close the connection with this client
     client.close()
     print(f'All connected clients: ',
           f'[{len(clients)}/{maxClientCount}]')
@@ -41,5 +36,5 @@ def handle_disconnect_request(client, clients, address, rooms,
     # Remove room code from roomCodes if its corresponding room is empty
     if len(room.get_client_list()) == 0:
         roomCodes.remove(roomCode)
-        print(f'Room [{roomCode}] is empty, removed from room codes.\n')        
+        print(f'Room [{roomCode}] is empty, removed from room codes.\n')
     return
