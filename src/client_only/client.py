@@ -11,7 +11,7 @@ import socket
 from check_server_capacity import check_server_capacity
 from handle_room_decision import handle_room_decision
 from handle_username import handle_username
-from recv_from_server import recv_msg_from_server
+from recv_from_server import recv_from_server
 from send_to_server import send_msg_to_server
 from threading import Event, Thread
 
@@ -56,7 +56,7 @@ class Client:
         handle_username(self.client, self.CHUNK_SIZE)
             
         # Use thread t1 to receive message from server
-        t1 = Thread(target=recv_msg_from_server, 
+        t1 = Thread(target=recv_from_server, 
                     args=(self.client, self.shutdownEvent, 
                           self.CHUNK_SIZE, self.MAX_FILE_SIZE, self.extList))
         t1.daemon = True
