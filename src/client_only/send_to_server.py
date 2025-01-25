@@ -1,5 +1,6 @@
 # send_to_server.py
 
+import time
 from general.file_transmission import (check_if_directory_exists,
                                       check_if_filename_is_valid,
                                       check_if_filesize_is_valid,
@@ -58,7 +59,13 @@ def handle_send_file_request(client, chunkSize, maxFileSize, extList):
         # Inform server that this client wants to send a file
         send_msg_with_prefix(client, '', 2)
         
+        # Send metadata of the file to server
         send_metadata(client, filename, filesize)
+        
+        # Wait for 1 second before sending the whole file
+        # This is needed to solve problem where server receives both 
+        #   the metadata and the file itself from only one recv(chunkSize)
+        time.sleep(1)
         
         # Send the whole file to server
         send_file(filepath, filename, client, 
