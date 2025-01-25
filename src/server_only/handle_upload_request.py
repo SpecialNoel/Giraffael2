@@ -1,12 +1,14 @@
 # handle_upload_request.py
 
 import json
-from general.file_transmission import (check_if_filesize_is_too_large,
+from general.file_transmission import (check_if_filesize_is_valid,
                                       check_metadata_format,
-                                      recv_file, split_metadata)
+                                      recv_file, split_metadata,
+                                      get_extension_from_filename,
+                                      check_if_filename_has_valid_extension)
 from general.message import get_prefix_and_content
 
-def handle_upload_request(client, address, chunkSize, maxFileSize):
+def handle_upload_request(client, address, chunkSize, maxFileSize, extList):
     print(f'client [{address}] is uploading a file.\n')
     
     # Receive metadata from client
@@ -24,9 +26,15 @@ def handle_upload_request(client, address, chunkSize, maxFileSize):
     filename, filesize = split_metadata(metadataBytes)
     
     # Stop receiving file if filesize is greater than MAX_FILE_SIZE
-    if check_if_filesize_is_too_large(filesize, maxFileSize):
+    if not check_if_filesize_is_valid(filesize, maxFileSize):
         print('Stopped receiving file.\n')
         return
+    
+    # Stop receiving file if file extension is not in extList
+    extension = get_extension_from_filename(filename)
+    if not check_if_filename_has_valid_extension(extension, extList):
+        print('Stopped receiving file.')
+        return 
     
     filepath = 'received_files'
 

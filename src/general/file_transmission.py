@@ -81,16 +81,32 @@ def get_valid_filepath(filepath):
             return None        
     return filepath
 
-def check_if_filesize_is_too_large(filesize, maxFileSize):
+def get_extension_from_filename(filename):
+    # Returns the extension of a file, including dot.
+    # Example: .txt, .pdf, .png, etc..
+    return os.path.splitext(filename)[1]
+
+def check_if_filesize_is_valid(filesize, maxFileSize):
     def check_valid_filesize(filesize, maxFileSize):
         return filesize <= maxFileSize
     
-    # If filesize is exceeded MAX_FILE_SIZE, stop sending the file
+    # If filesize is exceeded MAX_FILE_SIZE, stop sending/receiving the file
     if not check_valid_filesize(filesize, maxFileSize):
-        print(f'Invalid filesize: File has a size of {filesize},',
-              f'which is larger than Maximum File Size: {maxFileSize}')
-        return True # filesize > MAX_FILE_SIZE
-    return False # filesize <= MAX_FILE_SIZE
+        print(f'Invalid filesize: File has a size of [{filesize}],',
+              f'which is larger than Maximum File Size: [{maxFileSize}].')
+        return False # filesize > MAX_FILE_SIZE
+    return True      # filesize <= MAX_FILE_SIZE
+
+def check_if_filename_has_valid_extension(extension, extList):
+    def check_valid_extension(extension, extList):
+        return extension in extList
+    
+    # If extension is not in extList, stop sending/receiving the file
+    if not check_valid_extension(extension, extList):
+        print(f'Invalid file extension: File ends with [{extension}].',
+              f'Valid extensions: {extList}.')
+        return False # extension not in extList
+    return True      # extension in extList
 
 def create_metadata(filepath):
     '''
