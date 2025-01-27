@@ -32,6 +32,7 @@ def add_prefix(msg, typePrefix=0):
     3: File-download      (not decode-able)
     4: Display history    (msg/file)
     5: Clear history      (msg/file/all)
+    6: OpenAI suggestions 
 
     @param msg: a bytes-object
     @param typePrefix: an integer

@@ -13,6 +13,7 @@ from handle_room_decision import handle_room_decision
 from handle_username import handle_username
 from recv_from_server import recv_msg_from_server
 from send_to_server import send_msg_to_server
+from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
 from threading import Event, Thread
 
 class Client:
@@ -25,12 +26,9 @@ class Client:
         self.shutdownEvent = Event() # threading.Event()
         self.ruleAboutRoomCodeSent = False
         
-        self.CHUNK_SIZE = 1025
-        self.MAX_FILE_SIZE = 104857600 # in bytes; which is equivalent to 100MB
-        self.extList = ['.txt',  '.md',   '.json', '.xml', '.csv',
-                        '.docx', '.xlsx', '.pdf',  '.py',  '.html',
-                        '.css',  '.cpp',  '.java', '.tar.gz',
-                        '.png',  '.jpg',  '.gif',  '.mp3', '.mp4', '.db']
+        self.CHUNK_SIZE = CHUNK_SIZE
+        self.MAX_FILE_SIZE = MAX_FILE_SIZE
+        self.extList = EXT_LIST
 
     def init_client_socket(self):
         try: 
