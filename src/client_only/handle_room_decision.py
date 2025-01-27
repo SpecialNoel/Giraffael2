@@ -1,6 +1,6 @@
 # handle_room_decision.py
 
-from send_to_server import send_decision_on_room, send_room_code
+from client_only.send_to_server import send_decision_on_room, send_room_code
 
 def handle_room_decision(client, chunkSize):
     # Try sending client decision on room to server

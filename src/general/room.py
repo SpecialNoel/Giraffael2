@@ -7,8 +7,9 @@ class Room:
     def __init__(self, roomCode, roomName='New Room'):
         self.__roomCode = roomCode # unmodifiable, unique
         self.__roomName = roomName
-        self.__clientList = [] # each element is a client_obj
-        self.__messageList = []
+        self.__clientList = []  # each element is a client_obj
+        self.__messageList = [] # used to display msg list to client only
+        self.__messageListForServer = [] # used by server
         self.__storedFiles = []
     
     def get_room_code(self):
@@ -23,6 +24,9 @@ class Room:
     def get_message_list(self):
         return self.__messageList
     
+    def get_message_list_for_server(self):
+        return self.__messageListForServer
+    
     def get_stored_files(self):
         return self.__storedFiles
         
@@ -34,6 +38,9 @@ class Room:
         
     def add_message_to_message_list(self, msg):
         self.__messageList.append(msg)
+        
+    def add_message_to_message_list_for_server(self, msg):
+        self.__messageListForServer.append(msg)
     
     def add_files_to_stored_files(self, filename):
         self.__storedFiles.append(filename)
@@ -80,6 +87,7 @@ class Room:
             
     def clearMsgHistory(self):
         self.__messageList = []
+        self.__messageListForServer = []
     
     def clearFileHistory(self):
         self.__storedFiles = []

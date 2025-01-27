@@ -8,6 +8,7 @@ Note: Every 'client' instance references to a socket in server.py
 
 import socket
 import string
+from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
 from server_only.accept_connection import accept_a_connection
 from threading import Thread, Event
 
@@ -32,12 +33,9 @@ class Server:
         
         # Char pools, containing all Digits, Upper and Lower-case letters
         self.charPools = string.ascii_letters + string.digits
-        self.CHUNK_SIZE = 1025
-        self.MAX_FILE_SIZE = 104857600 # in bytes; which is equivalent to 100MB
-        self.extList = ['.txt',  '.md',   '.json', '.xml', '.csv',
-                '.docx', '.xlsx', '.pdf',  '.py',  '.html',
-                '.css',  '.cpp',  '.java', '.tar.gz',
-                '.png',  '.jpg',  '.gif',  '.mp3', '.mp4', '.db']
+        self.CHUNK_SIZE = CHUNK_SIZE
+        self.MAX_FILE_SIZE = MAX_FILE_SIZE
+        self.extList = EXT_LIST
 
     def get_server_ip(self):
         try:
