@@ -53,7 +53,7 @@ class Room:
         except Exception as e:
             print('Error creating file-storing folder for room',
                   f'[{self.__roomCode}].')
-        
+
     def delete_file_storing_folder(self):
         folder_name = str(self.__roomCode)
         fullpath = '.' + os.sep + 'rooms' + os.sep + folder_name
@@ -66,3 +66,21 @@ class Room:
             print(f'Folder [{fullpath}] does not exist.')
         except Exception as e:
             print(f'Error deleting folder [{fullpath}]: [{e}].')
+            
+    def delete_all_files_in_file_storing_folder(self):
+        folder_name = str(self.__roomCode)
+        fullpath = '.' + os.sep + 'rooms' + os.sep + folder_name
+        
+        for filename in os.listdir(fullpath):
+            file_path = os.path.join(fullpath, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+            
+    def clearMsgHistory(self):
+        self.__messageList = []
+    
+    def clearFileHistory(self):
+        self.__storedFiles = []
+        self.delete_all_files_in_file_storing_folder()

@@ -1,8 +1,9 @@
 # handle_request.py
 
+import pickle
 from client_only.handle_send_file_request import handle_send_file_request
 from client_only.handle_recv_file_request import handle_recv_file_request
-from general.message import send_msg_with_prefix, recv_decoded_content
+from general.message import send_msg_with_prefix
 
 def handle_request(msg, client, chunkSize, maxFileSize, extList):
     lowerCasedMsg = msg.lower()
@@ -39,8 +40,7 @@ def handle_display_history_request(client, historyToDisplay, chunkSize):
     # historyToDisplay is either 'msg' or 'file'.
     # Prefix for displaying msg/file history: 4.
     send_msg_with_prefix(client, historyToDisplay, 4)
-    response = recv_decoded_content(client, chunkSize)
-    print(response)
+    # Response is received in recv_from_server(), case 4
     return
 
 def handle_clear_history_request(client, historyToClear, chunkSize):
@@ -49,6 +49,5 @@ def handle_clear_history_request(client, historyToClear, chunkSize):
     # historyToClear is either 'msg', 'file' or 'all'.
     # Prefix for clearing msg/file/all history: 5.
     send_msg_with_prefix(client, historyToClear, 5)
-    response = recv_decoded_content(client, chunkSize)
-    print(response)
+    # Response is received in recv_from_server(), case 5
     return

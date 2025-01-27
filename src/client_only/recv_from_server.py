@@ -6,6 +6,7 @@ from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1]
 sys.path.append(str(src_folder))
 
+import pickle
 from general.file_transmission import *
 from general.message import (get_prefix_and_content, rstrip_message, 
                              recv_decoded_content)
@@ -39,6 +40,15 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
                     print(f'filepath: [{filepath}]')
                     recv_file_from_server(client, filepath, 
                                          chunkSize, maxFileSize, extList)
+                case 4: 
+                    response = pickle.loads(msgContent)
+                    if type(response) == str and response == 'INVALID':
+                        print('Response from server: Invalid display history request.\n')
+                    else:    
+                        print(response, '\n')
+                case 5: 
+                    response = msgContent.decode()
+                    print(response+'\n')
                 case _: # invalid prefix
                     print(f'Received invalid prefix: [{typePrefix}].')
         except Exception as e:
