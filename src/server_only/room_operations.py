@@ -4,16 +4,17 @@ from general.room import Room
 
 def create_room(roomCode, rooms):
     room = Room(roomCode)
+    room.create_file_storing_folder()
     rooms.append(room)
     print(f'Created room with room code [{roomCode}]') 
-    return
+    return room
 
 def enter_room(clientObj, roomCode, rooms):
     room = [r for r in rooms if r.get_room_code() == roomCode][0]
     room.add_client_to_client_list(clientObj)
     address = clientObj.get_address()
     print(f'Client [{address}] entered room [{roomCode}].\n')
-    return
+    return room
     
 def print_room_status(room):
     print(f'Connected clients in room [{room.get_room_code()}]:',

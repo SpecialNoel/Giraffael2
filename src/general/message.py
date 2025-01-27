@@ -26,10 +26,12 @@ def add_prefix(msg, typePrefix=0):
     Note that this only applies when the client is already inside a room.
     
     Type prefixes:
-    0: Operation message (room code, username, etc.)
-    1: Normal message    (decode-able)
-    2: File-upload       (not decode-able)
-    3: File-download     (not decode-able)
+    0: Operation message  (room code, username, etc.)
+    1: Normal message     (decode-able)
+    2: File-upload        (not decode-able)
+    3: File-download      (not decode-able)
+    4: Display history    (msg/file)
+    5: Clear history      (msg/file/all)
 
     @param msg: a bytes-object
     @param typePrefix: an integer

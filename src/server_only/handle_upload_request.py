@@ -1,6 +1,7 @@
 # handle_upload_request.py
 
 import json
+import os
 from general.file_transmission import (check_if_filesize_is_valid,
                                       check_metadata_format,
                                       recv_file, split_metadata,
@@ -8,7 +9,8 @@ from general.file_transmission import (check_if_filesize_is_valid,
                                       check_if_filename_has_valid_extension)
 from general.message import get_prefix_and_content
 
-def handle_upload_request(client, address, chunkSize, maxFileSize, extList):
+def handle_upload_request(client, address, room, roomCode, chunkSize, 
+                          maxFileSize, extList):
     print(f'client [{address}] is uploading a file.\n')
     
     # Receive metadata from client
@@ -36,9 +38,13 @@ def handle_upload_request(client, address, chunkSize, maxFileSize, extList):
         print('Stopped receiving file.')
         return 
     
-    filepath = 'received_files'
+    filepath = 'rooms' + os.sep + roomCode
 
     # Receive the whole file from client
     recv_file(filename, filepath, filesize, client, 
              chunkSize, client.getpeername())
+    
+    # Update '__storedFiles' in the room client is in
+    room.add_files_to_stored_files(filename)
+    print(f'\nCurrent files in room [{roomCode}]: {room.get_stored_files()}\n.')
     return

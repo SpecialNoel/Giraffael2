@@ -60,14 +60,14 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
     
     # Create the room if the client has chosen to do so
     if wantCreateRoom:
-        create_room(roomCode, rooms)
+        room = create_room(roomCode, rooms)
 
     # Make the client enter the room
-    enter_room(clientObj, roomCode, rooms)
+    room = enter_room(clientObj, roomCode, rooms)
     print_info_when_client_enter_room(address, username, clients, roomCode,
                                       rooms, maxClientCount)
 
     # Start handling this client
-    handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
+    handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
                       rooms, roomCodes, maxClientCount, maxFileSize, extList)
     return
