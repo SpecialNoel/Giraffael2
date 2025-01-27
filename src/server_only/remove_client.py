@@ -37,4 +37,6 @@ def handle_disconnect_request(client, clients, address, rooms,
     if len(room.get_client_list()) == 0:
         roomCodes.remove(roomCode)
         print(f'Room [{roomCode}] is empty, removed from room codes.\n')
+        # Remove the file-storing folder for that room as well
+        room.delete_file_storing_folder()
     return

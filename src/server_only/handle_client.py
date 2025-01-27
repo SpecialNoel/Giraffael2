@@ -6,7 +6,7 @@ from server_only.handle_normal_msg import handle_normal_msg
 from server_only.remove_client import handle_disconnect_request
 from server_only.handle_upload_request import handle_upload_request
 
-def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
+def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
                       rooms, roomCodes, maxClientCount, maxFileSize, extList):
     client = clientObj.get_socket()
     address = clientObj.get_address()
@@ -36,12 +36,12 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize,
                     print(f'msgContent:{msgContent}\n')
                 case 1: # Received normal message
                     handle_normal_msg(client, msgContent, clients, 
-                                                 rooms, roomCode)
+                                      rooms, room, roomCode)
                 case 2: # Received file-upload request
-                    handle_upload_request(client, address, 
+                    handle_upload_request(client, address, room, roomCode,
                                           chunkSize, maxFileSize, extList)
                 case 3: # Received file-download request
-                    handle_download_request(client, address, 
+                    handle_download_request(client, address, room, roomCode,
                                            msgContent, chunkSize, 
                                            maxFileSize, extList)
                 case _: # Received invalid prefix

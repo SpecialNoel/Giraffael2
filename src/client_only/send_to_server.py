@@ -1,175 +1,29 @@
 # send_to_server.py
 
-import time
-from general.file_transmission import (check_if_directory_exists,
-                                      check_if_filename_is_valid,
-                                      check_if_filesize_is_valid,
-                                      create_metadata, display_rule, 
-                                      get_valid_filepath,
-                                      send_file, send_directory_and_filename,
-                                      send_metadata,
-                                      get_extension_from_filename,
-                                      check_if_filename_has_valid_extension)
+from client_only.handle_request import handle_request
+from general.file_transmission import *
 from general.message import (rstrip_message, send_msg_with_prefix, 
                              recv_decoded_content)
 
 def send_msg_to_server(client, shutdownEvent, chunkSize, 
                        maxFileSize, extList):
-        # Sent rules to the client console
+        # Send rules to the client console
         display_rule()
 
         # Send message to server
         while not shutdownEvent.is_set():            
             msg = rstrip_message(input())
             
-            # Empty message -> client closes connection
             if not msg:
+                # Empty message -> client closes connection
                 print('Disconnected from the channel.\n')
                 shutdownEvent.set()
                 client.close() # will be detected by server's 'recv()'
                 break
-            elif msg.lower() == 'send': # Client wants to send a file to server
-                handle_send_file_request(client, chunkSize, 
-                                        maxFileSize, extList)
-            elif msg.lower() == 'recv': # Client wants to recv a file to server
-                handle_recv_file_request(client)
-            else: # Client wants to send a normal message to server
-                send_msg_with_prefix(client, msg, 1)
+            
+            handle_request(msg, client, chunkSize, maxFileSize, extList)
         print('Client sender thread stopped.')
         return
-
-def handle_send_file_request(client, chunkSize, maxFileSize, extList):
-    def send_file_to_server(client, filepath, chunkSize, maxFileSize, extList):
-        # Create and send metadata to server
-        filename, filesize = create_metadata(filepath)
-        
-        # Stop sending file if filesize is greater than MAX_FILE_SIZE
-        if not check_if_filesize_is_valid(filesize, maxFileSize):
-            print('Stopped sending file.')
-            display_rule()
-            return
-        
-        # Stop sending file if file extension is not in extList
-        extension = get_extension_from_filename(filename)
-        if not check_if_filename_has_valid_extension(extension, extList):
-            print('Stopped receiving file.')
-            display_rule()
-            return 
-        
-        # Inform server that this client wants to send a file
-        send_msg_with_prefix(client, '', 2)
-        
-        # Send metadata of the file to server
-        send_metadata(client, filename, filesize)
-        
-        # Wait for 1 second before sending the whole file
-        # This is needed to solve problem where server receives both 
-        #   the metadata and the file itself from only one recv(chunkSize)
-        time.sleep(1)
-        
-        # Send the whole file to server
-        send_file(filepath, filename, client, 
-                chunkSize, 'server')
-        
-        display_rule()
-        return
-    
-    print('Type in filepath of the file you want to send.')
-    print('OR, type <exit> to stop sending file.\n')
-    filepath = rstrip_message(input())
-    
-    # Client does not want to send the file anymore
-    if filepath.lower() == 'exit':
-        print('Stopped sending file.')
-        display_rule()
-        return
-    
-    # Check if filepath is valid
-    filepath = get_valid_filepath(filepath)
-    
-    if filepath == None:
-        print('Stopped sending file.')
-        display_rule()
-        return
-    
-    # Send the file to server
-    send_file_to_server(client, filepath, chunkSize, maxFileSize, extList)
-    return
-
-def handle_recv_file_request(client):
-    def get_client_directory():
-        print('Type in directory where you want to store the file.')
-        print('OR, type <exit> to stop receiving file.\n')
-        directory = rstrip_message(input())
-        
-        # Client does not want to receive the file anymore
-        if directory.lower() == 'exit':
-            print('Stopped receiving file.')
-            display_rule()
-            return None
-        return directory
-        
-    def validate_client_directory(directory):
-        while not check_if_directory_exists(directory):
-            print('Type in directory where you want to store the file.')
-            print('OR, type <exit> to stop receiving file.\n')
-            
-            directory = rstrip_message(input())
-            # Client does not want to receive the file anymore
-            if directory.lower() == 'exit':
-                print('Stopped receiving file.')
-                display_rule()
-                return None
-        return directory
-    
-    def get_client_filename():
-        print('Type in name of the file you want to receive.')
-        print('OR, type <exit> to stop receiving file.\n')
-        filename = rstrip_message(input())
-        
-        # Client does not want to receive the file anymore
-        if filename.lower() == 'exit':
-            print('Stopped receiving file.')
-            display_rule()
-            return None
-        return filename
-    
-    def validate_client_filename(filename):
-        while not check_if_filename_is_valid(filename):
-            print('Type in name of the file you want to receive.')
-            print('OR, type <exit> to stop receiving file.\n')
-            
-            filename = rstrip_message(input())
-            # Client does not want to receive the file anymore
-            if filename.lower() == 'exit':
-                print('Stopped receiving file.')
-                display_rule()
-                return None
-        return filename
-        
-    # Step1: prompt client where to store the file
-    directory = get_client_directory()
-    if directory == None:
-        return
-    
-    # Validate the directory    
-    directory = validate_client_directory(directory)
-    if directory == None:
-        return
-    
-    # Step2: prompt client which file to receive/download
-    filename = get_client_filename()
-    if filename == None:
-        return
-     
-    filename = validate_client_filename(filename)
-    if filename == None:
-        return
-    
-    # Step3: start receiving metadata and file chunks if file exists on server
-    # Inform server that this client wants to receive a file
-    send_directory_and_filename(client, directory, filename)
-    return
     
 def recv_user_input():
     msg = rstrip_message(input())

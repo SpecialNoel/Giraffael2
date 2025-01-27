@@ -6,11 +6,7 @@ from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1]
 sys.path.append(str(src_folder))
 
-from general.file_transmission import (check_if_filesize_is_valid,
-                                      display_rule, recv_file, 
-                                      split_metadata,
-                                      get_extension_from_filename,
-                                      check_if_filename_has_valid_extension)
+from general.file_transmission import *
 from general.message import (get_prefix_and_content, rstrip_message, 
                              recv_decoded_content)
 

@@ -12,15 +12,20 @@ Functions here are used by clients or server to transfer
 '''
 
 def display_rule():
-    print('\nInput message to send to the chatroom,',
-        'or\nInput [send] to send a file to server,',
-        'or\nInput [recv] to receive a file from server.')
-    print('Press [Enter/Return] key to disconnect.\n')
+    print('\nInput message to send to this chatroom,',
+          '\nInput [send] to upload a file to this room,',
+          '\nInput [recv] to download a file from this room,',
+          '\nInput [msg history] to display all message history in this room,',
+          '\nInput [file history] to display all files stored in this room,',
+          '\nInput [clear msg history] to delete all message history in this room,'
+          '\nInput [clear file history] to delete all files stored in this room,',
+          '\nInput [clear all history] to delete all history of this room.',
+          '\nPress [Enter/Return] key to disconnect.\n')
     return
 
 def find_file_in_directory(filename, target_dir, start_dir='.'):
     '''
-    Used by server to check if it has the file in test_files,
+    Used by server to check if it has the file in target_dir,
       for which client wanted to download to their local machine
     '''
     for root, dirs, files in os.walk(start_dir):
