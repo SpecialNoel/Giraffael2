@@ -2,10 +2,7 @@
 
 from server_only.room_operations import print_room_status
 
-def remove_client_from_clients(client, clients):
-    # Get address of client
-    address = client.getpeername()
-    
+def remove_client_from_clients(address, clients):    
     # Remove client from clients based on address
     for clientObj in clients:
         if clientObj.get_address() == address:
@@ -18,12 +15,12 @@ def remove_client_from_room(client, room):
     room.remove_client_from_client_list(client)
     return room
 
-def handle_disconnect_request(client, clients, address, rooms, 
+def handle_disconnect_request(client, address, clients, rooms, 
                               roomCode, roomCodes, maxClientCount):
-    print(f'Client on [{client.getpeername()}] disconnected.')
+    print(f'Client on [{address}] disconnected.')
     
     # Remove client from client list
-    remove_client_from_clients(client, clients)
+    remove_client_from_clients(address, clients)
     client.close()
     print(f'All connected clients: ',
           f'[{len(clients)}/{maxClientCount}]')

@@ -38,10 +38,10 @@ def handle_download_request(client, address, room, roomCode, msgContent,
         # Inform client about this
         send_msg_with_prefix(client, 'file_exists', 0)
         # Send file to client
-        send_file_to_client(client, filepath, chunkSize, maxFileSize, extList)
+        send_file_to_client(client, address, filepath, chunkSize, maxFileSize, extList)
     return
 
-def send_file_to_client(client, filepath, chunkSize, maxFileSize, extList):
+def send_file_to_client(client, address, filepath, chunkSize, maxFileSize, extList):
     # Create and send metadata to client
     filename, filesize = create_metadata(filepath)
     
@@ -64,6 +64,5 @@ def send_file_to_client(client, filepath, chunkSize, maxFileSize, extList):
     time.sleep(1)
        
     # Send the whole file to client
-    send_file(filepath, filename, client, 
-             chunkSize, client.getpeername())
+    send_file(filepath, filename, client, chunkSize, address)
     return
