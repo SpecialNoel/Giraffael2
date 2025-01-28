@@ -18,7 +18,7 @@ class Server:
     def __init__(self):
         self.MAX_CLIENT_COUNT = 3
         self.SERVER_IP = '127.0.0.1' # host for testing
-        #self.SERVER_IP = self.get_server_ip() # host with private ip
+        self.SERVER_IP = self.get_server_ip() # host with private ip
         self.SERVER_PORT = 5001
         
         # Source: https://www.hivesystems.com
@@ -40,6 +40,7 @@ class Server:
         self.extList = EXT_LIST
         
         # SSL
+        self.usingSSL = True
         self.context = setup_ssl_context()
 
     def get_server_ip(self):
@@ -122,13 +123,22 @@ class Server:
         
         # Start listening for connection from clients
         self.start_listening()
-
-        with self.context.wrap_socket(self.server, 
-                                      server_side=True) as tls_server:
+        
+        if self.usingSSL:
+            with self.context.wrap_socket(self.server, 
+                                        server_side=True) as tls_server:
+                # Server should be always-on
+                while True:
+                    try:
+                        self.start_accepting(tls_server)
+                    except KeyboardInterrupt as e:
+                        self.handle_keyboard_interrupt(e)
+                        break
+        else:
             # Server should be always-on
             while True:
                 try:
-                    self.start_accepting(tls_server)
+                    self.start_accepting(self.server)
                 except KeyboardInterrupt as e:
                     self.handle_keyboard_interrupt(e)
                     break

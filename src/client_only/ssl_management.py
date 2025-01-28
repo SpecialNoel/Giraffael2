@@ -3,7 +3,7 @@
 import ssl
 
 def setup_ssl_context():
-    context = ssl.create_default_context()
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT) # TLS
     # Disable hostname check (for self-signed certificates)
     context.check_hostname = False  
     # Accept self-signed certificates (use CERT_REQUIRED for CA validation)
