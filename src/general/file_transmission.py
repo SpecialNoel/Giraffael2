@@ -180,17 +180,16 @@ def split_metadata(metadataBytes):
 
 def get_filepath_without_duplication(filepath):
     counter = 1
+    filenameWithExt = os.path.basename(filepath)
+    filename, extension = os.path.splitext(filenameWithExt)
+    base, extension = os.path.splitext(filepath)
+    directory = os.path.dirname(filepath)
     while check_if_filepath_exists(filepath):
         # Filepath exists -> filename is duplicated on recipient's end
         # Need to append a counter to the end of filename, 
         #   but before extension, to solve duplication
-        filenameWithExt = os.path.basename(filepath)
-        filename, extension = os.path.splitext(filenameWithExt)
-        base, extension = os.path.splitext(filepath)
-        directory = os.path.dirname(filepath)
-        
-        filename = f'{filename}_{counter}{extension}'
-        filepath = os.path.join(directory, filename)
+        newFilename = f'{filename}_{counter}{extension}'
+        filepath = os.path.join(directory, newFilename)
         print(f'New filepath: {filepath}')
         counter += 1
     return filepath
