@@ -24,7 +24,7 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
 
             # Empty message -> client closed connection
             if not msg:
-                handle_disconnect_request(client, clients, address, 
+                handle_disconnect_request(client, address, clients, 
                                           rooms, roomCode, roomCodes,
                                           maxClientCount)
                 break
@@ -38,7 +38,7 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
             # Close connection with this client
             print(f'Error: [{e}]. ',
                   f'Removed [{address}] from client socket list.')
-            handle_disconnect_request(client, clients, address, 
+            handle_disconnect_request(client, address, clients, 
                                       rooms, roomCode, roomCodes,
                                       maxClientCount)            
             break

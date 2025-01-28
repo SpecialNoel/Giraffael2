@@ -5,7 +5,7 @@ from general.message import rstrip_message, send_msg_with_prefix
 from server_only.check_client_alive import check_client_alive
 from server_only.remove_client import remove_client_from_clients
 
-def handle_normal_msg(client, username, msgContent, clients, room):
+def handle_normal_msg(client, address, username, msgContent, clients, room):
     msg = rstrip_message(msgContent.decode())
 
     # A list used to remove disconnected client sockets
@@ -31,7 +31,7 @@ def handle_normal_msg(client, username, msgContent, clients, room):
         if not msgAddedToMsgList:
             msgAddedToMsgList = True
             room.add_message_to_message_list(msgWithTime)
-            msgWithTime = f'[{date_now} <{username}>{client.getpeername()}: {msg}]'
+            msgWithTime = f'[{date_now} <{username}>{address}: {msg}]'
             room.add_message_to_message_list_for_server(msgWithTime)
             print(f'Current messages in Room [{room.get_room_code()}]:',
                   f'{room.get_message_list_for_server()}.')

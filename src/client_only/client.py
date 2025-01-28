@@ -13,6 +13,7 @@ from handle_room_decision import handle_room_decision
 from handle_username import handle_username
 from recv_from_server import recv_msg_from_server
 from send_to_server import send_msg_to_server
+from ssl_management import setup_ssl_context
 from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
 from threading import Event, Thread
 
@@ -21,7 +22,7 @@ class Client:
         self.SERVER_IP = '127.0.0.1' # depending on server ip
         self.SERVER_PORT = 5001
         
-        self.client = self.init_client_socket() # client socket
+        self.client = None # client socket
         
         self.shutdownEvent = Event() # threading.Event()
         self.ruleAboutRoomCodeSent = False
@@ -29,6 +30,10 @@ class Client:
         self.CHUNK_SIZE = CHUNK_SIZE
         self.MAX_FILE_SIZE = MAX_FILE_SIZE
         self.extList = EXT_LIST
+        
+        # SSL
+        self.context = setup_ssl_context()
+        self.tls_client = self.init_client_socket()
 
     def init_client_socket(self):
         try: 
@@ -36,7 +41,12 @@ class Client:
             self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Connect to the server socket with [IP, Port number] combination
             self.client.connect((self.SERVER_IP, self.SERVER_PORT)) 
-            return self.client
+            
+            self.tls_client = self.context.wrap_socket(self.client, 
+                                                       server_hostname=self.SERVER_IP)
+            print(f'Connected securely to {self.SERVER_IP} with protocol:',
+                  f'{self.tls_client.version()}.')
+            return self.tls_client
         except ConnectionRefusedError:
             print('Connection refused. Server is not on yet.')
             return None
@@ -46,25 +56,25 @@ class Client:
 
     def run_client(self):
         # Prevent connection if client socket is not initialized correctly
-        if self.client == None:
+        if self.tls_client == None:
             exit()
         # Prevent connection if server reached max client capacity
-        if not check_server_capacity(self.client, self.CHUNK_SIZE):
+        if not check_server_capacity(self.tls_client, self.CHUNK_SIZE):
             print('Connection failed: server reached max client capacity.')
             exit()
             
-        handle_room_decision(self.client, self.CHUNK_SIZE)
-        handle_username(self.client, self.CHUNK_SIZE)
+        handle_room_decision(self.tls_client, self.CHUNK_SIZE)
+        handle_username(self.tls_client, self.CHUNK_SIZE)
             
         # Use thread t1 to receive message from server
         t1 = Thread(target=recv_msg_from_server, 
-                    args=(self.client, self.shutdownEvent, 
+                    args=(self.tls_client, self.shutdownEvent, 
                           self.CHUNK_SIZE, self.MAX_FILE_SIZE, self.extList))
         t1.daemon = True
         t1.start()
         # Use thread t2 to send message to server
         t2 = Thread(target=send_msg_to_server, 
-                    args=(self.client, self.shutdownEvent, 
+                    args=(self.tls_client, self.shutdownEvent, 
                           self.CHUNK_SIZE, self.MAX_FILE_SIZE, self.extList))
         t2.daemon = True
         t2.start()

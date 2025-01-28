@@ -42,7 +42,7 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
 
     # Receive the whole file from client
     recv_file(filename, filepath, filesize, client, 
-             chunkSize, client.getpeername())
+             chunkSize, address)
     
     # Update '__storedFiles' in the room client is in
     room.add_files_to_stored_files(filename)

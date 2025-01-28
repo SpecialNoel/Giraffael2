@@ -17,7 +17,7 @@ def handle_request(prefix, client, username, msgContent, clients,
             print(f'msgContent:{msgContent}\n')
         case 1: 
             # Received normal message
-            handle_normal_msg(client, username, msgContent, clients, room)
+            handle_normal_msg(client, address, username, msgContent, clients, room)
         case 2: 
             # Received file-upload request
             handle_upload_request(client, address, room, roomCode,
