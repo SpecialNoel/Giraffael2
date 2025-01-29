@@ -11,7 +11,7 @@ from general.file_transmission import (check_if_filesize_is_valid,
                                       check_if_filename_has_valid_extension)
 from general.message import send_msg_with_prefix
 
-def handle_download_request(client, address, room, roomCode, msgContent, 
+def handle_download_request(client, address, roomCode, msgContent, 
                             chunkSize, maxFileSize, extList):
     # Received file-download request
     print(f'client [{address}] is downloading a file.\n')
@@ -43,9 +43,9 @@ def handle_download_request(client, address, room, roomCode, msgContent,
 
 def send_file_to_client(client, address, filepath, chunkSize, maxFileSize, extList):
     # Create and send metadata to client
-    filename, filesize = create_metadata(filepath)
+    filename, filesize, hashedFileContent = create_metadata(filepath)
     
-    send_metadata(client, filename, filesize)
+    send_metadata(client, filename, filesize, hashedFileContent)
     
     # Stop sending file if filesize is greater than MAX_FILE_SIZE
     if not check_if_filesize_is_valid(filesize, maxFileSize):

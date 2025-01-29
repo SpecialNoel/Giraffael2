@@ -29,7 +29,7 @@ def handle_send_file_request(client, chunkSize, maxFileSize, extList):
 
 def send_file_to_server(client, filepath, chunkSize, maxFileSize, extList):
     # Create and send metadata to server
-    filename, filesize = create_metadata(filepath)
+    filename, filesize, hashedFileContent = create_metadata(filepath)
     
     # Stop sending file if filesize is greater than MAX_FILE_SIZE
     if not check_if_filesize_is_valid(filesize, maxFileSize):
@@ -48,7 +48,7 @@ def send_file_to_server(client, filepath, chunkSize, maxFileSize, extList):
     send_msg_with_prefix(client, '', 2)
     
     # Send metadata of the file to server
-    send_metadata(client, filename, filesize)
+    send_metadata(client, filename, filesize, hashedFileContent)
     
     # Wait for 1 second before sending the whole file
     # This is needed to solve problem where server receives both 
@@ -57,7 +57,7 @@ def send_file_to_server(client, filepath, chunkSize, maxFileSize, extList):
     
     # Send the whole file to server
     send_file(filepath, filename, client, 
-            chunkSize, 'server')
+             chunkSize, 'server')
     
     display_rule()
     return

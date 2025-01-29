@@ -81,7 +81,7 @@ def recv_file_from_server(client, filepath, chunkSize, maxFileSize, extList):
         # Receive metadata from server
         msg = client.recv(chunkSize)
         prefix, metadataBytes = get_prefix_and_content(msg)
-        filename, filesize = split_metadata(metadataBytes)
+        filename, filesize, hashedFileContent = split_metadata(metadataBytes)
         
         # Stop receiving file if filesize is greater than MAX_FILE_SIZE
         if not check_if_filesize_is_valid(filesize, maxFileSize):
@@ -97,8 +97,8 @@ def recv_file_from_server(client, filepath, chunkSize, maxFileSize, extList):
             return 
         
         # Receive file from server, and store it on client desired location
-        recv_file(filename, filepath, filesize, client, chunkSize,
-                 'server')
+        recv_file(filename, filepath, filesize, hashedFileContent, 
+                  client, chunkSize, 'server')
         
         display_rule()
     elif response == 'file_not_found':

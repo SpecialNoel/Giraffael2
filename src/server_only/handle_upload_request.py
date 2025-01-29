@@ -25,7 +25,7 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
         return
     
     # Split the metadata of the file received from client
-    filename, filesize = split_metadata(metadataBytes)
+    filename, filesize, hashedFileContent = split_metadata(metadataBytes)
     
     # Stop receiving file if filesize is greater than MAX_FILE_SIZE
     if not check_if_filesize_is_valid(filesize, maxFileSize):
@@ -41,10 +41,14 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
     filepath = 'rooms' + os.sep + roomCode
 
     # Receive the whole file from client
-    recv_file(filename, filepath, filesize, client, 
-             chunkSize, address)
+    fileSaved = recv_file(filename, filepath, filesize, hashedFileContent,
+                        client, chunkSize, address)
     
     # Update '__storedFiles' in the room client is in
-    room.add_files_to_stored_files(filename)
+    
+    if fileSaved:
+        room.add_files_to_stored_files(filename)
+    else:
+        print(f'Failed to add [{filename}] to room [{roomCode}].')
     print(f'\nCurrent files in room [{roomCode}]: {room.get_stored_files()}\n.')
     return
