@@ -9,7 +9,7 @@ from server_only.openai_model_settings import (maxTokensPerSuggestion,
                                                numOfSuggestions, temp)
 
 load_dotenv()
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
 def handle_msg_suggestion_request(client, pastMsgList):
     # Obtain msg suggestions (a string) from OpenAI model

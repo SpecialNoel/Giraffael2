@@ -3,7 +3,7 @@
 # .txt: text files
 
 def create_file_with_zeros(filename, filesize):
-    """Creates a file with zeros and the specified size in megabytes."""
+    '''Creates a file with zeros and the specified size in megabytes.'''
     filesizeInBytes = filesize * 1024 * 1024
     with open(filename, 'wb') as file:
         file.write(b'\0' * filesizeInBytes) # Fill with null bytes (zeros)

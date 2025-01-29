@@ -141,7 +141,7 @@ def send_metadata(socket, filename, filesize):
         'filesize': filesize
     }
     metadata_json = json.dumps(metadata)
-    metadata_bytes = metadata_json.encode('utf-8')
+    metadata_bytes = metadata_json.encode()
     socket.send(add_prefix(metadata_bytes, 2))
     return
 
@@ -151,12 +151,12 @@ def send_directory_and_filename(socket, directory, filename):
         'filename': filename
     }
     dirAndName_json = json.dumps(dirAndName)
-    dirAndName_bytes = dirAndName_json.encode('utf-8')
+    dirAndName_bytes = dirAndName_json.encode()
     socket.send(add_prefix(dirAndName_bytes, 3))
     return
 
 def get_directory_and_filename(dirAndNameEncoded):
-    dirAndName_json = dirAndNameEncoded.decode('utf-8')
+    dirAndName_json = dirAndNameEncoded.decode()
     dirAndName = json.loads(dirAndName_json)
     directory = dirAndName['directory']
     filename = dirAndName['filename']
@@ -171,7 +171,7 @@ def check_metadata_format(metadata):
     return False
 
 def split_metadata(metadataBytes):
-    metadata_json = metadataBytes.decode('utf-8')
+    metadata_json = metadataBytes.decode()
     metadata = json.loads(metadata_json)
     filename = metadata['filename']
     filesize = int(metadata['filesize'])
