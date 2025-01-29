@@ -20,7 +20,7 @@ def setup_ssl_context():
     pathToCert = find_file_from_root_dir('cert.pem')
     pathToKey = find_file_from_root_dir('key.pem')
     context.load_cert_chain(certfile=pathToCert, keyfile=pathToKey)
-    print("SSL context on server side loaded successfully!")
+    print('SSL context on server side loaded successfully!')
     return context
 
 def find_file_from_root_dir(filename):
