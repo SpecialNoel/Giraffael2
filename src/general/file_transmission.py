@@ -1,5 +1,6 @@
 # file_transmission.py
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -79,10 +80,9 @@ def check_if_file_exists(filepath):
         if not os.path.basename(filepath):
             print('Invalid filepath: filename is missing.')
             return False
-        return check_if_filepath_exists(filepath)
     except Exception as e:
         print(f'Error validating filepath: {e}')
-        return check_if_filepath_exists(filepath)
+    return check_if_filepath_exists(filepath)
 
 def get_valid_filepath(filepath):    
     while not check_if_file_exists(filepath):
@@ -121,6 +121,15 @@ def check_if_filename_has_valid_extension(extension, extList):
         return False # extension not in extList
     return True      # extension in extList
 
+def compute_hash(data):
+    return hashlib.sha256(data).hexdigest()
+
+def read_all_from_file(filepath):
+    fileContent = b''
+    with open(filepath, 'rb') as file:
+        fileContent = file.read()
+    return fileContent
+
 def create_metadata(filepath):
     '''
     Used by the sender to create the associate metadata of the file.
@@ -128,17 +137,21 @@ def create_metadata(filepath):
     the original file.
 
     @param filepath: the filepath of the file
-    @return: filename, filesize
+    @return: filename, filesize, hashedFileContent
     '''
     filename = os.path.basename(filepath)
     filesize = os.path.getsize(filepath)
-    print(f'Filename: [{filename}], filesize: [{filesize}].\n')
-    return filename, filesize
+    fileContent = read_all_from_file(filepath)
+    hashedFileContent = compute_hash(fileContent)
+    print(f'Filename: [{filename}], filesize: [{filesize}],',
+          f'hashedFileContent: [{hashedFileContent}].\n')
+    return filename, filesize, hashedFileContent
 
-def send_metadata(socket, filename, filesize):
+def send_metadata(socket, filename, filesize, hashedFileContent):
     metadata = {
         'filename': filename,
-        'filesize': filesize
+        'filesize': filesize,
+        'hashedFileContent': hashedFileContent
     }
     metadata_json = json.dumps(metadata)
     metadata_bytes = metadata_json.encode()
@@ -164,7 +177,7 @@ def get_directory_and_filename(dirAndNameEncoded):
     return directory, filename
 
 def check_metadata_format(metadata):
-    if len(metadata) == 2 and metadata['filename'] and metadata['filesize']:
+    if len(metadata) == 3 and metadata['filename'] and metadata['filesize'] and metadata['hashedFileContent']:
         print('Metadata format is valid.')
         return True
     print('Invalid metadata format.')
@@ -175,8 +188,10 @@ def split_metadata(metadataBytes):
     metadata = json.loads(metadata_json)
     filename = metadata['filename']
     filesize = int(metadata['filesize'])
-    print(f'Filename: [{filename}], filesize: [{filesize}].')
-    return filename, filesize
+    hashedFileContent = metadata['hashedFileContent']
+    print(f'Filename: [{filename}], filesize: [{filesize}],',
+          f'hashedFileContent: [{hashedFileContent}].\n')
+    return filename, filesize, hashedFileContent
 
 def get_filepath_without_duplication(filepath):
     counter = 1
@@ -216,7 +231,8 @@ def send_file(filepath, filename, socket, chunk_size, recipient):
         print(f'Error occurred in send_file(): [{e}].')
     return
 
-def recv_file(filename, filepath, filesize, socket, chunkSize, sender):
+def recv_file(filename, filepath, filesize, hashedFileContent, 
+             socket, chunkSize, sender):
     '''
     Used by the recipient to receive the file from the sender.
     Received content will be stored in the 'received_files' folder
@@ -233,16 +249,36 @@ def recv_file(filename, filepath, filesize, socket, chunkSize, sender):
     try:
         filepath = os.path.join(filepath, filename)
         filepath = get_filepath_without_duplication(filepath)
+        
+        # Receive all file content from sender
+        dataBuffer = b''
+        received_len = 0
+        while received_len < filesize:
+            data = socket.recv(chunkSize)
+            if not data:
+                break
+            dataBuffer += data
+            received_len += len(data)
+            
+        # Compute hash of the received content
+        recipientHashedFileContent = compute_hash(dataBuffer)
+        print(f'Recipient computed hash: [{recipientHashedFileContent}].')
+        print(f'Sender computer hash:    [{hashedFileContent}].')
+        
+        # Compare the computed result to the one calculated by sender
+        if not recipientHashedFileContent == hashedFileContent:
+            print('Error: Recipient hash does not equal to sender hash.')
+            print('Stopped receiving file.')
+            return False
+        
+        # Save the file
         with open(filepath, 'wb') as file:
-            received_len = 0
-            while received_len < filesize:
-                data = socket.recv(chunkSize)
-                if not data:
-                    break
-                file.write(data)
-                received_len += len(data)
+            file.write(dataBuffer)
+
+        print('Recipient hash equals to sender hash.')
         print(f'Successfully received file [{filename}] from [{sender}].\n')
         print(f'The file is Stored in filepath: [{filepath}].')
+        return True
     except Exception as e: 
         print(f'Error occurred in recv_file(): [{e}].')
-    return
+        return False

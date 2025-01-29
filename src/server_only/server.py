@@ -18,7 +18,7 @@ class Server:
     def __init__(self):
         self.MAX_CLIENT_COUNT = 3
         self.SERVER_IP = '127.0.0.1' # host for testing
-        self.SERVER_IP = self.get_server_ip() # host with private ip
+        #self.SERVER_IP = self.get_server_ip() # host with private ip
         self.SERVER_PORT = 5001
         
         # Source: https://www.hivesystems.com
