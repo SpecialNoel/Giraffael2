@@ -8,7 +8,7 @@ from general.message import send_msg_with_prefix
 from server_only.openai_model_settings import (maxTokensPerSuggestion, 
                                                numOfSuggestions, temp)
 
-load_dotenv()
+load_dotenv() 
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
 def handle_msg_suggestion_request(client, pastMsgList):
