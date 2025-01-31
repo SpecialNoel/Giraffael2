@@ -4,6 +4,8 @@
         "gethostname",
         "keyout",
         "newkey",
+        "openpyxl",
+        "reportlab",
         "uppered"
     ]
 }
