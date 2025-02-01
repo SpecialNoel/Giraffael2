@@ -8,3 +8,4 @@ pip install pillow     # for create_img.py
 pip install reportlab  # for create_pdf.py
 pip install openai     # for generate_msg_suggestion.py
 pip install python-dotenv
+pip install boto3

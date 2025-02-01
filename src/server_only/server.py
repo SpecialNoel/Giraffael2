@@ -11,7 +11,8 @@ import socket
 import string
 from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
 from server_only.accept_connection import accept_a_connection
-from server_only.ssl_management import setup_ssl_context
+from server_only.retrieve_secret_from_aws import setup_ssl_context
+#from server_only.ssl_management import setup_ssl_context
 from threading import Thread, Event
 
 class Server:
