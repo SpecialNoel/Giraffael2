@@ -3,8 +3,8 @@
 import boto3
 import json
 import ssl
+import tempfile
 from botocore.exceptions import ClientError
-from io import BytesIO
 
 def get_secret_api_key():
     # Initialize SSM client
@@ -47,8 +47,18 @@ def get_secret_cert_and_key():
 def setup_ssl_context():
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) # TLS
     certification, privateKey = get_secret_cert_and_key()
-    context.load_cert_chain(certfile=None, keyfile=None, 
-                            certfile_data=certification, 
-                            keyfile_data=privateKey)
+    
+    with (tempfile.NamedTemporaryFile(delete=True) as cert_file, 
+          tempfile.NamedTemporaryFile(delete=True) as key_file):
+        # Write certificate and key to the temporary files
+        cert_file.write(certification.encode())
+        cert_file.flush()
+        key_file.write(privateKey.encode())
+        key_file.flush()
+
+        # Create an SSL context
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(certfile=cert_file.name, keyfile=key_file.name)
+    
     print('SSL context on server side loaded successfully!')
     return context
