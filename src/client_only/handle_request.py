@@ -4,6 +4,7 @@ from client_only.handle_send_file_request import handle_send_file_request
 from client_only.handle_recv_file_request import handle_recv_file_request
 from general.message import send_msg_with_prefix
 
+'''
 def handle_request_with_match(msg, client, chunkSize, maxFileSize, extList):
     lowerCasedMsg = msg.lower()
     match lowerCasedMsg:
@@ -35,6 +36,7 @@ def handle_request_with_match(msg, client, chunkSize, maxFileSize, extList):
             # Client wants to send a normal message to the room
             send_msg_with_prefix(client, msg, 1)
     return
+'''
 
 def handle_request(msg, client, chunkSize, maxFileSize, extList):
     lowerCasedMsg = msg.lower()

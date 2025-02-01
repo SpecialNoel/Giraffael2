@@ -2,6 +2,7 @@
 
 from general.message import send_msg_with_prefix
 
+'''
 def handle_clear_history_request_with_match(client, address, msgContent, room):
     historyToClear = msgContent.decode().lower()
     
@@ -28,6 +29,7 @@ def handle_clear_history_request_with_match(client, address, msgContent, room):
             print(f'Received invalid clear history request from',
                 f'Client [{address}].')
     return
+'''
 
 def handle_clear_history_request(client, address, msgContent, room):
     historyToClear = msgContent.decode().lower()

@@ -7,6 +7,7 @@ from server_only.handle_msg_suggestion_request import handle_msg_suggestion_requ
 from server_only.handle_normal_msg import handle_normal_msg
 from server_only.handle_upload_request import handle_upload_request
 
+'''
 def handle_request_with_match(prefix, client, username, msgContent, clients, 
                               room, roomCode, address, chunkSize, maxFileSize,
                               extList, typePrefix):
@@ -40,6 +41,7 @@ def handle_request_with_match(prefix, client, username, msgContent, clients,
             # Received invalid prefix
             print(f'Received invalid prefix: {typePrefix}.')
     return
+'''    
 
 def handle_request(prefix, client, username, msgContent, clients, 
                    room, roomCode, address, chunkSize, maxFileSize, 

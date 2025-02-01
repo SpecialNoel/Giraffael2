@@ -12,6 +12,7 @@ from general.file_transmission import *
 from general.message import (get_prefix_and_content, rstrip_message, 
                              recv_decoded_content)
 
+'''
 def handle_recv_request_with_match(prefix, typePrefix, msgContent, client, 
                                    chunkSize, maxFileSize, extList):
     match prefix:
@@ -51,6 +52,7 @@ def handle_recv_request_with_match(prefix, typePrefix, msgContent, client,
         case _: # invalid prefix
             print(f'Received invalid prefix: [{typePrefix}].')
     return
+'''
 
 def handle_recv_request(prefix, typePrefix, msgContent, client, 
                         chunkSize, maxFileSize, extList):
