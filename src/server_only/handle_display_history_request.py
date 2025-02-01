@@ -3,6 +3,7 @@
 import pickle
 from general.message import add_prefix
 
+'''
 def handle_display_history_request_with_match(client, address, msgContent, room):
     historyToDisplay = msgContent.decode().lower()
     
@@ -22,7 +23,8 @@ def handle_display_history_request_with_match(client, address, msgContent, room)
             print(f'Received invalid display history request from',
                   f'Client [{address}].\n')
     return
-    
+'''   
+ 
 def handle_display_history_request(client, address, msgContent, room):
     historyToDisplay = msgContent.decode().lower()
     
