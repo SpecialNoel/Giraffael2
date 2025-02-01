@@ -8,4 +8,5 @@ def handle_username(client, chunkSize):
     while response != 'VALID_USERNAME':
         print(f'msg: [{msg}], response from server: [{response}]')
         msg, response = send_username(client, chunkSize)
+    return
         

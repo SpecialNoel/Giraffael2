@@ -7,23 +7,23 @@ from general.message import (rstrip_message, send_msg_with_prefix,
 
 def send_msg_to_server(client, shutdownEvent, chunkSize, 
                        maxFileSize, extList):
-        # Send rules to the client console
-        display_rule()
+    # Send rules to the client console
+    display_rule()
 
-        # Send message to server
-        while not shutdownEvent.is_set():            
-            msg = rstrip_message(input())
-            
-            if not msg:
-                # Empty message -> client closes connection
-                print('Disconnected from the channel.\n')
-                shutdownEvent.set()
-                client.close() # will be detected by server's 'recv()'
-                break
-            
-            handle_request(msg, client, chunkSize, maxFileSize, extList)
-        print('Client sender thread stopped.')
-        return
+    # Send message to server
+    while not shutdownEvent.is_set():            
+        msg = rstrip_message(input())
+        
+        if not msg:
+            # Empty message -> client closes connection
+            print('Disconnected from the channel.\n')
+            shutdownEvent.set()
+            client.close() # will be detected by server's 'recv()'
+            break
+        
+        handle_request(msg, client, chunkSize, maxFileSize, extList)
+    print('Client sender thread stopped.')
+    return
     
 def recv_user_input():
     msg = rstrip_message(input())

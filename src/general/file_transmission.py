@@ -177,7 +177,10 @@ def get_directory_and_filename(dirAndNameEncoded):
     return directory, filename
 
 def check_metadata_format(metadata):
-    if len(metadata) == 3 and metadata['filename'] and metadata['filesize'] and metadata['hashedFileContent']:
+    if (len(metadata) == 3 and 
+        metadata['filename'] and 
+        metadata['filesize'] and 
+        metadata['hashedFileContent']):
         print('Metadata format is valid.')
         return True
     print('Invalid metadata format.')

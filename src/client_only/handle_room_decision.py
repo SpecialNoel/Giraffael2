@@ -25,3 +25,4 @@ def handle_room_decision(client, chunkSize):
                 break
         msg, response = send_decision_on_room(client, chunkSize)
     print(f'In Room: [{response}].\n')
+    return
