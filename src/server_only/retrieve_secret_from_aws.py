@@ -47,7 +47,8 @@ def get_secret_cert_and_key():
 def setup_ssl_context():
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) # TLS
     certification, privateKey = get_secret_cert_and_key()
-    context.load_cert_chain(certfile=BytesIO(certification.encode()), 
-                            keyfile=BytesIO(privateKey.encode()))
+    context.load_cert_chain(certfile=None, keyfile=None, 
+                            certfile_data=certification, 
+                            keyfile_data=privateKey)
     print('SSL context on server side loaded successfully!')
     return context
