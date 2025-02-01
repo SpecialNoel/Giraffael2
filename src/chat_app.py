@@ -1,7 +1,9 @@
 # To run this script: python3 chat_app.py
 
+'''
 import sys
 assert sys.version_info >= (3, 10)
+'''
 
 from server_only.server import Server
 
