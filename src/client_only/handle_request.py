@@ -4,7 +4,7 @@ from client_only.handle_send_file_request import handle_send_file_request
 from client_only.handle_recv_file_request import handle_recv_file_request
 from general.message import send_msg_with_prefix
 
-def handle_request(msg, client, chunkSize, maxFileSize, extList):
+def handle_request_with_match(msg, client, chunkSize, maxFileSize, extList):
     lowerCasedMsg = msg.lower()
     match lowerCasedMsg:
         case 'send':
@@ -34,6 +34,37 @@ def handle_request(msg, client, chunkSize, maxFileSize, extList):
         case _:
             # Client wants to send a normal message to the room
             send_msg_with_prefix(client, msg, 1)
+    return
+
+def handle_request(msg, client, chunkSize, maxFileSize, extList):
+    lowerCasedMsg = msg.lower()
+    if lowerCasedMsg == 'send':
+        # Client wants to store a file in the room
+        handle_send_file_request(client, chunkSize, maxFileSize, extList)
+    elif lowerCasedMsg == 'recv':
+        # Client wants to download a file from the room
+        handle_recv_file_request(client)
+    elif lowerCasedMsg == 'msg history':
+        # Client wants to display all messages history of this room
+        handle_display_history_request(client, 'msg')
+    elif lowerCasedMsg == 'file history':
+        # Client wants to display all file stored in this room
+        handle_display_history_request(client, 'file')
+    elif lowerCasedMsg == 'clear msg history':
+        # Client wants to clear all messages history of this room
+        handle_clear_history_request(client, 'msg')
+    elif lowerCasedMsg == 'clear file history':
+        # Client wants to clear all file stored in this room
+        handle_clear_history_request(client, 'file')
+    elif lowerCasedMsg == 'clear all history':
+        # Client wants to clear both messages and files in this room
+        handle_clear_history_request(client, 'all')
+    elif lowerCasedMsg == 'ai suggestion':
+        # Client wants to ask OpenAI model for message suggestions
+        handle_suggestion_request(client)
+    else:
+        # Client wants to send a normal message to the room
+        send_msg_with_prefix(client, msg, 1)
     return
 
 def handle_display_history_request(client, historyToDisplay):

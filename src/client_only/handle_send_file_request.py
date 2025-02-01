@@ -56,8 +56,7 @@ def send_file_to_server(client, filepath, chunkSize, maxFileSize, extList):
     time.sleep(1)
     
     # Send the whole file to server
-    send_file(filepath, filename, client, 
-             chunkSize, 'server')
+    send_file(filepath, filename, client, chunkSize, 'server')
     
     display_rule()
     return
