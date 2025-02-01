@@ -1,6 +1,7 @@
 # retrieve_secret_from_aws.py
 
 import boto3
+import json
 import ssl
 from botocore.exceptions import ClientError
 from io import BytesIO
@@ -37,7 +38,8 @@ def get_secret_cert_and_key():
         # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
         raise e
 
-    secret = get_secret_value_response['SecretString']
+    secretJson = get_secret_value_response['SecretString']
+    secret = json.loads(secretJson)
     certification = secret['cert.pem']
     privateKey = secret['key.pem']
     return certification, privateKey
