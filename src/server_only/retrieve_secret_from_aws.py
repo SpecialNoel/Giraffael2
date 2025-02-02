@@ -42,6 +42,8 @@ def get_secret_cert_and_key():
     secret = json.loads(secretJson)
     certification = secret['cert.pem']
     privateKey = secret['key.pem']
+    print("Certificate snippet:", certification[:10])
+    print("PrivateKey snippet:", privateKey[:10])
     return certification, privateKey
     
 def setup_ssl_context():
