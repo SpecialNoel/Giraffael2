@@ -6,15 +6,18 @@ import ssl
 import tempfile
 
 def get_secret():
-    secret_name = "Secret-for-Giraffael-2"
-    region_name = "us-east-2"
-    client = boto3.client("secretsmanager", region_name)
+    secret_name = 'Secret-for-Giraffael-2'
+    region_name = 'us-east-2'
+    client = boto3.client('secretsmanager', region_name)
     response = client.get_secret_value(SecretId=secret_name)
-    return json.loads(response["SecretString"])
+    return json.loads(response['SecretString'])
 
 def get_api_key():
-    secret = get_secret()
-    return secret['openai_api_key']
+    secret_name = 'Secret-for-Giraffael-2'
+    region_name = 'us-east-2'
+    client = boto3.client('secretsmanager', region_name)
+    response = client.get_secret_value(SecretId=secret_name)
+    return response['SecretString']['openai_api_key']
 
 def get_cert_and_key():
     secret = get_secret()

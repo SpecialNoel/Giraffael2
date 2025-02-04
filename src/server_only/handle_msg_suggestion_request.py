@@ -9,16 +9,14 @@ from server_only.openai_model_settings import (maxTokensPerSuggestion,
                                                numOfSuggestions, temp)
 from server_only.retrieve_secret_from_aws import get_api_key
 
-
+'''
 # Get API key with local server
 load_dotenv() 
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
-
-
 '''
+
 # Get API key with remote server (aws ec2)
 client = OpenAI(api_key=get_api_key())
-'''
 
 def handle_msg_suggestion_request(client, pastMsgList):
     # Obtain msg suggestions (a string) from OpenAI model
