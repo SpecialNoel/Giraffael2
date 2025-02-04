@@ -23,4 +23,4 @@ def associate_elastic_ip(instanceId, elasticIpAllocationId, region='us-east-2'):
 
     print('Elastic IP associated successfully.')
     print('Association ID:', response['AssociationId'])
-    return public_ip
+    return private_ip
