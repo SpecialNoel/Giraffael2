@@ -17,8 +17,8 @@ def get_api_key():
     region_name = 'us-east-2'
     client = boto3.client('secretsmanager', region_name)
     response = client.get_secret_value(SecretId=secret_name)
-    print(response['SecretString'][:20])
-    return response['SecretString']['openai_api_key']
+    print(json.loads(response['SecretString'])['openai_api_key'][:20])
+    return ''
 
 def get_cert_and_key():
     secret = get_secret()
