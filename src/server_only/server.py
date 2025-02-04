@@ -11,7 +11,6 @@ import socket
 import string
 from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
 from server_only.accept_connection import accept_a_connection
-from server_only.associate_elastic_ip import associate_elastic_ip
 from server_only.retrieve_secret_from_aws import setup_ssl_context
 #from server_only.ssl_management import setup_ssl_context
 from threading import Thread, Event
@@ -19,10 +18,9 @@ from threading import Thread, Event
 class Server:
     def __init__(self):
         self.MAX_CLIENT_COUNT = 3
-        #self.SERVER_IP = '127.0.0.1' # host for testing
+        #self.SERVER_IP = '127.0.0.1' # host for local testing
         #self.SERVER_IP = self.get_server_ip() # host with private ip
-        # for hosting on remote server
-        #self.SERVER_IP = associate_elastic_ip('i-009fcac58742a958c', 'eipalloc-06556ea46406c6d86')
+        # for hosting remote server on aws ec2
         self.SERVER_IP = '0.0.0.0'
         self.SERVER_PORT = 5001
         

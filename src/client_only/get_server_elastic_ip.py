@@ -1,8 +1,8 @@
-# associate_elastic_ip.py
+# get_server_elastic_ip.py
 
 import boto3
 
-def associate_elastic_ip(instanceId, elasticIpAllocationId, region='us-east-2'):
+def get_elastic_ip(instanceId, elasticIpAllocationId, region):
     ec2 = boto3.client('ec2', region_name=region)
     
     # Get the current private/public IP of the instance
@@ -23,4 +23,4 @@ def associate_elastic_ip(instanceId, elasticIpAllocationId, region='us-east-2'):
 
     print('Elastic IP associated successfully.')
     print('Association ID:', response['AssociationId'])
-    return private_ip
+    return public_ip # public ip should be returned

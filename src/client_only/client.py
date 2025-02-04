@@ -8,6 +8,7 @@ Note: 'client' is essentially only a socket in client.py
 '''
 
 import socket
+from client_only.get_server_elastic_ip import get_elastic_ip
 from check_server_capacity import check_server_capacity
 from handle_room_decision import handle_room_decision
 from handle_username import handle_username
@@ -19,10 +20,12 @@ from threading import Event, Thread
 
 class Client:
     def __init__(self):
-        self.SERVER_IP = '127.0.0.1' # depending on server ip
-        self.SERVER_IP = '3.130.9.233'
+        #self.SERVER_IP = '127.0.0.1' # for server hosting locally
+        self.SERVER_IP = get_elastic_ip('i-009fcac58742a958c', 
+                                        'eipalloc-06556ea46406c6d86', 
+                                        'us-east-2')
         self.SERVER_PORT = 5001
-                
+
         self.shutdownEvent = Event() # threading.Event()
         self.ruleAboutRoomCodeSent = False
         
