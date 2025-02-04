@@ -41,8 +41,8 @@ class Server:
         self.extList = EXT_LIST
         
         # SSL
-        self.usingSSL = True
-        self.context = setup_ssl_context()
+        self.usingSSL = False
+        #self.context = setup_ssl_context()
 
     def get_server_ip(self):
         try:
