@@ -22,8 +22,8 @@ class Server:
         #self.SERVER_IP = '127.0.0.1' # host for testing
         #self.SERVER_IP = self.get_server_ip() # host with private ip
         # for hosting on remote server
-        self.SERVER_IP = associate_elastic_ip('i-009fcac58742a958c', 
-                                              'eipalloc-06556ea46406c6d86')
+        #self.SERVER_IP = associate_elastic_ip('i-009fcac58742a958c', 'eipalloc-06556ea46406c6d86')
+        self.SERVER_IP = '0.0.0.0'
         self.SERVER_PORT = 5001
         
         # Source: https://www.hivesystems.com
