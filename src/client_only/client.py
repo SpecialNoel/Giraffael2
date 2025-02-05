@@ -19,7 +19,7 @@ from threading import Event, Thread
 
 class Client:
     def __init__(self):
-        self.SERVER_IP = '127.0.0.1' # depending on server ip
+        self.SERVER_IP = '127.0.0.1' # depending on server ip 
         self.SERVER_PORT = 5001
                 
         self.shutdownEvent = Event() # threading.Event()
