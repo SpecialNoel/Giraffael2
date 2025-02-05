@@ -21,9 +21,12 @@ from threading import Event, Thread
 class Client:
     def __init__(self):
         #self.SERVER_IP = '127.0.0.1' # for server hosting locally
+        '''
         self.SERVER_IP = get_elastic_ip('i-009fcac58742a958c', 
                                         'eipalloc-06556ea46406c6d86', 
                                         'us-east-2')
+        '''
+        self.SERVER_IP = get_elastic_ip()
         self.SERVER_PORT = 5001
 
         self.shutdownEvent = Event() # threading.Event()
