@@ -1,7 +1,6 @@
 # flask_for_elastic_ip_address.py
 
 import boto3
-import os
 from flask import Flask, jsonify
 
 app = Flask(__name__)
@@ -18,7 +17,7 @@ def get_server_ip():
         elasticIp = response['Parameter']['Value']
         
         # Return the Elastic IP as a JSON response
-        return jsonify({"Elastic ip": elasticIp}), 200
+        return jsonify({"ElasticIp": elasticIp}), 200
     except Exception as e:
         return jsonify({"Error": str(e)}), 500
 
