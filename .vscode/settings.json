@@ -3,6 +3,7 @@
         "DGRAM",
         "eipalloc",
         "gethostname",
+        "jsonify",
         "keyout",
         "newkey",
         "openpyxl",
