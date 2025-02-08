@@ -20,8 +20,7 @@ class Server:
         self.MAX_CLIENT_COUNT = 3
         #self.SERVER_IP = '127.0.0.1' # host for local testing
         #self.SERVER_IP = self.get_server_ip() # host with private ip
-        # for hosting remote server on aws ec2
-        self.SERVER_IP = '0.0.0.0'
+        self.SERVER_IP = '0.0.0.0' # host remote server on aws ec2
         self.SERVER_PORT = 5001
         
         # Source: https://www.hivesystems.com
