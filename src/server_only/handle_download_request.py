@@ -11,7 +11,7 @@ from general.file_transmission import (check_if_filesize_is_valid,
                                       check_if_filename_has_valid_extension)
 from general.message import send_msg_with_prefix
 
-def handle_download_request(client, address, roomCode, msgContent, 
+def handle_download_request(client, address, room, roomCode, msgContent, 
                             chunkSize, maxFileSize, extList):
     # Received file-download request
     print(f'client [{address}] is downloading a file.\n')
@@ -23,7 +23,7 @@ def handle_download_request(client, address, roomCode, msgContent,
     send_msg_with_prefix(client, clientDir, 2)
 
     # Try finding the requested file on server
-    directory = 'rooms' + os.sep + roomCode
+    directory = room.get_fullpath()
     print(f'Searching requested file in directory: [{directory}].')
     filepath = find_file_in_directory(filename, roomCode, directory)
 

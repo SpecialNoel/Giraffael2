@@ -25,7 +25,7 @@ def handle_request_with_match(prefix, client, username, msgContent, clients,
                                   chunkSize, maxFileSize, extList)
         case 3: 
             # Received file-download request
-            handle_download_request(client, address, roomCode,
+            handle_download_request(client, address, room, roomCode,
                                     msgContent, chunkSize, 
                                     maxFileSize, extList)
         case 4: 
@@ -59,7 +59,7 @@ def handle_request(prefix, client, username, msgContent, clients,
                                 chunkSize, maxFileSize, extList)
     elif prefix == 3: 
         # Received file-download request
-        handle_download_request(client, address, roomCode,
+        handle_download_request(client, address, room, roomCode,
                                 msgContent, chunkSize, 
                                 maxFileSize, extList)
     elif prefix == 4: 

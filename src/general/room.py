@@ -1,6 +1,7 @@
 # room.py
 
 import os
+from pathlib import Path
 import shutil
 
 class Room:
@@ -11,6 +12,9 @@ class Room:
         self.__messageList = [] # used to display msg list to client only
         self.__messageListForServer = [] # used by server
         self.__storedFiles = []
+        
+        self.__folderName = str(self.__roomCode)
+        self.__fullpath = self.get_fullpath_to_rooms()
     
     def get_room_code(self):
         return self.__roomCode
@@ -29,6 +33,12 @@ class Room:
     
     def get_stored_files(self):
         return self.__storedFiles
+    
+    def get_folderName(self):
+        return self.__folderName
+    
+    def get_fullpath(self):
+        return self.__fullpath
         
     def set_room_name(self, roomName):
         self.__roomName = roomName
@@ -45,6 +55,19 @@ class Room:
     def add_files_to_stored_files(self, filename):
         self.__storedFiles.append(filename)
         
+    def get_fullpath_to_rooms(self):
+        pathToParent = os.path.abspath('.')
+        print(f'pathToParent: ', pathToParent)
+        parentFolderName = Path(pathToParent).resolve().name
+        if parentFolderName != 'src':
+            pathToRooms = os.path.join(pathToParent, 'src' + os.sep + 'rooms')
+        else:
+            pathToRooms = os.path.join(pathToParent, 'rooms')
+        print(f'pathToRooms: ', pathToRooms)
+        fullpath = os.path.join(pathToRooms, self.__folderName)
+        print(f'fullpath: ', fullpath)
+        return fullpath
+        
     def remove_client_from_client_list(self, address):
         for clientObj in self.__clientList:
             if clientObj.get_address() == address:
@@ -53,33 +76,31 @@ class Room:
 
     def create_file_storing_folder(self):
         try: 
-            folder_name = str(self.__roomCode)
-            fullpath = '.' + os.sep + 'rooms' + os.sep + folder_name
-            os.makedirs(fullpath, exist_ok=True)
-            print(f'Folder [{fullpath}] created successfully.')
+            os.makedirs(self.__fullpath, exist_ok=True)
+            print(f'Folder [{self.__fullpath}] created successfully.')
+        except FileNotFoundError:
+            print('Error creating file-storing folder for room',
+                  f'[{self.__roomCode}].')
+            print(f"Parent directory for '{self.__fullpath}' not found.")
         except Exception as e:
             print('Error creating file-storing folder for room',
                   f'[{self.__roomCode}].')
 
     def delete_file_storing_folder(self):
-        folder_name = str(self.__roomCode)
-        fullpath = '.' + os.sep + 'rooms' + os.sep + folder_name
-
         # Remove the folder and its contents
         try:
-            shutil.rmtree(fullpath)
-            print(f'Folder [{fullpath}] and its contents deleted successfully.')
+            shutil.rmtree(self.__fullpath)
+            print(f'Folder [{self.__fullpath}] and its contents deleted successfully.')
         except FileNotFoundError:
-            print(f'Folder [{fullpath}] does not exist.')
+            print('Error deleting file-storing folder for room',
+                  f'[{self.__roomCode}].')
+            print(f'Folder [{self.__fullpath}] does not exist.')
         except Exception as e:
-            print(f'Error deleting folder [{fullpath}]: [{e}].')
+            print(f'Error deleting folder [{self.__fullpath}]: [{e}].')
             
     def delete_all_files_in_file_storing_folder(self):
-        folder_name = str(self.__roomCode)
-        fullpath = '.' + os.sep + 'rooms' + os.sep + folder_name
-        
-        for filename in os.listdir(fullpath):
-            file_path = os.path.join(fullpath, filename)
+        for filename in os.listdir(self.__fullpath):
+            file_path = os.path.join(self.__fullpath, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
             elif os.path.isdir(file_path):
