@@ -10,7 +10,7 @@ class Room:
         self.__clientList = []  # each element is a client_obj
         self.__messageList = [] # used to display msg list to client only
         self.__messageListForServer = [] # used by server
-        self.__storedFiles = []
+        self.__storedFiles = [] 
     
     def get_room_code(self):
         return self.__roomCode
