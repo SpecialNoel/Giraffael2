@@ -5,7 +5,8 @@ from server_only.handle_request import handle_request
 from server_only.remove_client import handle_disconnect_request
 
 def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
-                      rooms, roomCodes, maxClientCount, maxFileSize, extList):
+                      rooms, roomCodes, maxClientCount, maxFileSize, extList,
+                      usingOpenAI):
     client = clientObj.get_socket()
     username = clientObj.get_username()
     address = clientObj.get_address()
@@ -31,7 +32,7 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
             
             handle_request(prefix, client, username, msgContent, clients, 
                            room, roomCode, address, chunkSize, maxFileSize, 
-                           extList, typePrefix)
+                           extList, typePrefix, usingOpenAI)
         except (BrokenPipeError, 
                 ConnectionResetError, 
                 ConnectionAbortedError) as e:

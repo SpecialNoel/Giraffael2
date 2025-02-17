@@ -9,20 +9,24 @@ from server_only.openai_model_settings import (maxTokensPerSuggestion,
                                                numOfSuggestions, temp)
 from server_only.retrieve_secret_from_aws import get_api_key
 
-'''
-# Get API key with local server
-load_dotenv() 
-client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
-'''
+serverIsLocal = True
+if serverIsLocal:
+    # Get API key with local server
+    load_dotenv() 
+    client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+else:
+    # Get API key with remote server (aws ec2)
+    client = OpenAI(api_key=get_api_key())
 
-# Get API key with remote server (aws ec2)
-client = OpenAI(api_key=get_api_key())
-
-def handle_msg_suggestion_request(client, pastMsgList):
-    # Obtain msg suggestions (a string) from OpenAI model
-    response = get_msg_suggestion_from_model(pastMsgList)
-    # Send the suggestions to client
-    send_msg_with_prefix(client, response, 6)
+def handle_msg_suggestion_request(client, pastMsgList, usingOpenAI):
+    if usingOpenAI:
+        # Obtain msg suggestions (a string) from OpenAI model
+        response = get_msg_suggestion_from_model(pastMsgList)
+        send_msg_with_prefix(client, response, 6)
+        # Send the suggestions to client
+    else:
+        response = 'Open AI is not enabled by server.'
+        send_msg_with_prefix(client, response, 1)
     return
 
 def get_msg_suggestion_from_model(pastMsgList):
