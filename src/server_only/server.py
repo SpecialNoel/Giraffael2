@@ -16,7 +16,7 @@ from threading import Thread, Event
 class Server:
     def __init__(self):
         # Run Local or Remote server
-        self.usingLocalServer = True
+        self.usingLocalServer = False
         self.usingRemoteServer = not self.usingLocalServer
         # OpenAI
         self.usingOpenAI = True

@@ -9,7 +9,7 @@ from server_only.openai_model_settings import (maxTokensPerSuggestion,
                                                numOfSuggestions, temp)
 from server_only.retrieve_secret_from_aws import get_api_key
 
-serverIsLocal = True
+serverIsLocal = False
 if serverIsLocal:
     # Get API key with local server
     load_dotenv() 

@@ -21,7 +21,7 @@ from threading import Event, Thread
 class Client:
     def __init__(self):
         # Run Local or Remote server
-        self.serverIsLocal = True
+        self.serverIsLocal = False
         self.serverIsRemote = not self.serverIsLocal
         # TLS
         self.usingTLS = False
