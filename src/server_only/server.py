@@ -20,7 +20,7 @@ class Server:
         self.MAX_CLIENT_COUNT = 3
         self.SERVER_IP = '127.0.0.1' # host for testing
         #self.SERVER_IP = self.get_server_ip() # host with private ip
-        self.SERVER_PORT = 5001
+        self.SERVER_PORT = 5001 
         
         # Source: https://www.hivesystems.com
         self.ROOM_CODE_LENGTH = 11 # takes about 618k years to crack as of 2024
