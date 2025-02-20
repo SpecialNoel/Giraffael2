@@ -1,6 +1,6 @@
 # tls_management.py
 
-# Note: this file is only appliable for testing locally.
+# Note: this file is only applicable for testing locally.
 #       To support TLS with remote server, 
 #         use setup_tls_context() in retrieve_secret_from_aws.py
 

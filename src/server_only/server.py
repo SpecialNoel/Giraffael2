@@ -62,7 +62,7 @@ class Server:
                 return '127.0.0.1'
     
         if self.usingLocalServer:
-            # host with private ip for testing within same LAN
+            # host with private ip for testing locally
             return get_server_private_ip()
         elif self.usingRemoteServer:
             # host remote server on aws ec2
