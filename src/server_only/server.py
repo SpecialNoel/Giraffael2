@@ -17,7 +17,7 @@ from threading import Thread, Event
 
 class Server:
     def __init__(self):
-        self.MAX_CLIENT_COUNT = 3
+        self.MAX_CLIENT_COUNT = 3 
         self.SERVER_IP = '127.0.0.1' # host for testing
         #self.SERVER_IP = self.get_server_ip() # host with private ip
         self.SERVER_PORT = 5001 
