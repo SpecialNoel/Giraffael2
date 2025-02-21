@@ -8,8 +8,8 @@ from general.message import send_msg_with_prefix
 from server_only.openai_model_settings import (maxTokensPerSuggestion, 
                                                numOfSuggestions, temp)
 from server_only.retrieve_secret_from_aws import get_api_key
+from server_only.settings import serverIsLocal
 
-serverIsLocal = False
 if serverIsLocal:
     # Get API key with local server
     load_dotenv() 

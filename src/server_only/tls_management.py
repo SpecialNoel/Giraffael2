@@ -19,7 +19,7 @@ openssl command to create a ssl certificate and private key:
 import os
 import ssl
 
-def setup_tls_context():
+def setup_tls_context_locally():
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) # TLS
     pathToCert = find_file_from_root_dir('cert.pem')
     pathToKey = find_file_from_root_dir('key.pem')

@@ -20,10 +20,10 @@ serverIsLocal = False
 #                  suggestion.
 # If set to True:  server will be using OpenAI for generating message 
 #                  suggestion, upon client request.
-usingOpenAI = False
+usingOpenAI = True
 
 # If set to False: both server and client will not be using TLS on the socket 
 #                  to provide encryption of transmitted data.  
 # If set to True:  both server and client will be using TLS on the socket to 
 #                  provide encryption of transmitted data.
-usingTLS = False
+usingTLS = True

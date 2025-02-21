@@ -4,6 +4,7 @@ import boto3
 import json
 import ssl
 import tempfile
+from server_only.settings import serverIsLocal
 
 def get_secret():
     secret_name = 'Secret-for-Giraffael-2'
@@ -20,7 +21,10 @@ def get_cert_and_key():
     secret = get_secret()
     return secret['cert.pem'], secret['key.pem']
     
-def setup_tls_context():
+def setup_tls_context_remote():
+    if serverIsLocal:
+        return None
+    
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) # TLS
     certificate, privateKey = get_cert_and_key()
     

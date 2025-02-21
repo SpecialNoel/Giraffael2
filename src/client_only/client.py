@@ -16,15 +16,16 @@ from recv_from_server import recv_msg_from_server
 from send_to_server import send_msg_to_server
 from tls_management import setup_tls_context
 from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
+from server_only.settings import serverIsLocal, usingTLS
 from threading import Event, Thread
 
 class Client:
     def __init__(self):
         # Run Local or Remote server
-        self.serverIsLocal = False
+        self.serverIsLocal = serverIsLocal
         self.serverIsRemote = not self.serverIsLocal
         # TLS
-        self.usingTLS = False
+        self.usingTLS = usingTLS
         self.context = setup_tls_context() if self.usingTLS else None
 
         # Parameters of client
@@ -56,7 +57,7 @@ class Client:
             self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Connect to the server socket with [IP, Port number] combination
             self.client.connect((self.SERVER_IP, self.SERVER_PORT)) 
-            if self.usingTLS:
+            if self.usingTLS and self.context != None:
                 tls_client = self.context.wrap_socket(self.client, server_hostname=self.SERVER_IP)
                 print(f'Connected securely to {self.SERVER_IP} with protocol:',
                       f'{tls_client.version()}.')

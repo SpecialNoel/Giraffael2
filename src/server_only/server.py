@@ -10,19 +10,23 @@ import socket
 import string
 from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
 from server_only.accept_connection import accept_a_connection
-from server_only.retrieve_secret_from_aws import setup_tls_context
+from server_only.retrieve_secret_from_aws import setup_tls_context_remote
+from server_only.tls_management import setup_tls_context_locally
+from server_only.settings import serverIsLocal, usingOpenAI, usingTLS
 from threading import Thread, Event
 
 class Server:
     def __init__(self):
         # Run Local or Remote server
-        self.usingLocalServer = False
+        self.usingLocalServer = serverIsLocal
         self.usingRemoteServer = not self.usingLocalServer
         # OpenAI
-        self.usingOpenAI = True
+        self.usingOpenAI = usingOpenAI
         # TLS
-        self.usingTLS = False
-        self.context = setup_tls_context() if self.usingTLS else None
+        self.usingTLS = usingTLS
+        self.context = None
+        if self.usingTLS:
+            self.context = setup_tls_context_locally() if self.usingLocalServer else setup_tls_context_remote()
         
         # Parameters of server
         self.SERVER_IP = self.get_server_ip_based_on_mode()
@@ -110,6 +114,13 @@ class Server:
         return
         
     def run_server(self): 
+        def print_server_parameters():
+            print('Server parameters:',
+                  f'- Server is hosted locally: {self.serverIsLocal}',
+                  f'- Server is using OpenAI:   {self.usingOpenAI}',
+                  f'- Server is using TLS:      {self.usingTLS}')
+            return 
+        
         def run_server_loop(server):
             # Server should be always-on
             while True:
@@ -144,11 +155,12 @@ class Server:
             return
         
         # Set up server socket     
-        self.init_server()  
+        self.init_server() 
+        print_server_parameters()
         # Start listening for connection from clients
         self.start_listening()
         # Run server with or without TLS
-        if self.usingTLS:
+        if self.usingTLS and self.context != None:
             with self.context.wrap_socket(self.server, server_side=True) as tls_server:
                 run_server_loop(tls_server)
         else:
