@@ -31,8 +31,13 @@ def setup_tls_context_remote():
     with (tempfile.NamedTemporaryFile(delete=True) as cert_file, 
           tempfile.NamedTemporaryFile(delete=True) as key_file):
         # Write certificate and key to the temporary files
+        certificate = certificate.replace('-----BEGIN CERTIFICATE----- ', '-----BEGIN CERTIFICATE----- \n')
+        certificate = certificate.replace('-----END CERTIFICATE-----', '\n-----END CERTIFICATE-----')
         cert_file.write(certificate.encode())
         cert_file.flush()
+        
+        privateKey = privateKey.replace('-----BEGIN PRIVATE KEY----- ', '-----BEGIN PRIVATE KEY----- \n')
+        privateKey = privateKey.replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----')
         key_file.write(privateKey.encode())
         key_file.flush()
 

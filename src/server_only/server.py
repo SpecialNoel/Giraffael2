@@ -115,10 +115,10 @@ class Server:
         
     def run_server(self): 
         def print_server_parameters():
-            print('Server parameters:',
-                  f'- Server is hosted locally: {self.serverIsLocal}',
-                  f'- Server is using OpenAI:   {self.usingOpenAI}',
-                  f'- Server is using TLS:      {self.usingTLS}')
+            print('Server parameters:\n',
+                  f'- Server is hosted locally: {self.usingLocalServer}\n',
+                  f'- Server is using OpenAI:   {self.usingOpenAI}\n',
+                  f'- Server is using TLS:      {self.usingTLS}\n')
             return 
         
         def run_server_loop(server):
