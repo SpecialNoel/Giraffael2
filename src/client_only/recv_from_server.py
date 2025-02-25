@@ -105,6 +105,10 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
                 shutdownEvent.set()
                 break
             
+            if msg.data.startswith(b'\x02'):
+                print('Server has sent a HEATBEAT message with header: \x02.')
+                continue
+            
             typePrefix, msgContent = get_prefix_and_content(msg)
             prefix = int.from_bytes(typePrefix, byteorder='big')
 
