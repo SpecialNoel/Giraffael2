@@ -105,7 +105,7 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
                 shutdownEvent.set()
                 break
             
-            if msg.data.startswith(b'\x02'):
+            if msg.startswith(b'\x02'):
                 print('Server has sent a HEATBEAT message with header: \x02.')
                 continue
             
