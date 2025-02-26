@@ -95,7 +95,7 @@ def handle_recv_request(prefix, typePrefix, msgContent, client,
 def recv_msg_from_server(client, shutdownEvent, chunkSize, 
                          maxFileSize, extList):
     # Receive message from server
-    while not shutdownEvent.is_set():
+    while not shutdownEvent.is_set(): 
         try:
             msg = client.recv(chunkSize) # 1025 bytes
             
