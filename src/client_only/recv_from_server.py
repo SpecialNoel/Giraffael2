@@ -100,7 +100,7 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
             msg = client.recv(chunkSize) # 1025 bytes
             
             # Empty message received -> server closed connection
-            if not msg: 
+            if not msg:  
                 print('Server has closed the connection.')
                 shutdownEvent.set()
                 break
