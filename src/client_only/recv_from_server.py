@@ -112,7 +112,7 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
                                 chunkSize, maxFileSize, extList)
         except Exception as e:
             print(f'Error [{e}] occurred when receiving message.')
-            break
+            break 
     client.close() # will be detected by server's 'recv()'
     print('Client receiver thread stopped.')
     return
