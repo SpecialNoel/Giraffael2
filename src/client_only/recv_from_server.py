@@ -103,7 +103,7 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
             if not msg:  
                 print('Server has closed the connection.')
                 shutdownEvent.set()
-                break
+                break 
             
             typePrefix, msgContent = get_prefix_and_content(msg)
             prefix = int.from_bytes(typePrefix, byteorder='big')
