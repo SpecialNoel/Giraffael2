@@ -59,7 +59,7 @@ def handle_recv_request(prefix, typePrefix, msgContent, client,
     if prefix == 0: 
         # operation message
         print()
-    elif prefix == 1:  
+    elif prefix == 1: 
         # normal message
         msgContent = rstrip_message(msgContent)
         print(msgContent.decode() + '\n')
