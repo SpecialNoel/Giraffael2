@@ -38,7 +38,7 @@ def handle_request_with_match(msg, client, chunkSize, maxFileSize, extList):
     return
 '''
 
-def handle_request(msg, client, chunkSize, maxFileSize, extList):
+def handle_request(msg, client, chunkSize, maxFileSize, extList): 
     lowerCasedMsg = msg.lower()
     if lowerCasedMsg == 'send':
         # Client wants to store a file in the room
