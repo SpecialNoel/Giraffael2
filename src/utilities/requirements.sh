@@ -9,3 +9,5 @@ pip install reportlab  # for create_pdf.py
 pip install openai     # for generate_msg_suggestion.py
 pip install python-dotenv
 pip install boto3
+pip install pycryptodome cryptography
+pip install Crypto

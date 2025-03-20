@@ -1,10 +1,13 @@
 {
     "cSpell.words": [
         "DGRAM",
+        "ECDH",
         "eipalloc",
         "gethostname",
+        "hkdf",
         "jsonify",
         "keyout",
+        "keypair",
         "newkey",
         "openpyxl",
         "reportlab",
