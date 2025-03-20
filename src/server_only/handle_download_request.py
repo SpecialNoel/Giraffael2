@@ -1,6 +1,5 @@
 # handle_download_request.py
 
-import os
 import time
 from general.file_transmission import (check_if_filesize_is_valid,
                                       create_metadata,

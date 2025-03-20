@@ -1,7 +1,6 @@
 # handle_upload_request.py
 
 import json
-import os
 from general.file_transmission import (check_if_filesize_is_valid,
                                       check_metadata_format,
                                       recv_file, split_metadata,
