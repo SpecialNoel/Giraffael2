@@ -10,7 +10,7 @@ Functions here are used to argument messages transmitted
 ************************************************
 '''
 
-def rstrip_message(msg):
+def rstrip_message(msg): 
     '''
     Used for removing the new line character at the end of the message.
 
