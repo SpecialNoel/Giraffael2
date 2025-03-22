@@ -17,7 +17,7 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
     msg = client.recv(chunkSize)
     prefix, metadataBytes = get_prefix_and_content(msg)
     
-    # Obtain metadata
+    # Obtain metadata 
     metadata_json = metadataBytes.decode()
     metadata = json.loads(metadata_json)
     print(f'Metadata: [{metadata}].')
