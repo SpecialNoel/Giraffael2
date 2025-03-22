@@ -22,7 +22,7 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
     metadata = json.loads(metadata_json)
     print(f'Metadata: [{metadata}].')
     if not check_metadata_format(metadata):
-        return
+        return 
     
     # Split the metadata of the file received from client
     filename, filesize, hashedFileContent = split_metadata(metadataBytes)
