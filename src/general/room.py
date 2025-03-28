@@ -19,7 +19,7 @@ class Room:
         return self.__roomName
     
     def get_client_list(self): 
-        return self.__clientList 
+        return self.__clientList
     
     def get_message_list(self):
         return self.__messageList
