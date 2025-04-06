@@ -27,7 +27,7 @@ class Room:
     def get_message_list_for_server(self):
         return self.__messageListForServer
     
-    def get_stored_files(self):
+    def get_stored_files(self): 
         return self.__storedFiles
         
     def set_room_name(self, roomName):
