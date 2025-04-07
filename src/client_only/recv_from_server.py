@@ -13,7 +13,7 @@ from general.message import (get_prefix_and_content, rstrip_message,
                              recv_decoded_content)
 
 def handle_recv_request(prefix, typePrefix, msgContent, client, 
-                        chunkSize, maxFileSize, extList):
+                        chunkSize, maxFileSize, extList):    
     if prefix == 0: 
         # operation message
         print()
@@ -25,6 +25,12 @@ def handle_recv_request(prefix, typePrefix, msgContent, client,
         # file-download request initiated by client
         print(f'type prefix: [{typePrefix}]')
         print(f'msgContent: [{msgContent}]')
+        
+        # filepath here should be received from server.
+        # Though filepath is originally sent from client to server,
+        #   since it is sent from the sender thread of the client,
+        #   the receiver thread of the client (this thread) does not know filepath.
+        # Thus, this thread needs the server to relay filepath to it.
         filepath = rstrip_message(msgContent).decode()
         print(f'filepath: [{filepath}]')
         recv_file_from_server(client, filepath, chunkSize, maxFileSize, extList)
@@ -69,6 +75,10 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
             
             typePrefix, msgContent = get_prefix_and_content(msg)
             prefix = int.from_bytes(typePrefix, byteorder='big')
+            
+            print(f'typePrefix: {typePrefix}')
+            print(f'prefix: {prefix}')
+            print(f'msgContent: {msgContent}')
 
             handle_recv_request(prefix, typePrefix, msgContent, client, 
                                 chunkSize, maxFileSize, extList)

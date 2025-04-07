@@ -42,7 +42,7 @@ class Client:
     
     def get_server_ip_based_on_mode(self):        
         if self.serverIsLocal:
-            return '10.0.0.197' # for local machine
+            return '10.0.0.88' # for local machine
         elif self.serverIsRemote:
             return get_server_elastic_ip() # for remote server 
         else:

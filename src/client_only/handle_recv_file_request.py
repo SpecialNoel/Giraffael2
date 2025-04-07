@@ -7,24 +7,24 @@ def handle_recv_file_request(client):
     directory = get_client_directory()
     if directory == None:
         return
-    
-    # Validate the directory    
     directory = validate_client_directory(directory)
     if directory == None:
         return
+    print(f'Directory [{directory}] is valid.')
     
     # Step2: prompt client which file to receive/download
     filename = get_client_filename()
     if filename == None:
         return
-     
     filename = validate_client_filename(filename)
     if filename == None:
         return
+    print(f'Filename [{filename}] is valid.')
     
     # Step3: start receiving metadata and file chunks if file exists on server
     # Inform server that this client wants to receive a file
     send_directory_and_filename(client, directory, filename)
+    print('Download request sent.')
     return
 
 def get_client_directory():

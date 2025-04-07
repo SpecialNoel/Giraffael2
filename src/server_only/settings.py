@@ -14,7 +14,7 @@
 # If set to False: server will be hosted with the local machine's private IP.
 # If set to True:  server will be hosted remotely on AWS ec2 instance, with
 #                  the elastic IP assigned to that instance.
-serverIsLocal = False
+serverIsLocal = True
 
 # If set to False: server will not be using OpenAI to generate message 
 #                  suggestion.

@@ -17,9 +17,10 @@ def handle_download_request(client, address, room, roomCode, msgContent,
 
     clientDir, filename = get_directory_and_filename(msgContent)
     print(f'clientFilepath: [{clientDir}]')
+    print(f'filename: [{filename}]')
 
     # Inform the client to get ready to receive server response
-    send_msg_with_prefix(client, clientDir, 2)
+    send_msg_with_prefix(client, clientDir, 2) # ----------------------------- Client does not receive this
     print('Sent clientFilepath to client.')
 
     # Try finding the requested file on server
@@ -37,7 +38,7 @@ def handle_download_request(client, address, room, roomCode, msgContent,
         # Filename exists in directory
         print(f'File found in [{directory}].')
         # Inform client about this
-        send_msg_with_prefix(client, 'file_exists', 0)
+        send_msg_with_prefix(client, 'file_exists', 0) # ------------------------ Client has received this
         print('Sent response on finding the requested file to client.')
         
         # Wait for 1 second before sending the metadata of the file
@@ -61,12 +62,14 @@ def send_file_to_client(client, address, filepath, chunkSize, maxFileSize, extLi
     if not check_if_filesize_is_valid(filesize, maxFileSize):
         print('Stopped sending file.\n')
         return
+    print('Filesize is valid.')
     
     # Stop sending file if file extension is not in extList
     extension = get_extension_from_filename(filename)
     if not check_if_filename_has_valid_extension(extension, extList):
         print('Stopped sending file.')
-        return 
+        return
+    print('File extension is valid.')
     
     # Wait for 1 second before sending the whole file
     # This is needed to solve problem where client receives both 
