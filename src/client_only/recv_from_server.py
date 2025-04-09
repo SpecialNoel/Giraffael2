@@ -6,7 +6,7 @@ from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1]
 sys.path.append(str(src_folder))
   
-import pickle
+import pickle 
 from client_only.handle_msg_suggestion import handle_msg_suggestion
 from general.file_transmission import *
 from general.message import (get_prefix_and_content, rstrip_message, 
