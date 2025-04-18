@@ -52,7 +52,7 @@ def handle_recv_request_with_match(prefix, typePrefix, msgContent, client,
         case _: # invalid prefix
             print(f'Received invalid prefix: [{typePrefix}].')
     return
-''' 
+'''  
 
 def handle_recv_request(prefix, typePrefix, msgContent, client, 
                         chunkSize, maxFileSize, extList):
