@@ -38,7 +38,7 @@ def handle_download_request(client, address, room, roomCode, msgContent,
         # Filename exists in directory
         print(f'File found in [{directory}].')
         # Inform client about this
-        send_msg_with_prefix(client, 'file_exists', 0) # ------------------------ Client has received this
+        send_msg_with_prefix(client, 'file_exists', 0)
         print('Sent response on finding the requested file to client.')
         
         # Wait for 1 second before sending the metadata of the file

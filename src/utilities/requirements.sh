@@ -11,3 +11,4 @@ pip install python-dotenv # for OpenAI API key
 pip install boto3      # for accessing AWS Secret Manager
 pip install pycryptodome cryptography # for E2EE
 pip install Crypto     # for E2EE
+pip install pymongo    # for MongoDB
