@@ -69,8 +69,8 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
                 shutdownEvent.set()
                 break
             
-            if msg.startswith(b'\x02'):
-                #print('Server has sent a HEARTBEAT message with header: \x02.')
+            if msg == (b'\x03\x02\x01\x00HEART'):
+                print('Server has sent a HEARTBEAT message with header: \x03\x02\x01\x00HEART.')
                 continue
             
             typePrefix, msgContent = get_prefix_and_content(msg)

@@ -20,7 +20,7 @@ def handle_download_request(client, address, room, roomCode, msgContent,
     print(f'filename: [{filename}]')
 
     # Inform the client to get ready to receive server response
-    send_msg_with_prefix(client, clientDir, 2) # ----------------------------- Client does not receive this
+    send_msg_with_prefix(client, clientDir, 2)
     print('Sent clientFilepath to client.')
 
     # Try finding the requested file on server
