@@ -7,7 +7,7 @@ class Client_Obj:
         self.__username = username
         self.__roomCode = roomCode
         
-    def get_socket(self):
+    def get_socket(self): 
         return self.__socket
     
     def get_address(self):
