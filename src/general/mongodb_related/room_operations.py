@@ -27,7 +27,7 @@ def create_room(roomCode, roomName='NewRoom'):
     }
     roomInsertedID = rooms_collection.insert_one(room_data).inserted_id
     print(f'Created room in DB with roomCode [{roomCode}]. ' +
-          f'Room Insert ID is [{roomInsertedID}].\n')
+          f'Room Insert ID is [{roomInsertedID}].')
     return
     
 # Delete a room in the DB (based on roomCode)
@@ -35,3 +35,8 @@ def delete_room(roomCode):
     rooms_collection.delete_one({"roomCode": roomCode})
     print(f'Deleted room with roomCode [{roomCode}].')
     return
+
+if __name__=='__main__':  
+    roomCode = 'f9wa8rq9fqvg0qj'
+    create_room(roomCode)
+    

@@ -5,6 +5,7 @@
         "ECDH",
         "eipalloc",
         "fghwo",
+        "fqvg",
         "gethostname",
         "gridfs",
         "hkdf",
@@ -18,6 +19,7 @@
         "openpyxl",
         "qdrfy",
         "reportlab",
+        "savedir",
         "savepath",
         "Unso",
         "uppered"
