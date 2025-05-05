@@ -12,7 +12,7 @@ Functions here are used by clients or server to transfer
   different kinds of files (.jpg, .pdf, .txt, .csv, etc.).
 '''
 
-CHUNK_SIZE = 1025
+CHUNK_SIZE = 1025 
 MAX_FILE_SIZE = 104857600 # in bytes; which is equivalent to 100MB
 EXT_LIST = ['.txt',  '.md',   '.json', '.xml', '.csv',
            '.docx', '.xlsx', '.pdf',  '.py',  '.html',
