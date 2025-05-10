@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1]
 sys.path.append(str(src_folder))
-
-import pickle
+  
+import pickle 
 from client_only.handle_msg_suggestion import handle_msg_suggestion
 from general.file_transmission import *
 from general.message import (get_prefix_and_content, rstrip_message, 
@@ -59,7 +59,7 @@ def handle_recv_request(prefix, typePrefix, msgContent, client,
 def recv_msg_from_server(client, shutdownEvent, chunkSize, 
                          maxFileSize, extList):
     # Receive message from server
-    while not shutdownEvent.is_set():
+    while not shutdownEvent.is_set(): 
         try:
             msg = client.recv(chunkSize) # 1025 bytes
             
@@ -67,7 +67,7 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
             if not msg:
                 print('Server has closed the connection.')
                 shutdownEvent.set()
-                break
+                break 
             
             if msg == (b'\x03\x02\x01\x00HEART'):
                 print('Server has sent a HEARTBEAT message with header: \x03\x02\x01\x00HEART.')
@@ -84,7 +84,7 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
                                 chunkSize, maxFileSize, extList)
         except Exception as e:
             print(f'Error [{e}] occurred when receiving message.')
-            break
+            break 
     client.close() # will be detected by server's 'recv()'
     print('Client receiver thread stopped.')
     return

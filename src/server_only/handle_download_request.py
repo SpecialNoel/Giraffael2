@@ -30,7 +30,7 @@ def handle_download_request(client, address, room, roomCode, msgContent,
 
     if filepath == None:
         # Filename does not exist in directory
-        print(f'File not found in [{directory}].')
+        print(f'File not found in [{directory}].') 
         # Inform client about this
         send_msg_with_prefix(client, 'file_not_found', 0)
         print('Sent response on finding the requested file to client.')

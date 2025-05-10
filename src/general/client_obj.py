@@ -12,7 +12,7 @@ class Client_Obj:
     def get_uuid(self):
         return self.__uuid
         
-    def get_socket(self):
+    def get_socket(self): 
         return self.__socket
     
     def get_address(self):

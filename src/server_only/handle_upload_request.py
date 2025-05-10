@@ -16,12 +16,12 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
     msg = client.recv(chunkSize)
     prefix, metadataBytes = get_prefix_and_content(msg)
     
-    # Obtain metadata
-    metadata_json = metadataBytes.decode()
+    # Obtain metadata 
+    metadata_json = metadataBytes.decode() 
     metadata = json.loads(metadata_json)
     print(f'Metadata: [{metadata}].')
     if not check_metadata_format(metadata):
-        return
+        return 
     
     # Split the metadata of the file received from client
     filename, filesize, hashedFileContent = split_metadata(metadataBytes)

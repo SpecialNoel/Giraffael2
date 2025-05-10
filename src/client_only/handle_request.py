@@ -4,9 +4,9 @@ from client_only.handle_send_file_request import handle_send_file_request
 from client_only.handle_recv_file_request import handle_recv_file_request
 from general.message import send_msg_with_prefix
 
-def handle_request(msg, client, chunkSize, maxFileSize, extList):
+def handle_request(msg, client, chunkSize, maxFileSize, extList): 
     lowerCasedMsg = msg.lower()
-    if lowerCasedMsg == 'send':
+    if lowerCasedMsg == 'send': 
         # Client wants to store a file in the room
         handle_send_file_request(client, chunkSize, maxFileSize, extList)
     elif lowerCasedMsg == 'recv':

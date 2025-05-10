@@ -15,7 +15,7 @@ def get_secret():
 
 def get_api_key(): # OpenAI
     secret = get_secret()
-    return secret['openai_api_key']
+    return secret['openai_api_key'] 
 
 def get_cert_and_key(): 
     secret = get_secret()
@@ -47,3 +47,4 @@ def setup_tls_context_remote():
     
     print('TLS context on server side loaded successfully!')
     return context
+ 
