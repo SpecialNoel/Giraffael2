@@ -1,11 +1,27 @@
 {
     "cSpell.words": [
+        "bson",
         "DGRAM",
+        "ECDH",
+        "eipalloc",
+        "fghwo",
+        "fqvg",
         "gethostname",
+        "gridfs",
+        "hkdf",
+        "jianminglin",
+        "jsonify",
+        "juge",
         "keyout",
+        "keypair",
+        "Metadatas",
         "newkey",
         "openpyxl",
+        "qdrfy",
         "reportlab",
+        "savedir",
+        "savepath",
+        "Unso",
         "uppered"
     ]
 }

@@ -1,11 +1,16 @@
 # client_obj.py
+import uuid
 
 class Client_Obj:
     def __init__(self, socket, address, username, roomCode):
-        self.__socket = socket # Unmodifiable, unique
-        self.__address = address # Unmodifiable, unique
-        self.__username = username
-        self.__roomCode = roomCode
+        self.__uuid = uuid.uuid4() # unmodifiable, unique
+        self.__socket = socket     # unmodifiable, unique
+        self.__address = address   # unmodifiable, unique
+        self.__username = username # duplicate-able
+        self.__roomCode = roomCode # unique
+
+    def get_uuid(self):
+        return self.__uuid
         
     def get_socket(self): 
         return self.__socket
@@ -24,3 +29,14 @@ class Client_Obj:
         
     def set_roomCode(self, roomCode):
         self.__roomCode = roomCode
+        
+    # Used to store the client object to the database
+    def to_dict(self):
+        # Need to wrap uuid with str() to make it compatible with bson (database related)
+        # Note: this does not include self.__roomCode, as the client will be added
+        #       only to the target room (and no rooms else).
+        return {
+            'uuid': str(self.__uuid),
+            'address': self.__address,
+            'username': self.__username,
+        }

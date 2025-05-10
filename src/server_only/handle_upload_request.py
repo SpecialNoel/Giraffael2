@@ -1,7 +1,6 @@
 # handle_upload_request.py
 
 import json
-import os
 from general.file_transmission import (check_if_filesize_is_valid,
                                       check_metadata_format,
                                       recv_file, split_metadata,
@@ -38,11 +37,9 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
         print('Stopped receiving file.')
         return 
     
-    filepath = 'rooms' + os.sep + roomCode
-
     # Receive the whole file from client
-    fileSaved = recv_file(filename, filepath, filesize, hashedFileContent,
-                        client, chunkSize, address)
+    fileSaved = recv_file(filename, room.get_fullpath(), filesize, 
+                        hashedFileContent, client, chunkSize, address)
     
     # Update '__storedFiles' in the room client is in
     

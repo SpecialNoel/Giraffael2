@@ -1,4 +1,8 @@
-# ssl_management.py
+# tls_management.py
+
+# Note: this file is only applicable for testing locally.
+#       To support TLS with remote server, 
+#         use setup_tls_context() in retrieve_secret_from_aws.py
 
 '''
 openssl command to create a ssl certificate and private key:
@@ -15,12 +19,12 @@ openssl command to create a ssl certificate and private key:
 import os
 import ssl
 
-def setup_ssl_context():
+def setup_tls_context_locally():
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) # TLS
     pathToCert = find_file_from_root_dir('cert.pem')
     pathToKey = find_file_from_root_dir('key.pem')
     context.load_cert_chain(certfile=pathToCert, keyfile=pathToKey)
-    print('SSL context on server side loaded successfully!')
+    print('TLS context on server side loaded successfully!')
     return context
 
 def find_file_from_root_dir(filename):

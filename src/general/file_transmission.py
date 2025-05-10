@@ -3,8 +3,10 @@
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
-
+src_folder = Path(__file__).resolve().parents[1]
+sys.path.append(str(src_folder))
 from general.message import add_prefix, rstrip_message
 
 '''

@@ -4,40 +4,6 @@ from client_only.handle_send_file_request import handle_send_file_request
 from client_only.handle_recv_file_request import handle_recv_file_request
 from general.message import send_msg_with_prefix
 
-'''
-def handle_request_with_match(msg, client, chunkSize, maxFileSize, extList):
-    lowerCasedMsg = msg.lower()
-    match lowerCasedMsg:
-        case 'send':
-            # Client wants to store a file in the room
-            handle_send_file_request(client, chunkSize, maxFileSize, extList)
-        case 'recv':
-            # Client wants to download a file from the room
-            handle_recv_file_request(client)
-        case 'msg history':
-            # Client wants to display all messages history of this room
-            handle_display_history_request(client, 'msg')
-        case 'file history':
-            # Client wants to display all file stored in this room
-            handle_display_history_request(client, 'file')
-        case 'clear msg history':
-            # Client wants to clear all messages history of this room
-            handle_clear_history_request(client, 'msg')
-        case 'clear file history':
-            # Client wants to clear all file stored in this room
-            handle_clear_history_request(client, 'file')
-        case 'clear all history':
-            # Client wants to clear both messages and files in this room
-            handle_clear_history_request(client, 'all')
-        case 'ai suggestion':
-            # Client wants to ask OpenAI model for message suggestions
-            handle_suggestion_request(client)
-        case _:
-            # Client wants to send a normal message to the room
-            send_msg_with_prefix(client, msg, 1)
-    return
-'''
-
 def handle_request(msg, client, chunkSize, maxFileSize, extList): 
     lowerCasedMsg = msg.lower()
     if lowerCasedMsg == 'send': 
