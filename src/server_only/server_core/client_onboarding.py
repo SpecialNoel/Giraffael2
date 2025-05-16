@@ -1,8 +1,8 @@
-# recv_from_client.py
+# client_onboarding.py
 
 from general.message import (recv_decoded_content, 
                              send_msg_with_prefix)
-from server_only.room_code_operations import generate_and_send_room_code
+from server_only.server_core.room_code_operations import generate_and_send_room_code
 
 def check_room_code_validness(roomCode, roomCodes):
     # Check if the received room code exists in roomCodes

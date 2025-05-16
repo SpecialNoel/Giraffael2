@@ -1,6 +1,6 @@
 # handle_username.py
 
-from client_only.send_to_server import send_username
+from client_only.client_core.send_to_server import send_username
 
 def handle_username(client, chunkSize):
 # Try sending client username to server

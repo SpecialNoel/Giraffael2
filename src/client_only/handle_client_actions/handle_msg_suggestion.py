@@ -1,7 +1,7 @@
 # handle_msg_suggestion.py
 
 import re
-from client_only.send_to_server import recv_user_input
+from client_only.client_core.send_to_server import recv_user_input
 from general.file_transmission import display_rule
 from general.message import rstrip_message, send_msg_with_prefix
 

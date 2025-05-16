@@ -5,6 +5,7 @@ from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1] # parent level
 sys.path.append(str(src_folder))
 from mongodb_initiator import rooms_collection, gfs
+from general_op import roomCode_to_roomID
 src_folder = Path(__file__).resolve().parents[3] # grandparent level
 sys.path.append(str(src_folder))
 from general.file_transmission import get_filepath_without_duplication
@@ -16,7 +17,7 @@ from gridfs.errors import NoFile
 
 
 # Download file from a room
-def download_file(fileID, roomID, savedir):
+def download_file(fileID, roomCode, savedir):
     try: 
         file = gfs.get(ObjectId(fileID))
     except InvalidId:
@@ -25,6 +26,8 @@ def download_file(fileID, roomID, savedir):
     except NoFile: 
         print(f'Error in download_file(). File with fileID [{fileID}] does not exist in database.')
         return
+    
+    roomID = roomCode_to_roomID(roomCode)
     
     # Test if given roomID is in invalid format
     try:

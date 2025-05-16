@@ -1,8 +1,8 @@
 # handle_client.py
 
 from general.message import get_prefix_and_content
-from server_only.handle_request import handle_request
-from server_only.remove_client import handle_disconnect_request
+from server_only.handle_requests.handle_request import handle_request
+from server_only.server_core.remove_client import handle_disconnect_request
 
 def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
                       rooms, roomCodes, maxClientCount, maxFileSize, extList,

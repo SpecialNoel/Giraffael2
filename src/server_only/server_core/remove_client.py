@@ -1,6 +1,7 @@
 # remove_client.py
 
-from server_only.room_operations import print_room_status
+from server_only.server_core.room_operations import print_room_status
+from server_only.mongodb_related.client_ops.delete_op import delete_client_to_list
 
 def remove_client_from_clients(address, clients):    
     # Remove client from clients based on address
@@ -10,9 +11,10 @@ def remove_client_from_clients(address, clients):
             break
     return
 
-def remove_client_from_room(client, room):
+def remove_client_from_room(clientAddress, room):
     # Remove client from the room it was in
-    room.remove_client_from_client_list(client)
+    room.remove_client_from_client_list(clientAddress)
+    delete_client_to_list(clientAddress, room.get_room_code())
     return room
 
 def handle_disconnect_request(client, address, clients, rooms, 

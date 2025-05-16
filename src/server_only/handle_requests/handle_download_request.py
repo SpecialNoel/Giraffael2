@@ -9,6 +9,8 @@ from general.file_transmission import (check_if_filesize_is_valid,
                                       get_extension_from_filename,
                                       check_if_filename_has_valid_extension)
 from general.message import send_msg_with_prefix
+from server_only.mongodb_related.file_ops.list_op import list_files
+from server_only.mongodb_related.file_ops.download_op import download_file
 
 def handle_download_request(client, address, room, roomCode, msgContent, 
                             chunkSize, maxFileSize, extList):
@@ -27,6 +29,10 @@ def handle_download_request(client, address, room, roomCode, msgContent,
     directory = room.get_fullpath()
     print(f'Searching requested file in directory: [{directory}].')
     filepath = find_file_in_directory(filename, roomCode, directory)
+    
+    # list files to check (database op)
+    
+    
 
     if filepath == None:
         # Filename does not exist in directory
@@ -78,4 +84,6 @@ def send_file_to_client(client, address, filepath, chunkSize, maxFileSize, extLi
        
     # Send the whole file to client
     send_file(filepath, filename, client, chunkSize, address)
+    
+    # download file (database op)
     return

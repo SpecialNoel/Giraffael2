@@ -1,7 +1,7 @@
 # handle_request.py
 
-from client_only.handle_send_file_request import handle_send_file_request
-from client_only.handle_recv_file_request import handle_recv_file_request
+from client_only.handle_client_actions.handle_send_file_request import handle_send_file_request
+from client_only.handle_client_actions.handle_recv_file_request import handle_recv_file_request
 from general.message import send_msg_with_prefix
 
 def handle_request(msg, client, chunkSize, maxFileSize, extList): 
