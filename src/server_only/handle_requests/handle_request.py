@@ -1,11 +1,11 @@
 # handle_request.py
 
-from server_only.handle_clear_history_request import handle_clear_history_request
-from server_only.handle_display_history_request import handle_display_history_request
-from server_only.handle_download_request import handle_download_request
-from server_only.handle_msg_suggestion_request import handle_msg_suggestion_request
-from server_only.handle_normal_msg import handle_normal_msg
-from server_only.handle_upload_request import handle_upload_request
+from server_only.handle_requests.handle_clear_history_request import handle_clear_history_request
+from server_only.handle_requests.handle_display_history_request import handle_display_history_request
+from server_only.handle_requests.handle_download_request import handle_download_request
+from server_only.handle_requests.handle_msg_suggestion_request import handle_msg_suggestion_request
+from server_only.handle_requests.handle_normal_msg import handle_normal_msg
+from server_only.handle_requests.handle_upload_request import handle_upload_request
 
 def handle_request(prefix, client, username, msgContent, clients, 
                    room, roomCode, address, chunkSize, maxFileSize, 

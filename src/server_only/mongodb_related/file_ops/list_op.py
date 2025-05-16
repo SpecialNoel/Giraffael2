@@ -5,13 +5,15 @@ from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1] # parent level
 sys.path.append(str(src_folder))
 from mongodb_initiator import gfs
+from general_op import roomCode_to_roomID
 
 from bson import ObjectId
 from bson.errors import InvalidId
 
 
 # List all files in a room
-def list_files(roomID):
+def list_files(roomCode):
+    roomID = roomCode_to_roomID(roomCode)
     try:
         room_id = ObjectId(roomID)  # Validates the format of roomID
     except InvalidId:

@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1] # parent level
 sys.path.append(str(src_folder))
-from mongodb_initiator import gfs
+from mongodb_initiator import rooms_collection, gfs
 
 from bson.errors import InvalidId
 
@@ -40,3 +40,10 @@ def get_fileID_by_filename_and_roomID(filename, roomID):
               f'File with filename [{filename}] cannot be found in room [{roomID}].')
         return ''
     return file._id
+    
+# get roomID with the roomCode of a room, if any
+def roomCode_to_roomID(roomCode):
+    room = rooms_collection.find_one(
+        {'roomCode': roomCode}
+    )   
+    return room['_id'] if room is not None else None

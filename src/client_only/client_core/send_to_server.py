@@ -1,6 +1,6 @@
 # send_to_server.py
 
-from client_only.handle_request import handle_request
+from client_only.client_core.handle_request import handle_request
 from general.file_transmission import *
 from general.message import (rstrip_message, send_msg_with_prefix, 
                              recv_decoded_content)

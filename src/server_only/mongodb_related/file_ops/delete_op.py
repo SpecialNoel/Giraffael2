@@ -5,13 +5,14 @@ from pathlib import Path
 src_folder = Path(__file__).resolve().parents[1] # parent level
 sys.path.append(str(src_folder))
 from mongodb_initiator import rooms_collection, gfs
+from general_op import roomCode_to_roomID
 
 from bson import ObjectId
 from bson.errors import InvalidId
 
 
 # Delete a file in a room
-def delete_file(fileID, roomID):
+def delete_file(fileID, roomCode):
     try:
         file = gfs.find_one({'_id': ObjectId(fileID)})
         if not file:
@@ -19,6 +20,8 @@ def delete_file(fileID, roomID):
             return
     except InvalidId:
         print(f'Error in delete_file(). fileID [{fileID}] is invalid.')
+        
+    roomID = roomCode_to_roomID(roomCode)
         
     # Test if given roomID is in invalid format
     try:

@@ -2,7 +2,7 @@
 
 from general.room import Room
 
-def create_room(roomCode, rooms):
+def create_room_locally(roomCode, rooms):
     room = Room(roomCode)
     room.create_file_storing_folder()
     rooms.append(room)

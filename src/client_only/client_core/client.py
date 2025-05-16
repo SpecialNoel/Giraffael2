@@ -8,15 +8,15 @@ Note: 'client' is essentially only a socket in client.py
 '''
 
 import socket
-from get_server_elastic_ip import get_server_elastic_ip
-from check_server_capacity import check_server_capacity
-from handle_room_decision import handle_room_decision
-from handle_username import handle_username
-from recv_from_server import recv_msg_from_server
-from send_to_server import send_msg_to_server
-from tls_management import setup_tls_context
+from client_only.others.get_server_elastic_ip import get_server_elastic_ip
+from client_only.client_core.check_server_capacity import check_server_capacity
+from client_only.client_core.handle_room_decision import handle_room_decision
+from client_only.client_core.handle_username import handle_username
+from client_only.client_core.recv_from_server import recv_msg_from_server
+from client_only.client_core.send_to_server import send_msg_to_server
+from client_only.others.tls_management import setup_tls_context
 from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
-from server_only.settings import serverIsLocal, usingTLS
+from server_only.others.settings import serverIsLocal, usingTLS
 from threading import Event, Thread
 
 class Client:
@@ -42,7 +42,7 @@ class Client:
     
     def get_server_ip_based_on_mode(self):        
         if self.serverIsLocal:
-            return '10.0.0.88' # for local machine
+            return '10.0.0.99' # for local machine
         elif self.serverIsRemote:
             return get_server_elastic_ip() # for remote server 
         else:

@@ -8,7 +8,7 @@ from mongodb_initiator import rooms_collection, gfs
 src_folder = Path(__file__).resolve().parents[3] # grand-grandparent level
 sys.path.append(str(src_folder))
 from general.file_transmission import check_if_file_exists
-from file_ops.general_op import check_file_existence_in_room
+from file_ops.general_op import check_file_existence_in_room, roomCode_to_roomID
 
 import os
 from bson import ObjectId
@@ -16,7 +16,7 @@ from bson.errors import InvalidId
 
 
 # Upload file to a room
-def upload_file(filepath, roomID):    
+def upload_file(filepath, roomCode):    
     # Generate a unique filename to avoid uploading a file with a duplicated filename
     #   as existing files in given room
     # Note: roomID used here will be in correct format as we'll check it before executing here
@@ -35,6 +35,8 @@ def upload_file(filepath, roomID):
     if not check_if_file_exists(filepath):
         print(f'Error in upload_file(). Filepath [{filepath}] is invalid.')
         return -1
+    
+    roomID = roomCode_to_roomID(roomCode)
     
     # Find the given room
     room = None

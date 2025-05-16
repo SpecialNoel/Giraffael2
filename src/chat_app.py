@@ -5,7 +5,7 @@ import sys
 assert sys.version_info >= (3, 10)
 '''
 
-from server_only.server import Server
+from server_only.server_core.server import Server
 
 class Chat_App:
     def __init__(self):

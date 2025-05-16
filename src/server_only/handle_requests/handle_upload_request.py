@@ -7,6 +7,7 @@ from general.file_transmission import (check_if_filesize_is_valid,
                                       get_extension_from_filename,
                                       check_if_filename_has_valid_extension)
 from general.message import get_prefix_and_content
+from server_only.mongodb_related.file_ops.upload_op import upload_file
 
 def handle_upload_request(client, address, room, roomCode, chunkSize, 
                           maxFileSize, extList):
@@ -38,13 +39,13 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
         return 
     
     # Receive the whole file from client
-    fileSaved = recv_file(filename, room.get_fullpath(), filesize, 
+    filepath = recv_file(filename, room.get_fullpath(), filesize, 
                         hashedFileContent, client, chunkSize, address)
     
     # Update '__storedFiles' in the room client is in
-    
-    if fileSaved:
+    if filepath:
         room.add_files_to_stored_files(filename)
+        upload_file(filepath, roomCode)
     else:
         print(f'Failed to add [{filename}] to room [{roomCode}].')
     print(f'\nCurrent files in room [{roomCode}]: {room.get_stored_files()}\n.')
