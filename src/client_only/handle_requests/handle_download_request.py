@@ -1,8 +1,8 @@
-# handle_recv_file_request.py
+# handle_download_request.py
 
 from general.file_transmission import *
 
-def handle_recv_file_request(client):
+def handle_download_file_request(client):
     # Step1: prompt client where to store the file
     directory = get_client_directory()
     if directory == None:

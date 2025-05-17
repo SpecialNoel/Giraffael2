@@ -1,10 +1,10 @@
-# handle_send_file_request.py
+# handle_upload_request.py
 
 import time
 from general.file_transmission import *
 from general.message import send_msg_with_prefix
 
-def handle_send_file_request(client, chunkSize, maxFileSize, extList):    
+def handle_upload_file_request(client, chunkSize, maxFileSize, extList):    
     print('Type in filepath of the file you want to send.')
     print('OR, type <exit> to stop sending file.\n')
     filepath = rstrip_message(input())
@@ -24,10 +24,10 @@ def handle_send_file_request(client, chunkSize, maxFileSize, extList):
         return
     
     # Send the file to server
-    send_file_to_server(client, filepath, chunkSize, maxFileSize, extList)
+    upload_file_to_server(client, filepath, chunkSize, maxFileSize, extList)
     return
 
-def send_file_to_server(client, filepath, chunkSize, maxFileSize, extList):
+def upload_file_to_server(client, filepath, chunkSize, maxFileSize, extList):
     # Create and send metadata to server
     filename, filesize, hashedFileContent = create_metadata(filepath)
     

@@ -23,4 +23,5 @@ def list_clients(roomCode):
             print(f'--uuid:[{client['uuid']}]. address:[{client['address']}]. username:[{client['username']}]')
     else: 
         print(f'Error in add_client_to_list(). Room with roomCode [{roomCode}] does not exist.')
+        return
     return 

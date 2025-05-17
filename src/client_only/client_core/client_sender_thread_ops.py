@@ -1,4 +1,6 @@
-# send_to_server.py
+# client_sender_thread_ops.py
+
+# This is the main logic behind client sender thread.
 
 from client_only.client_core.handle_request import handle_request
 from general.file_transmission import *
@@ -25,6 +27,7 @@ def send_msg_to_server(client, shutdownEvent, chunkSize,
     print('Client sender thread stopped.')
     return
     
+# Used to inform client to prompt required information (username, roomCode, etc.)
 def recv_user_input():
     msg = rstrip_message(input())
     # If client input empty message, make them input again

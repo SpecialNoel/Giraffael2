@@ -10,10 +10,10 @@ Note: 'client' is essentially only a socket in client.py
 import socket
 from client_only.others.get_server_elastic_ip import get_server_elastic_ip
 from client_only.client_core.check_server_capacity import check_server_capacity
-from client_only.client_core.handle_room_decision import handle_room_decision
-from client_only.client_core.handle_username import handle_username
-from client_only.client_core.recv_from_server import recv_msg_from_server
-from client_only.client_core.send_to_server import send_msg_to_server
+from client_only.client_core.client_onboarding import handle_room_decision
+from client_only.client_core.client_onboarding import handle_username
+from client_only.client_core.client_receiver_thread_ops import recv_msg_from_server
+from client_only.client_core.client_sender_thread_ops import send_msg_to_server
 from client_only.others.tls_management import setup_tls_context
 from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
 from server_only.others.settings import serverIsLocal, usingTLS

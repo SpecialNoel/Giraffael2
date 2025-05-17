@@ -1,6 +1,8 @@
-# handle_room_decision.py
+# client_onboarding.py
 
-from client_only.client_core.send_to_server import send_decision_on_room, send_room_code
+from client_only.client_core.client_sender_thread_ops import (send_decision_on_room, 
+                                                    send_room_code,
+                                                    send_username)
 
 def handle_room_decision(client, chunkSize):
     # Try sending client decision on room to server
@@ -26,3 +28,12 @@ def handle_room_decision(client, chunkSize):
         msg, response = send_decision_on_room(client, chunkSize)
     print(f'In Room: [{response}].\n')
     return
+
+def handle_username(client, chunkSize):
+# Try sending client username to server
+    msg, response = send_username(client, chunkSize)
+    while response != 'VALID_USERNAME':
+        print(f'msg: [{msg}], response from server: [{response}]')
+        msg, response = send_username(client, chunkSize)
+    return
+        

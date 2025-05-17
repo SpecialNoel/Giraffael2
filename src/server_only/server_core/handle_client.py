@@ -1,16 +1,15 @@
 # handle_client.py
 
 from general.message import get_prefix_and_content
-from server_only.handle_requests.handle_request import handle_request
+from server_only.server_core.handle_request import handle_request
 from server_only.server_core.remove_client import handle_disconnect_request
 
-def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
-                      rooms, roomCodes, maxClientCount, maxFileSize, extList,
+def handle_one_client(shutdownEvent, clientObj, chunkSize, room, roomCode,
+                      maxClientCount, maxFileSize, extList,
                       usingOpenAI):
     client = clientObj.get_socket()
     username = clientObj.get_username()
     address = clientObj.get_address()
-    roomCode = clientObj.get_room_code()
     
     while not shutdownEvent.is_set():
         try:
@@ -25,12 +24,12 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
 
             # Empty message -> client closed connection
             if not msg:
-                handle_disconnect_request(client, address, clients, 
-                                          rooms, roomCode, roomCodes,
+                handle_disconnect_request(client, address, 
+                                          roomCode,
                                           maxClientCount)
                 break
             
-            handle_request(prefix, client, username, msgContent, clients, 
+            handle_request(prefix, client, username, msgContent, 
                            room, roomCode, address, chunkSize, maxFileSize, 
                            extList, typePrefix, usingOpenAI)
         except (BrokenPipeError, 
@@ -39,8 +38,8 @@ def handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
             # Close connection with this client
             print(f'Error: [{e}]. ',
                   f'Removed [{address}] from client socket list.')
-            handle_disconnect_request(client, address, clients, 
-                                      rooms, roomCode, roomCodes,
+            handle_disconnect_request(client, address, 
+                                      roomCode,
                                       maxClientCount)            
             break
     return

@@ -35,9 +35,6 @@ class Server:
         self.MAX_CLIENT_COUNT = 3
         self.ROOM_CODE_LENGTH = 11
         self.MAX_USERNAME_LENGTH = 16
-        self.clients = [] # a list of 'Client_Obj's
-        self.rooms = [] # a dictionary of 'Room's
-        self.roomCodes = set() # a set of room codes
         
         # Threads
         self.shutdownEvent = Event() # threading.Event()
@@ -91,8 +88,6 @@ class Server:
         print(f'Server socket on [{self.SERVER_IP}: {self.SERVER_PORT}] ',
               f'started listening.')
         print(f'MAX: [{self.MAX_CLIENT_COUNT}] clients.')
-        print(f'All connected clients: ',
-              f'[{len(self.clients)}/{self.MAX_CLIENT_COUNT}]\n')
         return
         
     def start_accepting(self, server):
@@ -101,8 +96,8 @@ class Server:
         
         # Use a separate thread to accept and handle this client
         t = Thread(target=accept_a_connection, 
-                args=(conn, address, self.clients, self.rooms,
-                      self.roomCodes, self.CHAR_POOLS,
+                args=(conn, address,
+                      self.CHAR_POOLS,
                       self.shutdownEvent, self.CHUNK_SIZE,
                       self.ROOM_CODE_LENGTH,
                       self.MAX_USERNAME_LENGTH,
@@ -136,13 +131,13 @@ class Server:
             self.shutdownEvent.set()
             
             # Close connections with all clients
-            for clientObj in self.clients:
-                socket = clientObj.get_socket()
-                # Send an empty string to the client as an indicator
-                socket.send(b'')
-                socket.close()
-            self.clients.clear()
-            return
+            # for clientObj in self.clients:
+            #     socket = clientObj.get_socket()
+            #     # Send an empty string to the client as an indicator
+            #     socket.send(b'')
+            #     socket.close()
+            # self.clients.clear()
+            # return
         
         def handle_end_server():
             # Wait until all threads converge

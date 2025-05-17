@@ -7,7 +7,6 @@ class Client_Obj:
         self.__socket = socket     # unmodifiable, unique
         self.__address = address   # unmodifiable, unique
         self.__username = username # duplicate-able
-        self.__roomCode = roomCode # unique
 
     def get_uuid(self):
         return self.__uuid
@@ -20,15 +19,9 @@ class Client_Obj:
     
     def get_username(self):
         return self.__username
-
-    def get_room_code(self):
-        return self.__roomCode
     
     def set_username(self, username):
         self.__username = username
-        
-    def set_roomCode(self, roomCode):
-        self.__roomCode = roomCode
         
     # Used to store the client object to the database
     def to_dict(self):

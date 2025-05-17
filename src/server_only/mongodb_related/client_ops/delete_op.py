@@ -10,7 +10,7 @@ from mongodb_initiator import rooms_collection
 from bson import ObjectId
 
 
-def delete_client_to_list(address, roomCode):
+def delete_client_from_list(address, roomCode):
     roomID = roomCode_to_roomID(roomCode)
 
     if roomID:

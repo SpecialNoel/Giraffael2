@@ -1,17 +1,17 @@
 # handle_request.py
 
-from client_only.handle_client_actions.handle_send_file_request import handle_send_file_request
-from client_only.handle_client_actions.handle_recv_file_request import handle_recv_file_request
+from client_only.handle_requests.handle_upload_request import handle_upload_file_request
+from client_only.handle_requests.handle_download_request import handle_download_file_request
 from general.message import send_msg_with_prefix
 
 def handle_request(msg, client, chunkSize, maxFileSize, extList): 
     lowerCasedMsg = msg.lower()
-    if lowerCasedMsg == 'send': 
+    if lowerCasedMsg == 'send':
         # Client wants to store a file in the room
-        handle_send_file_request(client, chunkSize, maxFileSize, extList)
+        handle_upload_file_request(client, chunkSize, maxFileSize, extList)
     elif lowerCasedMsg == 'recv':
         # Client wants to download a file from the room
-        handle_recv_file_request(client)
+        handle_download_file_request(client)
     elif lowerCasedMsg == 'msg history':
         # Client wants to display all messages history of this room
         handle_display_history_request(client, 'msg')

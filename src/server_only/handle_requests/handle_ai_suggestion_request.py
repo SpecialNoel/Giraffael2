@@ -1,4 +1,4 @@
-# handle_msg_suggestion_request
+# handle_ai_suggestion_request.py
 
 import os
 from openai import OpenAI
@@ -18,7 +18,7 @@ else:
     # Get API key with remote server (aws ec2)
     client = OpenAI(api_key=get_api_key())
 
-def handle_msg_suggestion_request(client, pastMsgList, usingOpenAI):
+def handle_ai_suggestion_request(client, pastMsgList, usingOpenAI):
     if usingOpenAI:
         # Obtain msg suggestions (a string) from OpenAI model
         response = get_msg_suggestion_from_model(pastMsgList)

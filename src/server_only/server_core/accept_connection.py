@@ -10,30 +10,28 @@ from server_only.server_core.client_onboarding import (recv_response_on_creating
                                           handle_room_code_message,
                                           handle_username_message)
 from server_only.server_core.room_code_operations import generate_and_send_room_code
-from server_only.server_core.room_operations import (create_room_locally, enter_room, 
-                                         print_info_when_client_enter_room)
                                           
-def test_reach_max_client_count(conn, address, clients, maxClientCount):
+def test_reach_max_client_count(conn, address, maxClientCount):
     # Disconnect from the connection if reached max client count already
-    if len(clients) >= maxClientCount:
-        print(f'Max client count [{maxClientCount}] reached.',
-              f'Refused connection from [{address}].\n')
-        send_msg_with_prefix(conn, '-1', 0)
-        conn.close()
-        return True
+    # if len(clients) >= maxClientCount:
+    #     print(f'Max client count [{maxClientCount}] reached.',
+    #           f'Refused connection from [{address}].\n')
+    #     send_msg_with_prefix(conn, '-1', 0)
+    #     conn.close()
+    #     return True
     
-    # Otherwise, acknowledge client with 'len(clients)+1'
-    send_msg_with_prefix(conn, str((len(clients)+1)), 0)
+    # # Otherwise, acknowledge client with 'len(clients)+1'
+    # send_msg_with_prefix(conn, str((len(clients)+1)), 0)
     return False
 
-def accept_a_connection(conn, address, clients, rooms, roomCodes,
+def accept_a_connection(conn, address,
                         charPools, shutdownEvent, chunkSize, roomCodeLength,
                         maxUsernameLength, maxClientCount, maxFileSize, 
                         extList, usingOpenAI):
     # If reached max client count before this client: 
     #   disconnect, then acknowledge the client about the disconnection
     # Otherwise, acknowledge the client about the successful connection
-    if test_reach_max_client_count(conn, address, clients, maxClientCount):
+    if test_reach_max_client_count(conn, address, maxClientCount):
         return
     
     # Wait for client to either create or enter room
@@ -42,12 +40,12 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
     if wantCreateRoom:
         # Client chooses to create a new room
         roomCode = generate_and_send_room_code(conn, address, charPools, 
-                                               roomCodes, roomCodeLength)
+                                               roomCodeLength)
     else:
         # Client chooses to enter an existing room
         # Wait for client to send valid room code
         createInstead, roomCode = handle_room_code_message(
-                                                conn, address, roomCodes,
+                                                conn, address,
                                                 chunkSize, charPools, 
                                                 roomCodeLength)
         if createInstead: 
@@ -59,22 +57,14 @@ def accept_a_connection(conn, address, clients, rooms, roomCodes,
     
     # Create the room if the client has chosen to do so
     if wantCreateRoom:
-        room = create_room_locally(roomCode, rooms)
         create_room(roomCode) # Create a room with roomCode in database
         
     # Create a client obj for this client
     clientObj = Client_Obj(conn, address, username, roomCode)
     add_client_to_list(clientObj, roomCode) # Add the clientObj to the room with roomCode in database
-    
-    clients.append(clientObj)
-
-    # Make the client enter the room
-    room = enter_room(clientObj, roomCode, rooms)
-    print_info_when_client_enter_room(address, username, clients, roomCode,
-                                      rooms, maxClientCount)
 
     # Start handling this client
-    handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
-                      rooms, roomCodes, maxClientCount, maxFileSize, extList,
-                      usingOpenAI)
+    # handle_one_client(shutdownEvent, clientObj, chunkSize, room, roomCode,
+    #                   roomCodes, maxClientCount, maxFileSize, extList,
+    #                   usingOpenAI)
     return

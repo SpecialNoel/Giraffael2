@@ -3,18 +3,17 @@
 from datetime import datetime
 from general.message import rstrip_message, send_msg_with_prefix
 from server_only.server_core.check_client_alive import check_client_alive
-from server_only.server_core.remove_client import remove_client_from_clients
 from server_only.mongodb_related.msg_ops.add_op import add_msg_to_history
-from server_only.mongodb_related.client_ops.delete_op import delete_client_to_list
+from server_only.mongodb_related.client_ops.delete_op import delete_client_from_list
 
-def handle_normal_msg(client, address, username, msgContent, clients, room):
+def handle_normal_msg(address, username, msgContent, room):
     msg = rstrip_message(msgContent.decode())
 
     # A list used to remove disconnected client sockets
     clientSocketsToBeRemoved = []
     
     msgAddedToMsgList = False
-        
+
     # Broadcast received message to all clients within the same room
     for clientObject in room.get_client_list():
         socket = clientObject.get_socket()
@@ -44,7 +43,6 @@ def handle_normal_msg(client, address, username, msgContent, clients, room):
         
     # Remove disconnected clients
     for socket in clientSocketsToBeRemoved:
-        remove_client_from_clients(socket, clients)
-        delete_client_to_list(address, room.get_room_code())
+        delete_client_from_list(address, room.get_room_code())
         socket.close()
     return
