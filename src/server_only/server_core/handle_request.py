@@ -8,8 +8,10 @@ from server_only.handle_requests.handle_normal_msg import handle_normal_msg
 from server_only.handle_requests.handle_upload_request import handle_upload_request
 
 def handle_request(prefix, client, username, msgContent, 
-                   room, roomCode, address, chunkSize, maxFileSize, 
+                   roomCode, address, chunkSize, maxFileSize, 
                    extList, typePrefix, usingOpenAI):
+    room = ''
+    
     if prefix == 0:
         # Received operation message
         print('Received operation message.')

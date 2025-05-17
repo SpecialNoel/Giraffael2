@@ -25,3 +25,33 @@ def list_clients(roomCode):
         print(f'Error in add_client_to_list(). Room with roomCode [{roomCode}] does not exist.')
         return
     return 
+
+def get_all_connecting_clients():
+    rooms = rooms_collection.find({}, {"clientList": 1})
+    allClient = []
+    for room in rooms:
+        clientList = room['clientList']
+        for client in clientList:
+            allClient.append((client['uuid'], client['address'], client['username']))
+    return allClient
+
+def get_number_of_clients_from_one_room(roomCode):
+    roomID = roomCode_to_roomID(roomCode)
+    if roomID:
+        room = rooms_collection.find_one(
+            {'_id': ObjectId(roomID)}
+        )
+        clientList = room['clientList']
+        return len(clientList)
+    else: 
+        print('Error in get_number_of_clients_from_one_room(). ' +
+             f'Room with roomCode [{roomCode}] does not exist.')
+        return -1
+
+def get_number_of_clients_from_all_rooms():
+    numberOfClients = 0
+    
+    for room in rooms_collection.find({}, {"clientList": 1}):
+        numberOfClients += len(room.get("clientList", []))
+    
+    return numberOfClients

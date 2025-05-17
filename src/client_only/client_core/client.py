@@ -7,6 +7,11 @@ Note: must be executed when the server is alive.
 Note: 'client' is essentially only a socket in client.py
 '''
 
+import sys
+from pathlib import Path
+src_folder = Path(__file__).resolve().parents[2] # grandparent level
+sys.path.append(str(src_folder))
+
 import socket
 from client_only.others.get_server_elastic_ip import get_server_elastic_ip
 from client_only.client_core.check_server_capacity import check_server_capacity

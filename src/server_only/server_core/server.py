@@ -1,10 +1,12 @@
 # server.py
 
-'''
-To run this script: python3 server.py
+# To run this script: python3 server.py
 
-Note: Every 'client' instance references to a socket in server.py
-'''
+import sys
+from pathlib import Path
+src_folder = Path(__file__).resolve().parents[2] # grandparent level
+sys.path.append(str(src_folder))
+from server_only.mongodb_related.client_ops.list_op import get_all_connecting_clients
 
 import socket
 import string
@@ -26,12 +28,16 @@ class Server:
         self.usingTLS = usingTLS
         self.context = None
         if self.usingTLS:
-            self.context = setup_tls_context_locally() if self.usingLocalServer else setup_tls_context_remote()
+            self.context = (setup_tls_context_locally() 
+                            if self.usingLocalServer 
+                            else setup_tls_context_remote())
         
         # Parameters of server
         self.SERVER_IP = self.get_server_ip_based_on_mode()
         self.SERVER_PORT = 5001
         self.server = None # server socket
+        self.clients = get_all_connecting_clients()
+        print(f'All connecting clients: {self.clients}')
         self.MAX_CLIENT_COUNT = 3
         self.ROOM_CODE_LENGTH = 11
         self.MAX_USERNAME_LENGTH = 16
@@ -96,13 +102,11 @@ class Server:
         
         # Use a separate thread to accept and handle this client
         t = Thread(target=accept_a_connection, 
-                args=(conn, address,
-                      self.CHAR_POOLS,
-                      self.shutdownEvent, self.CHUNK_SIZE,
-                      self.ROOM_CODE_LENGTH,
-                      self.MAX_USERNAME_LENGTH,
-                      self.MAX_CLIENT_COUNT,
-                      self.MAX_FILE_SIZE, self.EXT_LIST, self.usingOpenAI))
+                args=(conn, address, self.clients,
+                      self.CHAR_POOLS, self.shutdownEvent, self.CHUNK_SIZE,
+                      self.ROOM_CODE_LENGTH, self.MAX_USERNAME_LENGTH,
+                      self.MAX_CLIENT_COUNT, self.MAX_FILE_SIZE, self.EXT_LIST,
+                      self.usingOpenAI))
         t.daemon = False # thread ends when the main thread ends
         self.threads.append(t)
         t.start()
@@ -131,13 +135,13 @@ class Server:
             self.shutdownEvent.set()
             
             # Close connections with all clients
-            # for clientObj in self.clients:
-            #     socket = clientObj.get_socket()
-            #     # Send an empty string to the client as an indicator
-            #     socket.send(b'')
-            #     socket.close()
-            # self.clients.clear()
-            # return
+            for clientObj in self.clients:
+                socket = clientObj.get_socket()
+                # Send an empty string to the client as an indicator
+                socket.send(b'')
+                socket.close()
+            self.clients.clear()
+            return
         
         def handle_end_server():
             # Wait until all threads converge

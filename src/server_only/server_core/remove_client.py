@@ -1,30 +1,18 @@
 # remove_client.py
 
-from server_only.mongodb_related.client_ops.delete_op import delete_client_to_list
+from server_only.mongodb_related.client_ops.delete_op import delete_client_from_list
+from server_only.mongodb_related.client_ops.list_op import get_number_of_clients_from_one_room
+from server_only.mongodb_related.room_ops.delete_op import delete_room
 
-def remove_client_from_room(clientAddress, room):
-    # Remove client from the room it was in
-    room.remove_client_from_client_list(clientAddress)
-    delete_client_to_list(clientAddress, room.get_room_code())
-    return room
-
-def handle_disconnect_request(client, address, 
-                              roomCode, maxClientCount):
+def handle_disconnect_request(client, address, roomCode):
+    client.close()
     print(f'Client on [{address}] disconnected.')
     
-    client.close()
-    # print(f'All connected clients: ',
-    #       f'[{len(clients)}/{maxClientCount}]')
+    # Remove client from database
+    delete_client_from_list(address, roomCode)
     
-    # Remove client from the room it was in
-    # room = [r for r in rooms if r.get_room_code() == roomCode][0]
-    # room = remove_client_from_room(address, room)
-    # print_room_status(room)
-    
-    # Remove room code from roomCodes if its corresponding room is empty
-    # if len(room.get_client_list()) == 0:
-    #     roomCodes.remove(roomCode)
-    #     print(f'Room [{roomCode}] is empty, removed from room codes.\n')
-    #     # Remove the file-storing folder for that room as well
-    #     room.delete_file_storing_folder()
+    # Remove room from database if the room is empty
+    if len(get_number_of_clients_from_one_room(roomCode)) == 0:
+        delete_room(roomCode)
+        print(f'Room [{roomCode}] is empty, removed from database.\n')
     return
