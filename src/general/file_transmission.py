@@ -274,7 +274,7 @@ def recv_file(filename, filepath, filesize, hashedFileContent,
         if not recipientHashedFileContent == hashedFileContent:
             print('Error: Recipient hash does not equal to sender hash.')
             print('Stopped receiving file.')
-            return False
+            return None
         
         # Save the file
         with open(filepath, 'wb') as file:
@@ -283,7 +283,7 @@ def recv_file(filename, filepath, filesize, hashedFileContent,
         print('Recipient hash equals to sender hash.')
         print(f'Successfully received file [{filename}] from [{sender}].\n')
         print(f'The file is Stored in filepath: [{filepath}].')
-        return True
+        return filepath
     except Exception as e: 
         print(f'Error occurred in recv_file(): [{e}].')
-        return False
+        return None

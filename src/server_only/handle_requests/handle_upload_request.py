@@ -1,6 +1,7 @@
 # handle_upload_request.py
 
 import json
+import os
 from general.file_transmission import (check_if_filesize_is_valid,
                                       check_metadata_format,
                                       recv_file, split_metadata,
@@ -9,8 +10,27 @@ from general.file_transmission import (check_if_filesize_is_valid,
 from general.message import get_prefix_and_content
 from server_only.mongodb_related.file_ops.upload_op import upload_file
 
-def handle_upload_request(client, address, room, roomCode, chunkSize, 
+def handle_upload_request(clientObj, roomCode, chunkSize, 
                           maxFileSize, extList):
+    def find_file_buffer_folder():
+        startDir = os.path.abspath('.')
+        targetFolder = 'file_buffer_folder'
+        for root, dirs, files in os.walk(startDir):
+            if targetFolder in dirs:
+                return os.path.join(root, targetFolder)
+        return None
+        
+    def remove_file_from_file_buffer_folder(filepath):
+        if os.path.isfile(filepath):
+            os.remove(filepath)
+            print(f'File [{filepath}] deleted.')
+        else:
+            print(f'Error in remove_file_from_file_buffer_folder: File [{filepath}]not found.')
+        return 
+
+    address = clientObj.get_address()
+    client = clientObj.get_socket()
+    
     print(f'client [{address}] is uploading a file.\n')
     
     # Receive metadata from client
@@ -39,14 +59,13 @@ def handle_upload_request(client, address, room, roomCode, chunkSize,
         return 
     
     # Receive the whole file from client
-    filepath = recv_file(filename, room.get_fullpath(), filesize, 
-                        hashedFileContent, client, chunkSize, address)
+    filepath = recv_file(filename, find_file_buffer_folder(), filesize, 
+                       hashedFileContent, client, chunkSize, address)
     
-    # Update '__storedFiles' in the room client is in
+    # Update fileList in the room in database
     if filepath:
-        room.add_files_to_stored_files(filename)
         upload_file(filepath, roomCode)
+        remove_file_from_file_buffer_folder(filepath)
     else:
         print(f'Failed to add [{filename}] to room [{roomCode}].')
-    print(f'\nCurrent files in room [{roomCode}]: {room.get_stored_files()}\n.')
     return

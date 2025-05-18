@@ -73,15 +73,15 @@ def recv_msg_from_server(client, shutdownEvent, chunkSize,
                 break 
             
             if msg == (b'\x03\x02\x01\x00HEART'):
-                print('Server has sent a HEARTBEAT message with header: \x03\x02\x01\x00HEART.')
+                # print('Server has sent a HEARTBEAT message with header: \x03\x02\x01\x00HEART.')
                 continue
             
             typePrefix, msgContent = get_prefix_and_content(msg)
             prefix = int.from_bytes(typePrefix, byteorder='big')
             
-            print(f'typePrefix: {typePrefix}')
-            print(f'prefix: {prefix}')
-            print(f'msgContent: {msgContent}')
+            # print(f'typePrefix: {typePrefix}')
+            # print(f'prefix: {prefix}')
+            # print(f'msgContent: {msgContent}')
 
             handle_recv_request(prefix, typePrefix, msgContent, client, 
                                 chunkSize, maxFileSize, extList)

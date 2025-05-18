@@ -3,7 +3,10 @@
 import pickle
 from general.message import add_prefix
 
-def handle_display_history_request(client, address, msgContent, room):
+def handle_display_history_request(clientObj, msgContent, room):
+    address = clientObj.get_address()
+    client = clientObj.get_socket()
+    
     historyToDisplay = msgContent.decode().lower()
     
     if historyToDisplay == 'msg':

@@ -2,12 +2,11 @@
 
 from general.message import get_prefix_and_content
 from server_only.server_core.handle_request import handle_request
-from server_only.server_core.remove_client import handle_disconnect_request
+from server_only.server_core.handle_client_disconnect_request import handle_disconnect_request
 
-def handle_one_client(shutdownEvent, clientObj, chunkSize, 
+def handle_one_client(shutdownEvent, clientObj, clients, room, rooms, chunkSize, 
                       roomCode, maxFileSize, extList, usingOpenAI):
     client = clientObj.get_socket()
-    username = clientObj.get_username()
     address = clientObj.get_address()
     
     while not shutdownEvent.is_set():
@@ -23,11 +22,11 @@ def handle_one_client(shutdownEvent, clientObj, chunkSize,
 
             # Empty message -> client closed connection
             if not msg:
-                handle_disconnect_request(client, address, roomCode)
+                handle_disconnect_request(client, clients, address, room, rooms)
                 break
-            
-            handle_request(prefix, client, username, msgContent, 
-                           roomCode, address, chunkSize, maxFileSize, 
+
+            handle_request(prefix, clientObj, msgContent, room, rooms,
+                           roomCode, chunkSize, maxFileSize, 
                            extList, typePrefix, usingOpenAI)
         except (BrokenPipeError, 
                 ConnectionResetError, 
@@ -35,7 +34,6 @@ def handle_one_client(shutdownEvent, clientObj, chunkSize,
             # Close connection with this client
             print(f'Error: [{e}]. ',
                   f'Removed [{address}] from client socket list.')
-            handle_disconnect_request(client, address, roomCode)
-          
+            handle_disconnect_request(client, clients, address, room, rooms)
             break
     return

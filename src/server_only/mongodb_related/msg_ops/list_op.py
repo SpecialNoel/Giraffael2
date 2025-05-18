@@ -25,3 +25,20 @@ def list_msg_history(roomCode):
     else:
         print(f'Error in list_msg(). Room with roomCode [{roomCode}] does not exist.')
     return
+
+def get_msg_history(roomCode):
+    roomID = roomCode_to_roomID(roomCode)
+
+    if roomID:
+        print(f'Msg history stored in room with roomCode [{roomCode}]:')
+        room = rooms_collection.find_one(
+            {'_id': ObjectId(roomID)}
+        )
+        msgHistory = []
+        msgMetadatas = room['msgList']
+        for msgMetadata in msgMetadatas:
+            msgHistory.append({msgMetadata['senderName']: msgMetadata['message']})
+        return msgHistory
+    else:
+        print(f'Error in list_msg(). Room with roomCode [{roomCode}] does not exist.')
+    return None

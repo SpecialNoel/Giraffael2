@@ -12,8 +12,11 @@ from general.message import send_msg_with_prefix
 from server_only.mongodb_related.file_ops.list_op import list_files
 from server_only.mongodb_related.file_ops.download_op import download_file
 
-def handle_download_request(client, address, room, roomCode, msgContent, 
+def handle_download_request(clientObj, room, roomCode, msgContent, 
                             chunkSize, maxFileSize, extList):
+    address = clientObj.get_address()
+    client = clientObj.get_socket()
+    
     # Received file-download request
     print(f'client [{address}] is downloading a file.\n')
 

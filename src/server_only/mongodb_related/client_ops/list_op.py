@@ -26,15 +26,6 @@ def list_clients(roomCode):
         return
     return 
 
-def get_all_connecting_clients():
-    rooms = rooms_collection.find({}, {"clientList": 1})
-    allClient = []
-    for room in rooms:
-        clientList = room['clientList']
-        for client in clientList:
-            allClient.append((client['uuid'], client['address'], client['username']))
-    return allClient
-
 def get_number_of_clients_from_one_room(roomCode):
     roomID = roomCode_to_roomID(roomCode)
     if roomID:
@@ -47,6 +38,15 @@ def get_number_of_clients_from_one_room(roomCode):
         print('Error in get_number_of_clients_from_one_room(). ' +
              f'Room with roomCode [{roomCode}] does not exist.')
         return -1
+
+def get_all_connecting_clients():
+    rooms = rooms_collection.find({}, {"clientList": 1})
+    allClient = []
+    for room in rooms:
+        clientList = room['clientList']
+        for client in clientList:
+            allClient.append((client['uuid'], client['address'], client['username']))
+    return allClient
 
 def get_number_of_clients_from_all_rooms():
     numberOfClients = 0

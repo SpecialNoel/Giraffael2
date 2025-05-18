@@ -2,7 +2,10 @@
 
 from general.message import send_msg_with_prefix
 
-def handle_clear_history_request(client, address, msgContent, room):
+def handle_clear_history_request(clientObj, msgContent, room):
+    address = clientObj.get_address()
+    client = clientObj.get_socket()
+    
     historyToClear = msgContent.decode().lower()
     
     if historyToClear == 'msg':

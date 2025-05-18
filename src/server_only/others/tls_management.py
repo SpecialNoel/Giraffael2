@@ -23,8 +23,6 @@ def setup_tls_context_locally():
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) # TLS
     pathToCert = find_file_from_root_dir('cert.pem')
     pathToKey = find_file_from_root_dir('key.pem')
-    print(f'pathToCert: {pathToCert}')
-    print(f'pathToKey:  {pathToKey}')
     
     context.load_cert_chain(certfile=pathToCert, keyfile=pathToKey)
     print('TLS context on server side loaded successfully!')

@@ -9,7 +9,7 @@ class Client_Obj:
         self.__username = username # duplicate-able
 
     def get_uuid(self):
-        return self.__uuid
+        return str(self.__uuid)
         
     def get_socket(self): 
         return self.__socket

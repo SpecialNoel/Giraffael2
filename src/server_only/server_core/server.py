@@ -36,7 +36,8 @@ class Server:
         self.SERVER_IP = self.get_server_ip_based_on_mode()
         self.SERVER_PORT = 5001
         self.server = None # server socket
-        self.clients = get_all_connecting_clients()
+        self.clients = []  # list of client sockets
+        self.rooms = []    # list of rooms
         print(f'All connecting clients: {self.clients}')
         self.MAX_CLIENT_COUNT = 3
         self.ROOM_CODE_LENGTH = 11
@@ -102,7 +103,7 @@ class Server:
         
         # Use a separate thread to accept and handle this client
         t = Thread(target=accept_a_connection, 
-                args=(conn, address, self.clients,
+                args=(conn, address, self.clients, self.rooms,
                       self.CHAR_POOLS, self.shutdownEvent, self.CHUNK_SIZE,
                       self.ROOM_CODE_LENGTH, self.MAX_USERNAME_LENGTH,
                       self.MAX_CLIENT_COUNT, self.MAX_FILE_SIZE, self.EXT_LIST,
@@ -119,7 +120,7 @@ class Server:
                   f'- Server is using OpenAI:   {self.usingOpenAI}\n',
                   f'- Server is using TLS:      {self.usingTLS}\n')
             return 
-        
+
         def run_server_loop(server):
             # Server should be always-on
             while True:

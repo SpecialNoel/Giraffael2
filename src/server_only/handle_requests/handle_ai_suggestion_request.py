@@ -10,6 +10,12 @@ from server_only.others.openai_model_settings import (maxTokensPerSuggestion,
 from server_only.others.retrieve_secret_from_aws import get_api_key
 from server_only.others.settings import serverIsLocal
 
+import sys
+from pathlib import Path
+src_folder = Path(__file__).resolve().parents[2] # grandparent level
+sys.path.append(str(src_folder))
+from server_only.mongodb_related.msg_ops.list_op import get_msg_history
+
 if serverIsLocal:
     # Get API key with local server
     load_dotenv() 
@@ -18,15 +24,18 @@ else:
     # Get API key with remote server (aws ec2)
     client = OpenAI(api_key=get_api_key())
 
-def handle_ai_suggestion_request(client, pastMsgList, usingOpenAI):
+def handle_ai_suggestion_request(clientObj, roomCode, usingOpenAI):
+    clientSocket = clientObj.get_socket()
+    pastMsgList = get_msg_history(roomCode)
+    
     if usingOpenAI:
         # Obtain msg suggestions (a string) from OpenAI model
         response = get_msg_suggestion_from_model(pastMsgList)
-        send_msg_with_prefix(client, response, 6)
+        send_msg_with_prefix(clientSocket, response, 6)
         # Send the suggestions to client
     else:
         response = 'Open AI is not enabled by server.'
-        send_msg_with_prefix(client, response, 1)
+        send_msg_with_prefix(clientSocket, response, 1)
     return
 
 def get_msg_suggestion_from_model(pastMsgList):
