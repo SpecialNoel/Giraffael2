@@ -7,7 +7,7 @@ sys.path.append(str(src_folder))
 
 from file_ops.upload_op import upload_file
 from file_ops.download_op import download_file
-from file_ops.list_op import list_files
+from file_ops.list_op import get_file_history
 from file_ops.delete_op import delete_file, delete_all_files
 
 if __name__=='__main__':  
@@ -19,9 +19,9 @@ if __name__=='__main__':
     fileID = '681e9e0c2353582f23e3635b'
     savedir = '/Users/jianminglin/recv_files'
     
-    #upload_file(filepath, roomID)
-    #download_file(fileID, roomID, savedir)
-    #list_files(roomID)
-    #delete_file(fileID, roomID)
-    #delete_all_files(roomID)
+    #upload_file(filepath, roomCode)
+    #download_file(fileID, roomCode, savedir)
+    #get_file_history(roomCode)
+    #delete_file(fileID, roomCode)
+    #delete_all_files(roomCode)
     

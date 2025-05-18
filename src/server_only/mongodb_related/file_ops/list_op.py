@@ -12,12 +12,12 @@ from bson.errors import InvalidId
 
 
 # List all files in a room
-def list_files(roomCode):
+def get_file_history(roomCode):
     roomID = roomCode_to_roomID(roomCode)
     try:
         room_id = ObjectId(roomID)  # Validates the format of roomID
     except InvalidId:
-        print(f'Error in list_files(). roomID [{roomID}] is invalid')
+        print(f'Error in get_file_history(). roomID [{roomID}] is invalid')
         return 
     
     # Find all files of given room
@@ -26,7 +26,4 @@ def list_files(roomCode):
         print(f'There are no existing files in room [{roomID}].')
         return
     
-    print(f'Files stored in room [{roomID}]:')
-    for file in files:
-        print(f'[{file.filename}]')
-    return
+    return [file.filename for file in files]

@@ -20,12 +20,12 @@ def delete_room(roomCode):
             {'_id': ObjectId(roomID)}
         )
     except InvalidId:
-        print(f'Error in upload_file(). roomID [{roomID}] is invalid.')
+        print(f'Error in upload_file(). roomCode [{roomCode}] is invalid.')
         return -1
     
     # Delete all files existed in that room first
-    delete_all_files(roomID)
+    delete_all_files(roomCode)
     # Delete the room in database
     rooms_collection.delete_one({'_id': ObjectId(roomID)})
-    print(f'Successfully deleted room with roomID [{roomID}].')
+    print(f'Successfully deleted room with roomCode [{roomCode}].')
     return

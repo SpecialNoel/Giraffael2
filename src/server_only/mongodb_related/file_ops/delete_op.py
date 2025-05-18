@@ -29,11 +29,11 @@ def delete_file(fileID, roomCode):
             {'_id': ObjectId(roomID)}
         )
     except InvalidId:
-        print(f'Error in delete_file(). roomID [{roomID}] is invalid.')
+        print(f'Error in delete_file(). roomCode [{roomCode}] is invalid.')
         return
     
     if file.metadata['roomID'] != roomID:
-        print(f'Error in delete_file(). File with fileID [{fileID}] does not exist in room [{roomID}].')
+        print(f'Error in delete_file(). File with fileID [{fileID}] does not exist in roomCode [{roomCode}].')
         return 
     
     # Delete the file, indicated by the fileID, from the database
@@ -43,23 +43,25 @@ def delete_file(fileID, roomCode):
         {'_id': ObjectId(roomID)},
         {'$pull': {'fileList': {'fileID': ObjectId(fileID)}}}
     )
-    print(f'Successfully deleted file with fileID [{fileID}] in room [{roomID}].')
+    print(f'Successfully deleted file with fileID [{fileID}] in room [{roomCode}].')
     return
 
 # Delete all files in a room
-def delete_all_files(roomID):
+def delete_all_files(roomCode):
+    roomID = roomCode_to_roomID(roomCode)
+
     # Use roomID to get all fileIDs of the room, then use the fileIDs to delete all files
     try:
         files = gfs.find({'metadata.roomID': roomID})
     except InvalidId:
-        print(f'Error in delete_all_files(). roomID [{roomID}] is invalid')
+        print(f'Error in delete_all_files(). roomCode [{roomCode}] is invalid')
         return
     
     if not files.alive:
-        print(f'There are no existing files in room [{roomID}].')
+        print(f'There are no existing files in room [{roomCode}].')
         return
     for file in files:
         print(f'FileID to be deleted: [{file._id}]')
-        delete_file(file._id, roomID)
-    print(f'Successfully deleted all files from room [{roomID}].')
+        delete_file(file._id, roomCode)
+    print(f'Successfully deleted all files from room [{roomCode}].')
     return

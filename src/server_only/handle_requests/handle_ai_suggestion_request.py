@@ -28,6 +28,8 @@ def handle_ai_suggestion_request(clientObj, roomCode, usingOpenAI):
     clientSocket = clientObj.get_socket()
     pastMsgList = get_msg_history(roomCode)
     
+    print(f'pastMsgList: {pastMsgList}')
+    
     if usingOpenAI:
         # Obtain msg suggestions (a string) from OpenAI model
         response = get_msg_suggestion_from_model(pastMsgList)
