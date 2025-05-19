@@ -22,6 +22,6 @@ if __name__=='__main__':
     username = 'ARK'
     clientSocket = Client_Obj(socket, address, username, roomCode)
     
-    add_client_to_list(clientSocket, roomCode)
+    #add_client_to_list(clientSocket, roomCode)
     #list_clients(roomCode)
     #delete_client_from_list(clientSocket.get_address(), roomCode)

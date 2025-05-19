@@ -8,15 +8,18 @@ from mongodb_initiator import rooms_collection, gfs
 from file_ops.general_op import roomCode_to_roomID
 src_folder = Path(__file__).resolve().parents[3] # grandparent level
 sys.path.append(str(src_folder))
-from general.file_transmission import get_filepath_without_duplication
 
 import os
 from bson import ObjectId
 from bson.errors import InvalidId
 from gridfs.errors import NoFile
 
-
 # Download file from a room
+# Note: the only intended way to use download_file() is to query target file from database 
+#       to server_only/handle_requests/file_buffer_folder, then the server can send that file
+#       to the client. Client download request has to be done this way given that server
+#       has to first send the metadata of the file to the client, before the whole file can
+#       be sent to the client.
 def download_file(fileID, roomCode, savedir):
     try: 
         file = gfs.get(ObjectId(fileID))
@@ -45,10 +48,9 @@ def download_file(fileID, roomCode, savedir):
     
     # Start downloading the file
     filename = file.filename 
+    # Note that savepath could potentially be colliding with other files in local file_buffer_folder
     savepath = os.path.join(savedir, filename)
-    # Add a unique postfix to the filename of the savepath to avoid duplicated filename inside user-end folder.
-    savepath = get_filepath_without_duplication(savepath)
     with open(savepath, 'wb') as f:
         f.write(file.read())
     print(f'Downloaded file with fileID [{fileID}] from room [{roomID}], stored at [{savepath}].')
-    return
+    return savepath

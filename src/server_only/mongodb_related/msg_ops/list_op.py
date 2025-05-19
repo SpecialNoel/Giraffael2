@@ -9,7 +9,6 @@ from mongodb_initiator import rooms_collection
 
 from bson import ObjectId
 
-
 # List out all messages sent over this room
 def list_msg_history(roomCode):
     roomID = roomCode_to_roomID(roomCode)

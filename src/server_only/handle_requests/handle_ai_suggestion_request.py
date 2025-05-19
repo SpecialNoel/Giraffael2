@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from general.message import send_msg_with_prefix
 from server_only.others.openai_model_settings import (maxTokensPerSuggestion, 
-                                               numOfSuggestions, temp)
+                                                      numOfSuggestions, temp)
 from server_only.others.retrieve_secret_from_aws import get_api_key
 from server_only.others.settings import serverIsLocal
 

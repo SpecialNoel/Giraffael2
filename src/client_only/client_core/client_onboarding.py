@@ -1,8 +1,8 @@
 # client_onboarding.py
 
 from client_only.client_core.client_sender_thread_ops import (send_decision_on_room, 
-                                                    send_room_code,
-                                                    send_username)
+                                                              send_room_code,
+                                                              send_username)
 
 def handle_room_decision(client, chunkSize):
     # Try sending client decision on room to server

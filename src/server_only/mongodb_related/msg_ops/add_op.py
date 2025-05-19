@@ -9,7 +9,6 @@ from mongodb_initiator import rooms_collection
 
 from bson import ObjectId
 
- 
 # Add msg to the msg history in a room
 def add_msg_to_history(roomCode, senderID, senderName, msg):
     # Generate a metadata for msg in the following format

@@ -7,7 +7,6 @@ sys.path.append(str(src_folder))
 from msg_ops.general_op import roomCode_to_roomID
 from mongodb_initiator import rooms_collection
 
-
 def create_room(roomCode, roomName='NewRoom'):
     if roomCode_to_roomID(roomCode) != None:
         print(f'Error in create_room(). Room with roomCode [{roomCode}] already exists.')

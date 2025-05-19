@@ -25,7 +25,7 @@ def handle_one_client(shutdownEvent, clientObj, clients, room, rooms, chunkSize,
                 handle_disconnect_request(client, clients, address, room, rooms)
                 break
 
-            handle_request(prefix, clientObj, msgContent, room, rooms,
+            handle_request(prefix, clientObj, msgContent, room,
                            roomCode, chunkSize, maxFileSize, 
                            extList, typePrefix, usingOpenAI)
         except (BrokenPipeError, 

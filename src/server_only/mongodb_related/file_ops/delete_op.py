@@ -10,7 +10,6 @@ from file_ops.general_op import roomCode_to_roomID
 from bson import ObjectId
 from bson.errors import InvalidId
 
-
 # Delete a file in a room
 def delete_file(fileID, roomCode):
     try:

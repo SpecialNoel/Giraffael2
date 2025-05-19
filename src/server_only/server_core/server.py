@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 src_folder = Path(__file__).resolve().parents[2] # grandparent level
 sys.path.append(str(src_folder))
-from server_only.mongodb_related.client_ops.list_op import get_all_connecting_clients
 
 import socket
 import string

@@ -11,7 +11,6 @@ from msg_ops.general_op import roomCode_to_roomID
 from bson import ObjectId
 from bson.errors import InvalidId
 
-
 # Delete a room in the DB (based on ObjectID of the room)
 def delete_room(roomCode):
     roomID = roomCode_to_roomID(roomCode)

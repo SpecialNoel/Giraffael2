@@ -9,7 +9,6 @@ from mongodb_initiator import rooms_collection
 
 from bson import ObjectId
 
-
 def add_client_to_list(clientObj, roomCode):
     roomID = roomCode_to_roomID(roomCode)
 

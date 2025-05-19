@@ -7,7 +7,7 @@ from server_only.handle_requests.handle_ai_suggestion_request import handle_ai_s
 from server_only.handle_requests.handle_normal_msg import handle_normal_msg
 from server_only.handle_requests.handle_upload_request import handle_upload_request
 
-def handle_request(prefix, clientObj, msgContent, room, rooms,
+def handle_request(prefix, clientObj, msgContent, room,
                    roomCode, chunkSize, maxFileSize, 
                    extList, typePrefix, usingOpenAI):  
     if prefix == 0:
@@ -22,7 +22,7 @@ def handle_request(prefix, clientObj, msgContent, room, rooms,
         handle_upload_request(clientObj, roomCode, chunkSize, maxFileSize, extList)
     elif prefix == 3: 
         # Received file-download request
-        handle_download_request(clientObj, room, roomCode,
+        handle_download_request(clientObj, room,
                                 msgContent, chunkSize, 
                                 maxFileSize, extList)
     elif prefix == 4: 

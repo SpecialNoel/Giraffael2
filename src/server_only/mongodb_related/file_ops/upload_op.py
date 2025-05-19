@@ -14,7 +14,6 @@ import os
 from bson import ObjectId
 from bson.errors import InvalidId
 
-
 # Upload file to a room
 def upload_file(filepath, roomCode):    
     # Generate a unique filename to avoid uploading a file with a duplicated filename

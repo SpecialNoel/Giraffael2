@@ -9,7 +9,6 @@ from mongodb_initiator import rooms_collection
 
 from bson import ObjectId
 
-
 # Clear all message history happened in this room
 def clear_msg_history(roomCode):
     roomID = roomCode_to_roomID(roomCode)

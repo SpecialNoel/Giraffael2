@@ -34,16 +34,6 @@ def display_rule():
           '\nPress [Enter/Return] key to disconnect.\n')
     return
 
-def find_file_in_directory(filename, target_dir, start_dir='.'):
-    '''
-    Used by server to check if it has the file in target_dir,
-      for which client wanted to download to their local machine
-    '''
-    for root, dirs, files in os.walk(start_dir):
-        if os.path.basename(root) == target_dir and filename in files:
-            return os.path.join(root, filename)
-    return None
-
 def check_if_directory_exists(directory):
     if not directory:
         directory = '.'

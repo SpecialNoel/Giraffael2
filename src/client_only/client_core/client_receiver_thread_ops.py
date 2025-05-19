@@ -11,7 +11,8 @@ sys.path.append(str(src_folder))
 import pickle 
 from client_only.handle_requests.handle_ai_suggestion import handle_ai_suggestion
 from general.file_transmission import *
-from general.message import (get_prefix_and_content, rstrip_message, 
+from general.message import (get_prefix_and_content, 
+                             rstrip_message, 
                              recv_decoded_content)
 
 def handle_recv_request(prefix, typePrefix, msgContent, client, 

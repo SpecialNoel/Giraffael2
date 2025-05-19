@@ -6,7 +6,6 @@ src_folder = Path(__file__).resolve().parents[1] # parent level
 sys.path.append(str(src_folder))
 from mongodb_initiator import rooms_collection
 
-
 def get_roomCodes():
     roomCodes = []
     

@@ -25,7 +25,7 @@ def handle_upload_request(clientObj, roomCode, chunkSize,
             os.remove(filepath)
             print(f'File [{filepath}] deleted.')
         else:
-            print(f'Error in remove_file_from_file_buffer_folder: File [{filepath}]not found.')
+            print(f'Error in remove_file_from_file_buffer_folder: File [{filepath}] not found.')
         return 
 
     address = clientObj.get_address()
