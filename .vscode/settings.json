@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "AESGCM",
+        "boto",
         "bson",
         "DGRAM",
         "ECDH",
@@ -17,11 +19,15 @@
         "Metadatas",
         "newkey",
         "openpyxl",
+        "Prekey",
+        "pycryptodome",
+        "pymongo",
         "qdrfy",
         "reportlab",
         "savedir",
         "savepath",
         "Unso",
-        "uppered"
+        "uppered",
+        "urandom"
     ]
 }
