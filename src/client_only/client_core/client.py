@@ -37,6 +37,9 @@ class Client:
         self.SERVER_IP = self.get_server_ip_based_on_mode()
         self.SERVER_PORT = 5001
         self.client = self.init_client_socket() # client socket
+        self.senderKeyCache = {} # a list of sender keys received from other clients in the room 
+        # a list of session keys with their corresponding clients, consisting pairs of {recipientID, sessionKey}
+        self.sessionKeysWithRecipients = {}
         
         # Threads
         self.shutdownEvent = Event() # threading.Event()
