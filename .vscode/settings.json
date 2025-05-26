@@ -16,6 +16,7 @@
         "juge",
         "keyout",
         "keypair",
+        "Keyseed",
         "Metadatas",
         "newkey",
         "openpyxl",
@@ -26,6 +27,8 @@
         "reportlab",
         "savedir",
         "savepath",
+        "signedpk",
+        "signingk",
         "Unso",
         "uppered",
         "urandom"
