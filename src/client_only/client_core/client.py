@@ -1,28 +1,23 @@
 # client.py
 
 '''
-To run this script: python3 client.py
-Note: must be executed when the server is alive.
+To run this script: python3 -m src.client_only.client_core.client
+Note: Must be executed when the server is alive.
 
 Note: 'client' is essentially only a socket in client.py
 '''
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[2] # grandparent level
-sys.path.append(str(src_folder))
-
 import socket
-from client_only.others.get_server_elastic_ip import get_server_elastic_ip
-from client_only.client_core.check_server_capacity import check_server_capacity
-from client_only.client_core.client_onboarding import handle_room_decision
-from client_only.client_core.client_onboarding import handle_username
-from client_only.client_core.client_receiver_thread_ops import recv_msg_from_server
-from client_only.client_core.client_sender_thread_ops import send_msg_to_server
-from client_only.others.tls_management import setup_tls_context
-from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
-from server_only.others.settings import serverIsLocal, usingTLS
 from threading import Event, Thread
+from src.client_only.others.get_server_elastic_ip import get_server_elastic_ip
+from src.client_only.client_core.check_server_capacity import check_server_capacity
+from src.client_only.client_core.client_onboarding import handle_room_decision
+from src.client_only.client_core.client_onboarding import handle_username
+from src.client_only.client_core.client_receiver_thread_ops import recv_msg_from_server
+from src.client_only.client_core.client_sender_thread_ops import send_msg_to_server
+from src.client_only.others.tls_management import setup_tls_context
+from src.general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
+from src.server_only.others.settings import serverIsLocal, usingTLS
 
 class Client:
     def __init__(self):

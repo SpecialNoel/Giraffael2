@@ -1,13 +1,8 @@
 # add_op.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1] # parent level
-sys.path.append(str(src_folder))
-from msg_ops.general_op import roomCode_to_roomID
-from mongodb_initiator import rooms_collection
-
 from bson import ObjectId
+from src.server_only.mongodb_related.msg_ops.general_op import roomCode_to_roomID
+from src.server_only.mongodb_related.mongodb_initiator import rooms_collection
 
 # Add msg to the msg history in a room
 def add_msg_to_history(roomCode, senderID, senderName, msg):

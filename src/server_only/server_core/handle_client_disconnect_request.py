@@ -1,8 +1,8 @@
 # remove_client.py
 
-from server_only.mongodb_related.client_ops.delete_op import delete_client_from_list
-from server_only.mongodb_related.client_ops.list_op import get_number_of_clients_from_one_room
-from server_only.mongodb_related.room_ops.delete_op import delete_room
+from src.server_only.mongodb_related.client_ops.delete_op import delete_client_from_list
+from src.server_only.mongodb_related.client_ops.list_op import get_number_of_clients_from_one_room
+from src.server_only.mongodb_related.room_ops.delete_op import delete_room
 
 def handle_disconnect_request(client, clients, address, room, rooms):
     roomCode = room.get_room_code()

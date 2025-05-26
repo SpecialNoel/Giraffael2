@@ -1,12 +1,7 @@
 # general_op.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1] # parent level
-sys.path.append(str(src_folder))
-from mongodb_initiator import rooms_collection, gfs
-
 from bson.errors import InvalidId
+from src.server_only.mongodb_related.mongodb_initiator import rooms_collection, gfs
 
 '''
   File structure:      (file_content, filename, metadata: {'roomID'})

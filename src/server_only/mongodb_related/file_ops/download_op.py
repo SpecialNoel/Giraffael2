@@ -1,18 +1,11 @@
 # download_op.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1] # parent level
-sys.path.append(str(src_folder))
-from mongodb_initiator import rooms_collection, gfs
-from file_ops.general_op import roomCode_to_roomID
-src_folder = Path(__file__).resolve().parents[3] # grandparent level
-sys.path.append(str(src_folder))
-
 import os
 from bson import ObjectId
 from bson.errors import InvalidId
 from gridfs.errors import NoFile
+from src.server_only.mongodb_related.file_ops.general_op import roomCode_to_roomID
+from src.server_only.mongodb_related.mongodb_initiator import rooms_collection, gfs
 
 # Download file from a room
 # Note: the only intended way to use download_file() is to query target file from database 

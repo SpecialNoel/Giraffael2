@@ -1,14 +1,9 @@
 # handle_display_history_request.py
 
 import pickle
-from general.message import add_prefix
-
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[2] # grandparent level
-sys.path.append(str(src_folder))
-from server_only.mongodb_related.msg_ops.list_op import get_msg_history
-from server_only.mongodb_related.file_ops.list_op import get_file_history
+from src.general.message import add_prefix
+from src.server_only.mongodb_related.msg_ops.list_op import get_msg_history
+from src.server_only.mongodb_related.file_ops.list_op import get_file_history
 
 def handle_display_history_request(clientObj, msgContent, room):
     address = clientObj.get_address()

@@ -1,12 +1,7 @@
 # client_onboarding.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[2] # grandparent level
-sys.path.append(str(src_folder))
-from server_only.mongodb_related.room_ops.list_op import get_roomCodes
-
-from general.message import recv_decoded_content, send_msg_with_prefix
+from src.general.message import recv_decoded_content, send_msg_with_prefix
+from src.server_only.mongodb_related.room_ops.list_op import get_roomCodes
     
 def recv_response_on_creating_room(client, chunkSize):
     # Obtain response from client about create or enter room

@@ -1,10 +1,10 @@
 # chat_app.py
 
-# Assume in the "src" folder:
-# To run this script: python3 chat_app.py
-# Then, run the client script: python3 client_only/client_core/client.py
+# Assume in the "Giraffael2" folder:
+# To run this script: python3 -m src.chat_app
+# Then, run the client script: python3 -m src.client_only.client_core.client
 
-from server_only.server_core.server import Server
+from src.server_only.server_core.server import Server
 
 class Chat_App:
     def __init__(self):

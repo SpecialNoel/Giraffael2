@@ -1,8 +1,8 @@
 # handle_client.py
 
-from general.message import get_prefix_and_content
-from server_only.server_core.handle_request import handle_request
-from server_only.server_core.handle_client_disconnect_request import handle_disconnect_request
+from src.general.message import get_prefix_and_content
+from src.server_only.server_core.handle_request import handle_request
+from src.server_only.server_core.handle_client_disconnect_request import handle_disconnect_request
 
 def handle_one_client(shutdownEvent, clientObj, clients, room, rooms, chunkSize, 
                       roomCode, maxFileSize, extList, usingOpenAI):

@@ -1,20 +1,15 @@
 # server.py
 
-# To run this script: python3 server.py
-
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[2] # grandparent level
-sys.path.append(str(src_folder))
+# To run this script: python3 -m src.server_only.server_core.server
 
 import socket
 import string
-from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
-from server_only.server_core.accept_connection import accept_a_connection
-from server_only.others.retrieve_secret_from_aws import setup_tls_context_remote
-from server_only.others.tls_management import setup_tls_context_locally
-from server_only.others.settings import serverIsLocal, usingOpenAI, usingTLS
 from threading import Thread, Event
+from src.general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
+from src.server_only.server_core.accept_connection import accept_a_connection
+from src.server_only.others.retrieve_secret_from_aws import setup_tls_context_remote
+from src.server_only.others.tls_management import setup_tls_context_locally
+from src.server_only.others.settings import serverIsLocal, usingOpenAI, usingTLS
 
 class Server:
     def __init__(self):

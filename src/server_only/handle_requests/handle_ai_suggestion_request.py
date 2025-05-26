@@ -4,17 +4,12 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 
-from general.message import send_msg_with_prefix
-from server_only.others.openai_model_settings import (maxTokensPerSuggestion, 
-                                                      numOfSuggestions, temp)
-from server_only.others.retrieve_secret_from_aws import get_api_key
-from server_only.others.settings import serverIsLocal
-
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[2] # grandparent level
-sys.path.append(str(src_folder))
-from server_only.mongodb_related.msg_ops.list_op import get_msg_history
+from src.general.message import send_msg_with_prefix
+from src.server_only.others.openai_model_settings import (maxTokensPerSuggestion, 
+                                                          numOfSuggestions, temp)
+from src.server_only.others.retrieve_secret_from_aws import get_api_key
+from src.server_only.others.settings import serverIsLocal
+from src.server_only.mongodb_related.msg_ops.list_op import get_msg_history
 
 if serverIsLocal:
     # Get API key with local server

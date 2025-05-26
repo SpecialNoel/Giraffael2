@@ -1,9 +1,9 @@
 # handle_ai_suggestion.py
 
 import re
-from client_only.client_core.client_sender_thread_ops import recv_user_input
-from general.file_transmission import display_rule
-from general.message import rstrip_message, send_msg_with_prefix
+from src.client_only.client_core.client_sender_thread_ops import recv_user_input
+from src.general.file_transmission import display_rule
+from src.general.message import rstrip_message, send_msg_with_prefix
 
 def handle_ai_suggestion(client, msgContent):
     response = msgContent.decode()

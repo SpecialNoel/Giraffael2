@@ -1,8 +1,8 @@
 # handle_upload_request.py
 
 import time
-from general.file_transmission import *
-from general.message import send_msg_with_prefix
+from src.general.file_transmission import *
+from src.general.message import send_msg_with_prefix
 
 def handle_upload_file_request(client, chunkSize, maxFileSize, extList):    
     print('Type in filepath of the file you want to send.')

@@ -1,22 +1,16 @@
 # accept_connection.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[2] # grandparent level
-sys.path.append(str(src_folder))
-
-from server_only.mongodb_related.client_ops.add_op import add_client_to_list
-from server_only.mongodb_related.client_ops.list_op import get_number_of_clients_from_all_rooms
-from server_only.mongodb_related.room_ops.create_op import create_room
-
-from general.client_obj import Client_Obj
-from general.message import send_msg_with_prefix
-from server_only.server_core.handle_client import handle_one_client
-from server_only.server_core.client_onboarding import (recv_response_on_creating_room,
-                                                       handle_room_code_message,
-                                                       handle_username_message)
-from server_only.server_core.room_code_operations import generate_room_code, send_room_code
-from server_only.server_core.room import Room 
+from src.general.client_obj import Client_Obj
+from src.general.message import send_msg_with_prefix
+from src.server_only.server_core.handle_client import handle_one_client
+from src.server_only.server_core.client_onboarding import (recv_response_on_creating_room,
+                                                           handle_room_code_message,
+                                                           handle_username_message)
+from src.server_only.server_core.room_code_operations import generate_room_code, send_room_code
+from src.server_only.server_core.room import Room 
+from src.server_only.mongodb_related.client_ops.add_op import add_client_to_list
+from src.server_only.mongodb_related.client_ops.list_op import get_number_of_clients_from_all_rooms
+from src.server_only.mongodb_related.room_ops.create_op import create_room
 
 def test_reach_max_client_count(conn, address, maxClientCount):
     # Disconnect from the connection if reached max client count already

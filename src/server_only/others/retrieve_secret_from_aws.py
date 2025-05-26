@@ -4,7 +4,7 @@ import boto3
 import json
 import ssl
 import tempfile
-from server_only.others.settings import serverIsLocal
+from src.server_only.others.settings import serverIsLocal
 
 def get_secret():
     secret_name = 'Secret-for-Giraffael-2'

@@ -2,13 +2,13 @@
 
 import json
 import os
-from general.file_transmission import (check_if_filesize_is_valid,
+from src.general.file_transmission import (check_if_filesize_is_valid,
                                       check_metadata_format,
                                       recv_file, split_metadata,
                                       get_extension_from_filename,
                                       check_if_filename_has_valid_extension)
-from general.message import get_prefix_and_content
-from server_only.mongodb_related.file_ops.upload_op import upload_file
+from src.general.message import get_prefix_and_content
+from src.server_only.mongodb_related.file_ops.upload_op import upload_file
 
 def handle_upload_request(clientObj, roomCode, chunkSize, 
                           maxFileSize, extList):

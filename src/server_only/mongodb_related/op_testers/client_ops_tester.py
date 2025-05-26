@@ -1,15 +1,9 @@
 # client_ops_tester.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[3] # grand-grandparent level
-sys.path.append(str(src_folder))
-from general.client_obj import Client_Obj
-src_folder = Path(__file__).resolve().parents[1] # parent level
-sys.path.append(str(src_folder))
-from client_ops.add_op import add_client_to_list
-from client_ops.list_op import list_clients
-from client_ops.delete_op import delete_client_from_list
+from src.general.client_obj import Client_Obj
+from src.server_only.mongodb_related.client_ops.add_op import add_client_to_list
+from src.server_only.mongodb_related.client_ops.list_op import list_clients
+from src.server_only.mongodb_related.client_ops.delete_op import delete_client_from_list
 
 import socket
 

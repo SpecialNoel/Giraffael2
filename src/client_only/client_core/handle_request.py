@@ -1,8 +1,8 @@
 # handle_request.py
 
-from client_only.handle_requests.handle_upload_request import handle_upload_file_request
-from client_only.handle_requests.handle_download_request import handle_download_file_request
-from general.message import send_msg_with_prefix
+from src.client_only.handle_requests.handle_upload_request import handle_upload_file_request
+from src.client_only.handle_requests.handle_download_request import handle_download_file_request
+from src.general.message import send_msg_with_prefix
 
 def handle_request(msg, client, chunkSize, maxFileSize, extList): 
     lowerCasedMsg = msg.lower()

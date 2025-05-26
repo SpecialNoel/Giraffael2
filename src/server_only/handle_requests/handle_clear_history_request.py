@@ -1,13 +1,8 @@
 # handle_clear_history_request.py
 
-from general.message import send_msg_with_prefix
-
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[2] # grandparent level
-sys.path.append(str(src_folder))
-from server_only.mongodb_related.msg_ops.clear_op import clear_msg_history
-from server_only.mongodb_related.file_ops.delete_op import delete_all_files
+from src.general.message import send_msg_with_prefix
+from src.server_only.mongodb_related.msg_ops.clear_op import clear_msg_history
+from src.server_only.mongodb_related.file_ops.delete_op import delete_all_files
 
 def handle_clear_history_request(clientObj, msgContent, room):
     address = clientObj.get_address()

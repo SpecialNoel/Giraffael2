@@ -1,9 +1,9 @@
 # handle_normal_msg.py
 
-from general.message import rstrip_message, send_msg_with_prefix
-from server_only.server_core.check_client_alive import check_client_alive
-from server_only.mongodb_related.msg_ops.add_op import add_msg_to_history
-from server_only.mongodb_related.client_ops.delete_op import delete_client_from_list
+from src.general.message import rstrip_message, send_msg_with_prefix
+from src.server_only.server_core.check_client_alive import check_client_alive
+from src.server_only.mongodb_related.msg_ops.add_op import add_msg_to_history
+from src.server_only.mongodb_related.client_ops.delete_op import delete_client_from_list
 
 def handle_normal_msg(clientObj, msgContent, room):
     msg = rstrip_message(msgContent.decode())

@@ -1,14 +1,8 @@
 # room_code_operations.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[2] # grandparent level
-sys.path.append(str(src_folder))
-from server_only.mongodb_related.room_ops.list_op import get_roomCodes
-
 import secrets
-from general.message import send_msg_with_prefix
-
+from src.general.message import send_msg_with_prefix
+from src.server_only.mongodb_related.room_ops.list_op import get_roomCodes
 
 def generate_room_code(charPools, roomCodeLength):
     # Generate an unique room code with roomCodeLength characters

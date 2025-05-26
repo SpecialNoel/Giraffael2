@@ -2,18 +2,12 @@
 
 # This is the main logic behind client receiver thread.
 
-# Used to import files from the 'general' folder
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1]
-sys.path.append(str(src_folder))
-  
 import pickle 
-from client_only.handle_requests.handle_ai_suggestion import handle_ai_suggestion
-from general.file_transmission import *
-from general.message import (get_prefix_and_content, 
-                             rstrip_message, 
-                             recv_decoded_content)
+from src.client_only.handle_requests.handle_ai_suggestion import handle_ai_suggestion
+from src.general.file_transmission import *
+from src.general.message import (get_prefix_and_content, 
+                                 rstrip_message, 
+                                 recv_decoded_content)
 
 def handle_recv_request(prefix, typePrefix, msgContent, client, 
                         chunkSize, maxFileSize, extList):    

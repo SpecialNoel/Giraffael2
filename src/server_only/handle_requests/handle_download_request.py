@@ -2,15 +2,15 @@
 
 import os
 import time
-from general.file_transmission import (check_if_filesize_is_valid,
-                                      create_metadata,
-                                      get_directory_and_filename,
-                                      send_file, send_metadata,
-                                      get_extension_from_filename,
-                                      check_if_filename_has_valid_extension)
-from general.message import send_msg_with_prefix
-from server_only.mongodb_related.file_ops.list_op import get_file_history, get_fileID
-from server_only.mongodb_related.file_ops.download_op import download_file
+from src.general.file_transmission import (check_if_filesize_is_valid,
+                                          create_metadata,
+                                          get_directory_and_filename,
+                                          send_file, send_metadata,
+                                          get_extension_from_filename,
+                                          check_if_filename_has_valid_extension)
+from src.general.message import send_msg_with_prefix
+from src.server_only.mongodb_related.file_ops.list_op import get_file_history, get_fileID
+from src.server_only.mongodb_related.file_ops.download_op import download_file
 
 def handle_download_request(clientObj, room, msgContent, 
                             chunkSize, maxFileSize, extList):
