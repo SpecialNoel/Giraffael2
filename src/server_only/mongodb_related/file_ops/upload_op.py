@@ -45,7 +45,7 @@ def upload_file(filepath, roomCode):
         return -1
     
     # Handle name of the file, if it is not unique
-    nameOfFile=filepath.split('/')[-1]
+    nameOfFile = os.path.basename(filepath)
     if check_file_existence_in_room(nameOfFile, roomID):
         nameOfFile = generate_filename_with_unique_postfix(nameOfFile, roomID)
     

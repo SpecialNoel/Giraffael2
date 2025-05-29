@@ -1,10 +1,10 @@
 # chat_app.py
 
 # Assume in the "Giraffael2" folder:
-# For Mac:
+# On Mac:
 #   To run this script: python3 -m src.chat_app
 #   Then, run the client script: python3 -m src.client_only.client_core.client
-# For Windows:
+# On Windows:
 #   To run this script: python -m src.chat_app
 #   Then, run the client script: python -m src.client_only.client_core.client
 
