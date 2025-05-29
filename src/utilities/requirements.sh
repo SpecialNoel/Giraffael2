@@ -1,5 +1,6 @@
 # requirements.sh
 
+# Assume in the "src" folder:
 # To run this script: ./utilities/requirements.sh 
 # Note: Have to cd to the src folder for this to work
 

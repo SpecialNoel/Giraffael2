@@ -1,11 +1,7 @@
 # client.py
 
-'''
-To run this script: python3 -m src.client_only.client_core.client
-Note: Must be executed when the server is alive.
-
-Note: 'client' is essentially only a socket in client.py
-'''
+# Note: Must be executed when the server is alive.
+# Note: 'client' is essentially only a socket in client.py
 
 import socket
 from threading import Event, Thread
@@ -45,7 +41,7 @@ class Client:
     
     def get_server_ip_based_on_mode(self):        
         if self.serverIsLocal:
-            return '10.0.0.99' # for local machine
+            return '10.0.0.33' # for local machine
         elif self.serverIsRemote:
             return get_server_elastic_ip() # for remote server 
         else:

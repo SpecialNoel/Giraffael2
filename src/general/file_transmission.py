@@ -15,8 +15,8 @@ CHUNK_SIZE = 1025
 MAX_FILE_SIZE = 104857600 # in bytes; which is equivalent to 100MB
 EXT_LIST = ['.txt',  '.md',   '.json', '.xml', '.csv',
            '.docx', '.xlsx', '.pdf',  '.py',  '.html',
-           '.css',  '.cpp',  '.java', '.tar.gz',
-           '.png',  '.jpg',  '.gif',  '.mp3', '.mp4', '.db']
+           '.css',  '.cpp',  '.java', '.tar.gz', '.db',
+           '.png',  '.jpg',  '.jpeg', '.gif',  '.mp3', '.mp4']
 
 def display_rule():
     print('\nInput message to send to this chatroom,',

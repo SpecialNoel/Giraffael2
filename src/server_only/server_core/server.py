@@ -1,7 +1,5 @@
 # server.py
 
-# To run this script: python3 -m src.server_only.server_core.server
-
 import socket
 import string
 from threading import Thread, Event
