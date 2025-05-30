@@ -6,6 +6,7 @@
         "DGRAM",
         "ECDH",
         "eipalloc",
+        "fastapi",
         "fghwo",
         "fqvg",
         "gethostname",
@@ -31,6 +32,7 @@
         "signingk",
         "Unso",
         "uppered",
-        "urandom"
+        "urandom",
+        "uvicorn"
     ]
 }
