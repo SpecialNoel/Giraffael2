@@ -1,6 +1,6 @@
 # chat_app.py
 
-# Assume in the "Giraffael2" folder:
+# Assume in the 'Giraffael2' folder:
 # On Mac:
 #   To run this script: python3 -m src.chat_app
 #   Then, run the client script: python3 -m src.client_only.client_core.client

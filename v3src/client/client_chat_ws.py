@@ -1,15 +1,15 @@
 # client_chat_ws.py
 
-# python v3-src/client/client_chat_ws.py
+# python v3src/client/client_chat_ws.py
 
 import asyncio
 import base64
 import json
 import sys
 import websockets
-from encryption import encrypt, decrypt
+from v3src.client.encryption import encrypt, decrypt
 
-# Websocket logic for sending a message to a target client
+# WebSocket logic for sending a message to a target client
 async def chat_send(wsUri, senderID, recipientID, key, plainText):
     encryptedText = encrypt(key, plainText)    
     cipherTextStr = base64.b64encode(encryptedText['cipherText']).decode()
@@ -19,7 +19,7 @@ async def chat_send(wsUri, senderID, recipientID, key, plainText):
     async with websockets.connect(wsUriWithSenderID) as websocket:
         msg = {
             'typeOfMsg': 'message',
-            'senderID': senderID,
+            'senderID': senderID, 
             'recipientID': recipientID,
             'cipherText': cipherTextStr,
             'nonce': nonceStr
@@ -32,7 +32,7 @@ async def chat_send(wsUri, senderID, recipientID, key, plainText):
         #     print('Received response:', response)
     return
             
-# Websocket logic for continuously receiving messages as a receiver client
+# WebSocket logic for continuously receiving messages as a receiver client
 async def chat_recv(wsUri, recipientID, key):
     wsUriWithRecipientID = wsUri + recipientID
     async with websockets.connect(wsUriWithRecipientID) as websocket:

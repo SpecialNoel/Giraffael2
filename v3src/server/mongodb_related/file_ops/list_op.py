@@ -3,8 +3,8 @@
 from bson import ObjectId
 from bson.errors import InvalidId
 
-from src.server_only.mongodb_related.file_ops.general_op import roomCode_to_roomID
-from src.server_only.mongodb_related.mongodb_initiator import gfs
+from v3src.server.mongodb_related.file_ops.general_op import roomCode_to_roomID
+from v3src.server.mongodb_related.mongodb_initiator import gfs
 
 # List all files in a room
 def get_file_history(roomCode):
@@ -25,6 +25,7 @@ def get_file_history(roomCode):
 
 def get_fileID(filename, roomCode):
     roomID = roomCode_to_roomID(roomCode)
+    print(f'roomID: {roomID}')
     
     try:
         room_id = ObjectId(roomID)  # Validates the format of roomID
@@ -37,4 +38,7 @@ def get_fileID(filename, roomCode):
         'metadata.roomID': roomID
     })
     file_ids = [file._id for file in files]
+    if not file_ids:
+        print(f'⚠️ No file found with filename [{filename}] in roomID [{roomID}]')
+        return None
     return file_ids[0]
