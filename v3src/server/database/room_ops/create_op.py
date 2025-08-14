@@ -1,7 +1,7 @@
 # create_op.py
 
-from v3src.server.mongodb_related.msg_ops.general_op import roomCode_to_roomID
-from v3src.server.mongodb_related.mongodb_initiator import rooms_collection
+from v3src.server.database.msg_ops.general_op import roomCode_to_roomID
+from v3src.server.database.mongodb_initiator import rooms_collection
 
 def create_room(roomCode, roomName='NewRoom'):
     if roomCode_to_roomID(roomCode) != None:

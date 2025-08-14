@@ -1,6 +1,6 @@
 # list_op.py
 
-from v3src.server.mongodb_related.mongodb_initiator import rooms_collection
+from v3src.server.database.mongodb_initiator import rooms_collection
 
 def get_roomCodes():
     roomCodes = []

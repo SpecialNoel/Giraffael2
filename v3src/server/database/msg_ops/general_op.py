@@ -1,6 +1,6 @@
 # general_op.py
 
-from v3src.server.mongodb_related.mongodb_initiator import rooms_collection
+from v3src.server.database.mongodb_initiator import rooms_collection
 
 # get roomID with the roomCode of a room, if any
 def roomCode_to_roomID(roomCode):

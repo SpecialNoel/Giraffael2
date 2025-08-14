@@ -1,8 +1,8 @@
 # delete_op.py
 
 from bson import ObjectId
-from v3src.server.mongodb_related.msg_ops.general_op import roomCode_to_roomID
-from v3src.server.mongodb_related.mongodb_initiator import rooms_collection
+from v3src.server.database.msg_ops.general_op import roomCode_to_roomID
+from v3src.server.database.mongodb_initiator import rooms_collection
 
 def delete_client_from_list(address, roomCode):
     roomID = roomCode_to_roomID(roomCode)

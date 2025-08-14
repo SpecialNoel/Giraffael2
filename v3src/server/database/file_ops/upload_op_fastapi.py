@@ -3,8 +3,8 @@
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import File, UploadFile
-from v3src.server.mongodb_related.file_ops.general_op import roomCode_to_roomID
-from v3src.server.mongodb_related.mongodb_initiator import rooms_collection, gfs
+from v3src.server.database.file_ops.general_op import roomCode_to_roomID
+from v3src.server.database.mongodb_initiator import rooms_collection, gfs
 
 # Upload file to a room using fastapi
 def upload_file_with_fastapi(roomCode: str, file: UploadFile = File(...)):    

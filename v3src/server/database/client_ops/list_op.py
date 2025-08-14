@@ -1,8 +1,8 @@
 # list_op.py
 
 from bson import ObjectId
-from v3src.server.mongodb_related.msg_ops.general_op import roomCode_to_roomID
-from v3src.server.mongodb_related.mongodb_initiator import rooms_collection
+from v3src.server.database.msg_ops.general_op import roomCode_to_roomID
+from v3src.server.database.mongodb_initiator import rooms_collection
 
 def list_clients(roomCode):
     roomID = roomCode_to_roomID(roomCode)

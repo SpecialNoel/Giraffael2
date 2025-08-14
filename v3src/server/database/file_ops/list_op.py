@@ -3,8 +3,8 @@
 from bson import ObjectId
 from bson.errors import InvalidId
 
-from v3src.server.mongodb_related.file_ops.general_op import roomCode_to_roomID
-from v3src.server.mongodb_related.mongodb_initiator import gfs
+from v3src.server.database.file_ops.general_op import roomCode_to_roomID
+from v3src.server.database.mongodb_initiator import gfs
 
 # List all files in a room
 def get_file_history(roomCode):

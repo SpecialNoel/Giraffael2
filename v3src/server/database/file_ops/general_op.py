@@ -1,7 +1,7 @@
 # general_op.py
 
 from bson.errors import InvalidId
-from v3src.server.mongodb_related.mongodb_initiator import rooms_collection, gfs
+from v3src.server.database.mongodb_initiator import rooms_collection, gfs
 
 '''
   File structure:      (file_content, filename, metadata: {'roomID'})

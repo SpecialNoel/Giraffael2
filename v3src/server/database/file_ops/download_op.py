@@ -1,12 +1,11 @@
-# download_op_fastapi.py
+# download_op.py
 
-import io
+import os
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi.responses import StreamingResponse
 from gridfs.errors import NoFile
-from v3src.server.mongodb_related.file_ops.general_op import roomCode_to_roomID
-from v3src.server.mongodb_related.mongodb_initiator import rooms_collection, gfs
+from v3src.server.database.file_ops.general_op import roomCode_to_roomID
+from v3src.server.database.mongodb_initiator import rooms_collection, gfs
 
 # Download file from a room
 # Note: the only intended way to use download_file() is to query target file from database 
@@ -14,7 +13,7 @@ from v3src.server.mongodb_related.mongodb_initiator import rooms_collection, gfs
 #       to the client. Client download request has to be done this way given that server
 #       has to first send the metadata of the file to the client, before the whole file can
 #       be sent to the client.
-def download_file_with_fastapi(roomCode, fileID):
+def download_file(fileID, roomCode, savedir):
     try: 
         file = gfs.get(ObjectId(fileID))
     except InvalidId:
@@ -25,8 +24,7 @@ def download_file_with_fastapi(roomCode, fileID):
         return
     
     roomID = roomCode_to_roomID(roomCode)
-    print(f'roomID: {roomID}')
-
+    
     # Test if given roomID is in invalid format
     try:
         room = rooms_collection.find_one(
@@ -40,12 +38,12 @@ def download_file_with_fastapi(roomCode, fileID):
     if file.metadata['roomID'] != roomID:
         print(f'Error in download_file(). File with fileID [{fileID}] does not exist in room [{roomID}].')
         return 
-    print(f'File {file.filename} belongs to room {roomID}, proceeding with download.')
     
-    fileData = file.read()
-    filename = file.filename or 'downloaded_file'
-    return StreamingResponse(
-        io.BytesIO(fileData),
-        media_type='application/octet-stream',
-        headers={'Content-Disposition': f'attachment; filename={filename}'}
-    )
+    # Start downloading the file
+    filename = file.filename 
+    # Note that savepath could potentially be colliding with other files in local file_buffer_folder
+    savepath = os.path.join(savedir, filename)
+    with open(savepath, 'wb') as f:
+        f.write(file.read())
+    print(f'Downloaded file with fileID [{fileID}] from room [{roomID}], stored at [{savepath}].')
+    return savepath
