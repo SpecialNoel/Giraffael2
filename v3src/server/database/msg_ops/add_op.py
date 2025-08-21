@@ -8,7 +8,7 @@ from v3src.server.database.mongodb_initiator import rooms_collection
 def add_msg_to_history(roomCode, senderID, senderName, msg):
     # Generate a metadata for msg in the following format
     # Note: senderID must be unique; senderName can be duplicate.
-    def gen_metadata(senderID, senderName, msg):
+    def generate_metadata(senderID, senderName, msg):
         return {
             'senderID': senderID,
             'senderName': senderName,
@@ -19,7 +19,7 @@ def add_msg_to_history(roomCode, senderID, senderName, msg):
     roomID = roomCode_to_roomID(roomCode)
     
     if roomID:
-        msgWithMetadata = gen_metadata(senderID, senderName, msg)
+        msgWithMetadata = generate_metadata(senderID, senderName, msg)
         rooms_collection.update_one(
             {'_id': ObjectId(roomID)},
             {'$push': {'msgList': msgWithMetadata}}
