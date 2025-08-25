@@ -2,7 +2,7 @@
 
 from bson import ObjectId
 from bson.errors import InvalidId
-from v3src.server.database.file_ops.general_op import roomCode_to_roomID
+from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
 from v3src.server.database.mongodb_initiator import rooms_collection, gfs
 
 # Delete a file in a room
@@ -14,19 +14,13 @@ def delete_file(fileID, roomCode):
             return
     except InvalidId:
         print(f'Error in delete_file(). fileID [{fileID}] is invalid.')
-        
-    roomID = roomCode_to_roomID(roomCode)
-        
-    # Test if given roomID is in invalid format
-    try:
-        room = rooms_collection.find_one(
-            {'_id': ObjectId(roomID)}
-        )
-    except InvalidId:
+                
+    # Test if given roomCode is in invalid format
+    if not room_code_exists_in_collection(roomCode):
         print(f'Error in delete_file(). roomCode [{roomCode}] is invalid.')
         return
     
-    if file.metadata['roomID'] != roomID:
+    if file.metadata['roomCode'] != roomCode:
         print(f'Error in delete_file(). File with fileID [{fileID}] does not exist in roomCode [{roomCode}].')
         return 
     
@@ -34,7 +28,7 @@ def delete_file(fileID, roomCode):
     gfs.delete(ObjectId(fileID))
     # Remove the filename, indicated by the fileID, from 'fileList' of this room    
     rooms_collection.update_one(
-        {'_id': ObjectId(roomID)},
+        {'roomCode': roomCode},
         {'$pull': {'fileList': {'fileID': ObjectId(fileID)}}}
     )
     print(f'Successfully deleted file with fileID [{fileID}] in room [{roomCode}].')
@@ -42,11 +36,9 @@ def delete_file(fileID, roomCode):
 
 # Delete all files in a room
 def delete_all_files(roomCode):
-    roomID = roomCode_to_roomID(roomCode)
-
-    # Use roomID to get all fileIDs of the room, then use the fileIDs to delete all files
+    # Use roomCode to get all fileIDs of the room, then use the fileIDs to delete all files
     try:
-        files = gfs.find({'metadata.roomID': roomID})
+        files = gfs.find({'metadata.roomCode': roomCode})
     except InvalidId:
         print(f'Error in delete_all_files(). roomCode [{roomCode}] is invalid')
         return

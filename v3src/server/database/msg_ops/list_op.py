@@ -1,17 +1,14 @@
 # list_op.py
 
-from bson import ObjectId
-from v3src.server.database.msg_ops.general_op import roomCode_to_roomID
+from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
 from v3src.server.database.mongodb_initiator import rooms_collection
 
 # List out all messages sent over this room
 def list_msg_history(roomCode):
-    roomID = roomCode_to_roomID(roomCode)
-
-    if roomID:
+    if room_code_exists_in_collection(roomCode):
         print(f'Msg history stored in room with roomCode [{roomCode}]:')
         room = rooms_collection.find_one(
-            {'_id': ObjectId(roomID)}
+            {'roomCode': roomCode}
         )
         msgMetadatas = room['msgList']
         for msgMetadata in msgMetadatas:
@@ -21,12 +18,10 @@ def list_msg_history(roomCode):
     return
 
 def get_msg_history(roomCode):
-    roomID = roomCode_to_roomID(roomCode)
-
-    if roomID:
+    if room_code_exists_in_collection(roomCode):
         print(f'Msg history stored in room with roomCode [{roomCode}]:')
         room = rooms_collection.find_one(
-            {'_id': ObjectId(roomID)}
+            {'roomCode': roomCode}
         )
         msgHistory = []
         msgMetadatas = room['msgList']

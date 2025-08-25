@@ -1,7 +1,7 @@
 # add_op.py
 
 from bson import ObjectId
-from v3src.server.database.msg_ops.general_op import roomCode_to_roomID
+from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
 from v3src.server.database.mongodb_initiator import rooms_collection
 
 # Add msg to the msg history in a room
@@ -15,13 +15,11 @@ def add_msg_to_history(roomCode, senderID, senderName, msg):
             'message': msg
         }
     
-    # Convert roomCode to roomID for generalization (using only roomID to execute DB operations)
-    roomID = roomCode_to_roomID(roomCode)
-    
-    if roomID:
+    # Convert roomCode to roomCode for generalization (using only roomCode to execute DB operations)
+    if room_code_exists_in_collection(roomCode):
         msgWithMetadata = generate_metadata(senderID, senderName, msg)
         rooms_collection.update_one(
-            {'_id': ObjectId(roomID)},
+            {'roomCode': roomCode},
             {'$push': {'msgList': msgWithMetadata}}
         )
         print(f'Successfully added msg to the msgList of room with roomCode [{roomCode}].')

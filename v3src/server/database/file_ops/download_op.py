@@ -4,7 +4,7 @@ import os
 from bson import ObjectId
 from bson.errors import InvalidId
 from gridfs.errors import NoFile
-from v3src.server.database.file_ops.general_op import roomCode_to_roomID
+from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
 from v3src.server.database.mongodb_initiator import rooms_collection, gfs
 
 # Download file from a room
@@ -22,21 +22,15 @@ def download_file(fileID, roomCode, savedir):
     except NoFile: 
         print(f'Error in download_file(). File with fileID [{fileID}] does not exist in database.')
         return
-    
-    roomID = roomCode_to_roomID(roomCode)
-    
-    # Test if given roomID is in invalid format
-    try:
-        room = rooms_collection.find_one(
-            {'_id': ObjectId(roomID)}
-        )
-    except InvalidId:
-        print(f'Error in download_file(). roomID [{roomID}] is invalid.')
+        
+    # Test if given roomCode is in invalid format
+    if not room_code_exists_in_collection(roomCode):
+        print(f'Error in download_file(). roomCode [{roomCode}] is invalid.')
         return
     
     # Test if the file is in database, but not in the given room 
-    if file.metadata['roomID'] != roomID:
-        print(f'Error in download_file(). File with fileID [{fileID}] does not exist in room [{roomID}].')
+    if file.metadata['roomCode'] != roomCode:
+        print(f'Error in download_file(). File with fileID [{fileID}] does not exist in room [{roomCode}].')
         return 
     
     # Start downloading the file
@@ -45,5 +39,5 @@ def download_file(fileID, roomCode, savedir):
     savepath = os.path.join(savedir, filename)
     with open(savepath, 'wb') as f:
         f.write(file.read())
-    print(f'Downloaded file with fileID [{fileID}] from room [{roomID}], stored at [{savepath}].')
+    print(f'Downloaded file with fileID [{fileID}] from room [{roomCode}], stored at [{savepath}].')
     return savepath

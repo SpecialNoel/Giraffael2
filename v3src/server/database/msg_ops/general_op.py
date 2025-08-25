@@ -2,9 +2,9 @@
 
 from v3src.server.database.mongodb_initiator import rooms_collection
 
-# get roomID with the roomCode of a room, if any
-def roomCode_to_roomID(roomCode):
+# check if the given roomCode exists in the rooms_collection
+def room_code_exists_in_collection(roomCode):
     room = rooms_collection.find_one(
         {'roomCode': roomCode}
     )   
-    return room['_id'] if room is not None else None
+    return True if room is not None else False

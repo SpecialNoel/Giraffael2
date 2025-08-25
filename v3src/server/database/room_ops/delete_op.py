@@ -1,25 +1,18 @@
 # delete_op.py
 
-from bson import ObjectId
-from bson.errors import InvalidId
-from v3src.server.database.msg_ops.general_op import roomCode_to_roomID
+from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
 from v3src.server.database.file_ops.delete_op import delete_all_files
 from v3src.server.database.mongodb_initiator import rooms_collection
 
 # Delete a room in the DB (based on ObjectID of the room)
 def delete_room(roomCode):
-    roomID = roomCode_to_roomID(roomCode)
-    try:
-        room = rooms_collection.find_one(
-            {'_id': ObjectId(roomID)}
-        )
-    except InvalidId:
+    if not room_code_exists_in_collection(roomCode):
         print(f'Error in upload_file(). roomCode [{roomCode}] is invalid.')
         return -1
     
     # Delete all files existed in that room first
     delete_all_files(roomCode)
     # Delete the room in database
-    rooms_collection.delete_one({'_id': ObjectId(roomID)})
+    rooms_collection.delete_one({'roomCode': roomCode})
     print(f'Successfully deleted room with roomCode [{roomCode}].')
     return

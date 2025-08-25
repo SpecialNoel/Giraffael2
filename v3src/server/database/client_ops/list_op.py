@@ -1,16 +1,13 @@
 # list_op.py
 
-from bson import ObjectId
-from v3src.server.database.msg_ops.general_op import roomCode_to_roomID
+from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
 from v3src.server.database.mongodb_initiator import rooms_collection
 
 def list_clients(roomCode):
-    roomID = roomCode_to_roomID(roomCode)
-
-    if roomID:
+    if room_code_exists_in_collection(roomCode):
         print(f'Clients in room with roomCode [{roomCode}]:')
         room = rooms_collection.find_one(
-            {'_id': ObjectId(roomID)}
+            {'roomCode': roomCode},
         )
         clientList = room['clientList']
         for client in clientList:
@@ -21,10 +18,9 @@ def list_clients(roomCode):
     return 
 
 def get_number_of_clients_from_one_room(roomCode):
-    roomID = roomCode_to_roomID(roomCode)
-    if roomID:
+    if room_code_exists_in_collection(roomCode):
         room = rooms_collection.find_one(
-            {'_id': ObjectId(roomID)}
+            {'roomCode': roomCode},
         )
         clientList = room['clientList']
         return len(clientList)
