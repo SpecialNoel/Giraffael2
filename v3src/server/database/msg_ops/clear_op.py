@@ -10,7 +10,7 @@ def clear_msg_history(roomCode):
             {'roomCode': roomCode},
             {'$set': {'msgList':[]}}
         )
-        print(f'Successfully cleared msg history in room with roomCode [{roomCode}].')
+        print(f'Successfully cleared msg history in room with room code [{roomCode}].')
     else: 
-        print(f'Error in clear_msg(). Room with roomCode [{roomCode}] does not exist.')
+        print(f'Error in clear_msg(). Room [{roomCode}] does not exist.')
     return

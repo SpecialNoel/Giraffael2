@@ -11,7 +11,7 @@ from v3src.server.database.mongodb_initiator import rooms_collection, gfs
 '''
 
 # Get the file in a room by filename
-def get_file_by_filename_and_roomCode(filename, roomCode):
+def get_file_by_filename_and_room_code(filename, roomCode):
     file = None
     try:
         file = gfs.find_one({
@@ -19,19 +19,18 @@ def get_file_by_filename_and_roomCode(filename, roomCode):
             'metadata.roomCode': roomCode
         })
     except InvalidId:
-        print('Error in get_file_by_filename_and_roomCode(). '
-              f'roomCode [{roomCode}] is invalid.')
+        print(f'Error in get_file_by_filename_and_room_code(). Room code [{roomCode}] is invalid.')
     return file
 
 # Check if the target file is stored in a room by filename
 def check_file_existence_in_room(filename, roomCode):
-    return get_file_by_filename_and_roomCode(filename, roomCode) is not None
+    return get_file_by_filename_and_room_code(filename, roomCode) is not None
 
 # Get the corresponding fileID with given filename in a room
-def get_fileID_by_filename_and_roomCode(filename, roomCode):
-    file = get_file_by_filename_and_roomCode(filename, roomCode)
+def get_fileID_by_filename_and_room_code(filename, roomCode):
+    file = get_file_by_filename_and_room_code(filename, roomCode)
     if file is None:
-        print('Error in get_fileID_by_filename_and_roomCode(). '
+        print('Error in get_fileID_by_filename_and_room_code(). '
               f'File with filename [{filename}] cannot be found in room [{roomCode}].')
         return ''
     return file._id

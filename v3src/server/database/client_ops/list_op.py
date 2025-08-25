@@ -13,7 +13,7 @@ def list_clients(roomCode):
         for client in clientList:
             print(f'--uuid:[{client['uuid']}]. address:[{client['address']}]. username:[{client['username']}]')
     else: 
-        print(f'Error in add_client_to_list(). Room with roomCode [{roomCode}] does not exist.')
+        print(f'Error in add_client_to_list(). Room with room code [{roomCode}] does not exist.')
         return
     return 
 
@@ -26,7 +26,7 @@ def get_number_of_clients_from_one_room(roomCode):
         return len(clientList)
     else: 
         print('Error in get_number_of_clients_from_one_room(). ' +
-             f'Room with roomCode [{roomCode}] does not exist.')
+             f'Room with room code [{roomCode}] does not exist.')
         return -1
 
 def get_all_connecting_clients():

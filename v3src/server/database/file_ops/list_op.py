@@ -9,7 +9,7 @@ from v3src.server.database.mongodb_initiator import gfs
 # List all files in a room
 def get_file_history(roomCode):
     if not room_code_exists_in_collection(roomCode):
-        print(f'Error in get_file_history(). roomCode [{roomCode}] is invalid')
+        print(f'Error in get_file_history(). Room code [{roomCode}] is invalid')
         return 
     
     # Find all files of given room
@@ -22,7 +22,7 @@ def get_file_history(roomCode):
 
 def get_fileID(filename, roomCode):
     if not room_code_exists_in_collection(roomCode):
-        print(f'Error in get_file_history(). roomCode [{roomCode}] is invalid')
+        print(f'Error in get_file_history(). Room code [{roomCode}] is invalid')
         return None
     
     files = gfs.find({
@@ -31,6 +31,6 @@ def get_fileID(filename, roomCode):
     })
     file_ids = [file._id for file in files]
     if not file_ids:
-        print(f'⚠️ No file found with filename [{filename}] in roomCode [{roomCode}]')
+        print(f'⚠️ No file found with filename [{filename}] in room [{roomCode}]')
         return None
     return file_ids[0]

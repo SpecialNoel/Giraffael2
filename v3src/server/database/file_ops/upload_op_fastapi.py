@@ -14,11 +14,11 @@ def upload_file_with_fastapi(roomCode: str, file: UploadFile = File(...)):
             {'roomCode': roomCode}
         )
     except InvalidId:
-        print(f'Error in upload_file(). roomCode [{roomCode}] is invalid.')
+        print(f'Error in upload_file(). Room code [{roomCode}] is invalid.')
         return -1
     
     if not room:
-        print(f'Error in upload_file(). Room with roomCode [{roomCode}] does not exist.')
+        print(f'Error in upload_file(). Room [{roomCode}] does not exist.')
         return -1
     
     contents = file.file.read()

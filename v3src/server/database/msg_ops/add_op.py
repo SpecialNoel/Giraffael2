@@ -14,8 +14,7 @@ def add_msg_to_history(roomCode, senderID, senderName, msg):
             'senderName': senderName,
             'message': msg
         }
-    
-    # Convert roomCode to roomCode for generalization (using only roomCode to execute DB operations)
+
     if room_code_exists_in_collection(roomCode):
         msgWithMetadata = generate_metadata(senderID, senderName, msg)
         rooms_collection.update_one(

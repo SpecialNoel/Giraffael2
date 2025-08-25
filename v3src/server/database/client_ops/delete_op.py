@@ -9,7 +9,7 @@ def delete_client_from_list(address, roomCode):
             {'roomCode': roomCode},
             {'$pull': {'clientList': {'address': address}}}
         )
-        print(f'Successfully deleted client with address [{address}] from the clientList of room with roomCode [{roomCode}].')
+        print(f'Successfully deleted client with address [{address}] from the clientList of room with room code [{roomCode}].')
     else: 
-        print(f'Error in delete_client_to_list(). Room with roomCode [{roomCode}] does not exist.')
+        print(f'Error in delete_client_to_list(). Room with room code [{roomCode}] does not exist.')
     return

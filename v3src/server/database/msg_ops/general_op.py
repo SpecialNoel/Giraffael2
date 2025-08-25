@@ -2,7 +2,7 @@
 
 from v3src.server.database.mongodb_initiator import rooms_collection
 
-# check if the given roomCode exists in the rooms_collection
+# check if the given room code exists in the rooms_collection
 def room_code_exists_in_collection(roomCode):
     room = rooms_collection.find_one(
         {'roomCode': roomCode}

@@ -24,9 +24,9 @@ def download_file_with_fastapi(roomCode, fileID):
         print(f'Error in download_file(). File with fileID [{fileID}] does not exist in database.')
         return
 
-    # Test if given roomCode is in invalid format
+    # Test if given room code is in invalid format
     if not room_code_exists_in_collection(roomCode):
-        print(f'Error in download_file(). roomCode [{roomCode}] is invalid.')
+        print(f'Error in download_file(). Room code [{roomCode}] is invalid.')
         return
     
     # Test if the file is in database, but not in the given room 

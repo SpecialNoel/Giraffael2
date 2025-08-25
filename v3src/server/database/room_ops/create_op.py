@@ -5,7 +5,7 @@ from v3src.server.database.mongodb_initiator import rooms_collection, user_statu
 
 def create_room(roomCode, roomName='NewRoom'):
     if room_code_exists_in_collection(roomCode):
-        print(f'Error in create_room(). Room with roomCode [{roomCode}] already exists.')
+        print(f'Error in create_room(). Room [{roomCode}] already exists.')
         return
     room_data = {
         'roomCode': roomCode,
@@ -15,8 +15,8 @@ def create_room(roomCode, roomName='NewRoom'):
         'fileList': []
     }
     roomInsertedID = rooms_collection.insert_one(room_data).inserted_id
-    print(f'Created room in DB with roomCode [{roomCode}]. ' +
-          f'roomCode is [{roomInsertedID}].')
+    print(f'Created room in DB with room code [{roomCode}]. ' +
+          f'Room code is [{roomInsertedID}].')
     
     room_data_for_online_status = {
         'roomCode': roomCode,

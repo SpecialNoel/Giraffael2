@@ -10,9 +10,9 @@ def add_client_to_list(clientObj, roomCode):
             {'roomCode': roomCode},
             {'$push': {'clientList': clientObj.to_dict()}}
         )
-        print(f'Successfully added client [{clientObj.get_address()}] to the clientList of room with roomCode [{roomCode}].')
+        print(f'Successfully added client [{clientObj.get_address()}] to the clientList of room with room code [{roomCode}].')
 
-        # Update the 
+        # Update the user statuses collection upon new user addition
         current_time = datetime.datetime.now(tz=datetime.timezone.utc)        
         user_statuses_collection.update_one(
             {'roomCode': roomCode},
@@ -20,5 +20,5 @@ def add_client_to_list(clientObj, roomCode):
         )
         print(f'')
     else: 
-        print(f'Error in add_client_to_list(). Room with roomCode [{roomCode}] does not exist.')
+        print(f'Error in add_client_to_list(). Room with room code [{roomCode}] does not exist.')
     return 

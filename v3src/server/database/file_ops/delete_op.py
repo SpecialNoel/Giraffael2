@@ -15,13 +15,13 @@ def delete_file(fileID, roomCode):
     except InvalidId:
         print(f'Error in delete_file(). fileID [{fileID}] is invalid.')
                 
-    # Test if given roomCode is in invalid format
+    # Test if given room code is in invalid format
     if not room_code_exists_in_collection(roomCode):
-        print(f'Error in delete_file(). roomCode [{roomCode}] is invalid.')
+        print(f'Error in delete_file(). Room code [{roomCode}] is invalid.')
         return
     
     if file.metadata['roomCode'] != roomCode:
-        print(f'Error in delete_file(). File with fileID [{fileID}] does not exist in roomCode [{roomCode}].')
+        print(f'Error in delete_file(). File with fileID [{fileID}] does not exist in room code [{roomCode}].')
         return 
     
     # Delete the file, indicated by the fileID, from the database
@@ -36,11 +36,11 @@ def delete_file(fileID, roomCode):
 
 # Delete all files in a room
 def delete_all_files(roomCode):
-    # Use roomCode to get all fileIDs of the room, then use the fileIDs to delete all files
+    # Use room code to get all fileIDs of the room, then use the fileIDs to delete all files
     try:
         files = gfs.find({'metadata.roomCode': roomCode})
     except InvalidId:
-        print(f'Error in delete_all_files(). roomCode [{roomCode}] is invalid')
+        print(f'Error in delete_all_files(). Room code [{roomCode}] is invalid')
         return
     
     if not files.alive:

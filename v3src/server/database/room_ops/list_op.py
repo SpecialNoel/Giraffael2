@@ -2,7 +2,7 @@
 
 from v3src.server.database.mongodb_initiator import rooms_collection
 
-def get_roomCodes():
+def get_room_codes():
     roomCodes = []
     
     rooms = rooms_collection.find({}, {'roomCode': 1})

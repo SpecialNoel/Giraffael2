@@ -14,12 +14,12 @@ def create_room_with_room_code(roomCode: str, roomList: list):
         return {'status': 'failed'}
 
 def join_room_with_room_code(roomCode: str, roomList: list): 
-    # Check if the given roomCode is in local cache room list first
+    # Check if the given room code is in local cache room list first
     if roomCode not in roomList:
         print(f'Client tried to join a non-existing room [{roomCode}].')
         return {'status': 'failed'}
     
-    # Check if the given roomCode is corresponding to a room stored in database
+    # Check if the given room code is corresponding to a room stored in database
     if join_room(roomCode):
         room = None
         for tempRoom in roomList:
