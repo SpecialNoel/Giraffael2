@@ -1,7 +1,7 @@
 # room_service.py
 
 from v3src.server.database.room_ops.create_op import create_room
-from v3src.server.database.room_ops.join_op import join_room
+from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
 from v3src.server.schemas.room import Room
 
 def create_room_with_room_code(roomCode: str, roomList: list):
@@ -19,14 +19,22 @@ def join_room_with_room_code(roomCode: str, roomList: list):
         print(f'Client tried to join a non-existing room [{roomCode}].')
         return {'status': 'failed'}
     
-    # Check if the given room code is corresponding to a room stored in database
-    if join_room(roomCode):
-        room = None
-        for tempRoom in roomList:
-            if tempRoom.get_room_code() == roomCode:
-                room = tempRoom
-                break
-        room.add_client_to_client_list(clientSocket) # problem
-        return {'status': 'success'}
-    else: 
+    # Check if the given room code corresponds to a room in database
+    if not room_code_exists_in_collection(roomCode):
+        print(f'Error in join_room(). Room [{roomCode}] does not exist in database.')
         return {'status': 'failed'}
+    
+    # Find the exist room from room list
+    room = None
+    for tempRoom in roomList:
+        if tempRoom.get_room_code() == roomCode:
+            room = tempRoom
+            break
+    
+    if room is None:
+        print(f'Error in join_room(). Room [{roomCode}] does not exist in room list.')
+        return {'status': 'failed'}
+    
+    # Add the client to the target room
+    room.add_client_to_client_list(clientSocket) # problem
+    return {'status': 'success'}

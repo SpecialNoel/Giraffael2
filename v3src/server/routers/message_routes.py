@@ -14,5 +14,5 @@ def send_message(msg: EncryptedMsg):
 
 # FastAPI endpoint for handling a 'fetch' request from a receiver client
 @router.get('/fetch/{recipientID}')
-def fetch_msg(recipientID: str):
+def fetch_message(recipientID: str):
     return fetch_msg(recipientID, msgList)

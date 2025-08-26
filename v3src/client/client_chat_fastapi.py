@@ -147,12 +147,12 @@ def download(uri, roomCode, filename, chunkSize):
 
 if __name__=='__main__':
     CHUNK_SIZE = 1024
-    uri = 'http://10.0.0.99:5001/'
+    uri = 'http://10.0.0.33:5001/'
     senderID = 'Dodo'
     recipientID = 'Fish'
     key = b'1234567890abcdef12345678'
     plainText = b'This is a plain text message.'
-    roomCode = 'fWpO003k8z5'
+    roomCode = 'fWpO003k8z6'
     filename = 'cc.jpeg'
     
     choice = sys.argv[1]
