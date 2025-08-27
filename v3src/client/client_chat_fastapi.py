@@ -20,8 +20,12 @@ def get_file_dir_path(filepath):
     return os.path.dirname(filepath)
 
 # FastAPI logic for creating and joining a room with given room code
-def create_room_with_room_code(uri, roomCode):
-    response = requests.post(uri+'/room/create/'+roomCode)
+def create_and_join_room_with_room_code(uri, roomCode):
+    # Client connects to the server via websocket
+    response = requests.post(uri+'ws/')
+    
+    # Client then proceeds to room creation 
+    response = requests.post(uri+'room/create/'+roomCode)
     print(f'Response status code: {response.status_code}')
     print(f'Received status from server: {response.json()}')
     if response.json().get('status') == 'success':
@@ -32,7 +36,7 @@ def create_room_with_room_code(uri, roomCode):
 
 # FastAPI logic for joining a room with given room code
 def join_room_with_room_code(uri, roomCode):
-    response = requests.post(uri+'/room/join/'+roomCode)
+    response = requests.post(uri+'room/join/'+roomCode)
     print(f'Response status code: {response.status_code}')
     print(f'Received status from server: {response.json()}')
     if response.json().get('status') == 'success':
@@ -157,7 +161,7 @@ if __name__=='__main__':
     
     choice = sys.argv[1]
     
-    create_room_with_room_code(uri, roomCode)
+    create_and_join_room_with_room_code(uri, roomCode)
     
     if choice == 'send':
         send(uri, senderID, recipientID, key, plainText)

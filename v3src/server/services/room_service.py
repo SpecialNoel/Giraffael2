@@ -1,19 +1,21 @@
 # room_service.py
 
+import uuid
+from fastapi import WebSocket
 from v3src.server.database.room_ops.create_op import create_room
 from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
 from v3src.server.schemas.room import Room
 
 def create_room_with_room_code(roomCode: str, roomList: list):
     try:
-        create_room(roomCode)
-        newRoom = Room(roomCode)
-        roomList.append(newRoom)
+        create_room(roomCode)    # create room in database
+        newRoom = Room(roomCode) # create the local cache of this room
+        roomList.append(newRoom) 
         return {'status': 'success'} 
     except:
         return {'status': 'failed'}
 
-def join_room_with_room_code(roomCode: str, roomList: list): 
+def join_room_with_room_code(roomCode: str, roomList: list, uuid: uuid, clientSocket: WebSocket): 
     # Check if the given room code is in local cache room list first
     if roomCode not in roomList:
         print(f'Client tried to join a non-existing room [{roomCode}].')
@@ -36,5 +38,5 @@ def join_room_with_room_code(roomCode: str, roomList: list):
         return {'status': 'failed'}
     
     # Add the client to the target room
-    room.add_client_to_client_list(clientSocket) # problem
+    room.add_client_to_client_list(clientSocket)
     return {'status': 'success'}

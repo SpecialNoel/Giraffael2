@@ -3,7 +3,7 @@
 import uuid
 
 class Client_Obj:
-    def __init__(self, socket, address, username, roomCode):
+    def __init__(self, socket, address, username):
         self.__uuid = uuid.uuid4() # unmodifiable, unique
         self.__socket = socket     # unmodifiable, unique
         self.__address = address   # unmodifiable, unique
@@ -27,8 +27,6 @@ class Client_Obj:
     # Used to store the client object to the database
     def to_dict(self):
         # Need to wrap uuid with str() to make it compatible with bson (database related)
-        # Note: this does not include self.__roomCode, as the client will be added
-        #       only to the target room (and no rooms else).
         return {
             'uuid': str(self.__uuid),
             'address': self.__address,

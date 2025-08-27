@@ -1,27 +1,33 @@
 # websocket_service.py
 
+import json
 from fastapi import WebSocket
-from fastapi.websockets import WebSocketDisconnect
+from v3src.server.schemas.client_obj import Client_Obj
 
-async def websocket_action(websocket: WebSocket, clientID: str, clientList: dict):
-    # Accept the client with the dedicated websocket and update clientList
-    await websocket.accept()
-    clientList[clientID] = websocket
-    
-    try:
-        # Message sending loop
-        while True:
-            # Wait and receive message and recipientID inputted by this client
-            data = await websocket.receive_json()
-            recipientID = data['recipientID']
-            if recipientID in clientList:
-                # If the recipient client is online (not disconnected), send the message to it
-                await clientList[recipientID].send_json(data)
-                print(f'{clientID} sent: {data}')
-            else:
-                # If the recipient client is offline (disconnected), do nothing
-                print(f'{recipientID} offline. Store message: {data}.')
-    except WebSocketDisconnect:
-        # The client disconnected, remove it from clientList 
-        del clientList[clientID]
+async def websocket_action(websocket: WebSocket, username: str):
+    try: 
+        # Accept the client with the dedicated websocket and update clientList
+        await websocket.accept()
+        
+        clientHost, clientPort = websocket.client
+        
+        # Now server has accepted client socket
+        clientObj = Client_Obj(socket=websocket,
+                            address=clientHost, 
+                            username=username)
+        
+        # Server sends a success status to the client
+        payload = {
+            'status': 'success'
+        }
+        await websocket.send_text(json.dumps(payload))
+        
+        # Return this 
+    except Exception as e:
+        print(f'Error in websocket_action(): {e}.')
+        # Server sends a failed status to the client
+        payload = {
+            'status': 'failed'
+        }
+        await websocket.send_text(json.dumps(payload))
     return  
