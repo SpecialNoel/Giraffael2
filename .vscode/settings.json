@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "AESGCM",
+        "aioredis",
         "boto",
         "bson",
         "DGRAM",

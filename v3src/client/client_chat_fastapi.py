@@ -5,19 +5,35 @@
 
 import base64
 import os
+import json
+import asyncio
 import requests
-import sys
+import websockets
 import tkinter as tk
 from tkinter import filedialog
 from v3src.client.encryption import encrypt, decrypt
 
+# Helper functions
 def get_file_extension(filename):
     # Returns the extension of a file, including dot.
     # Example: .txt, .pdf, .png, etc..
     return os.path.splitext(filename)[1]
-
 def get_file_dir_path(filepath):
     return os.path.dirname(filepath)
+
+# --------------------------------------------------------------------------------
+
+# Key functions
+# Used to test whether service side connection manager + redis works fine or not
+async def connect_to_server():
+    uri = 'ws://10.0.0.33:5001/ws/'
+    username = 'dodo'
+    
+    async with websockets.connect(uri+username) as websocket:
+        msg = await websocket.recv()
+        data = json.loads(msg)
+        print(f'Response from server: {data}')
+    return
 
 # FastAPI logic for creating and joining a room with given room code
 def create_and_join_room_with_room_code(uri, roomCode):
@@ -159,6 +175,9 @@ if __name__=='__main__':
     roomCode = 'fWpO003k8z6'
     filename = 'cc.jpeg'
     
+    asyncio.run(connect_to_server())
+    
+    '''
     choice = sys.argv[1]
     
     create_and_join_room_with_room_code(uri, roomCode)
@@ -173,3 +192,5 @@ if __name__=='__main__':
         download(uri, roomCode, filename, CHUNK_SIZE)
     else:
         print('Invalid argument passed when executing client_chat_fastapi.py')
+    '''
+    
