@@ -3,7 +3,7 @@
 import json
 import asyncio
 import redis.asyncio as redis
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 from v3src.server.schemas.client_obj import Client_Obj
 
 class ConnectionManager:
@@ -51,9 +51,14 @@ class ConnectionManager:
             print('Disconnected from Redis.')
 
     # Connect the client with a generated uuid, received username and socket
-    async def connect(self, username: str, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket):
         try: 
+            # Accept the connection established by client
             await websocket.accept()
+            
+            # Get room code and username inputted by the client
+            room_code = websocket.query_params.get('room_code')
+            username = websocket.query_params.get('username')
                     
             # Get client host address
             clientHost, clientPort = websocket.client
@@ -72,8 +77,17 @@ class ConnectionManager:
                 'status': 'success'
             }
             await websocket.send_text(json.dumps(payload))
-            print(f'Client with uuid [{uuid}] connected.')
-            print(f'Current actives: [{self.active}].')
+            print(f'Client [{uuid}] connected.')
+            
+            # Keep receiving client input until client disconnects
+            try:
+                while True:
+                    data = await websocket.receive_text()
+                    print(f'Received from client [{uuid}]: {data}')
+            except WebSocketDisconnect: 
+                print(f'Client [{uuid}] disconnected.')
+                self.disconnect(uuid)
+            
         except Exception as e:
             print(f'Error in connection with [{clientHost}]: {e}.')
             # Server sends a failed status to the client
@@ -85,8 +99,7 @@ class ConnectionManager:
  
     def disconnect(self, uuid: str):
         self.active.pop(uuid, None)
-        print(f'Client with uuid [{uuid}] disconnects.')
-        print(f'Current actives: [{self.active}].')
+        print(f'Client [{uuid}] removed from connection manager.')
         return
 
     async def send_json(self, uuid: str, payload: dict):

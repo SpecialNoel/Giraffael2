@@ -1,7 +1,7 @@
 # client_chat_fastapi.py
 
-# Note: replace 'arg' below with one of the action: [send, recv, upload, download]
-# python -m v3src.client.client_chat_fastapi arg
+# Note: Add one of the options to the command below: [send, recv, upload, download]
+# python -m v3src.client.client_chat_fastapi
 
 import base64
 import os
@@ -22,18 +22,73 @@ def get_file_dir_path(filepath):
     return os.path.dirname(filepath)
 
 # --------------------------------------------------------------------------------
+# New Key functions
 
-# Key functions
-# Used to test whether service side connection manager + redis works fine or not
+# Used to test service side connection with Connection Manager + Redis
 async def connect_to_server():
-    uri = 'ws://10.0.0.33:5001/ws/'
+    base_uri = 'ws://10.0.0.33:5001/ws?'
     username = 'dodo'
+    room_code = 'fWpO003k8z7'
     
-    async with websockets.connect(uri+username) as websocket:
+    VALID_ACTIONS = {'create', 'join', 'leave', 'disconnect'}
+    
+    uri = base_uri + f'username={username}'
+    
+    async with websockets.connect(uri) as websocket:
         msg = await websocket.recv()
         data = json.loads(msg)
         print(f'Response from server: {data}')
+        
+        if data['status'] == 'success':
+            print('Successfully connected to server.')
+            
+            # Setup a loop to listen for client input until disconnect
+            user_input = ''
+            while True:
+                if user_input == 'disconnect':
+                    break
+                
+                print('Type in your action: ')
+                while True:
+                    user_input = input('> ').strip()
+                    if user_input not in VALID_ACTIONS:
+                        print(f'Action invalid. Please type in any action in the following list: [{VALID_ACTIONS}].')
+                    else:
+                        if user_input == 'disconnect':
+                            await send_disconnect_request()
+                            print('Disconnected from server. Exited')
+                            break
+                        elif user_input == 'create':
+                            await send_create_room_request(base_uri, username, room_code, websocket)
+                            print(f'Created room [{room_code}].')
+                        elif user_input == 'join':
+                            await send_join_room_request()
+                            print(f'Joined room [{room_code}].')
+                        elif user_input == 'leave':
+                            await send_leave_room_request()
+                            print(f'Leaved room [{room_code}].')
+        else: 
+            print('Failed to connect to server. Exited.')
     return
+
+async def send_disconnect_request():
+    return
+
+async def send_create_room_request(base_uri, username, room_code, websocket):
+    print('Now sending the create room request.')
+    
+    room_creation_uri = base_uri + f'room_code={room_code}' + f'$username={username}'
+
+    return
+
+async def send_join_room_request():
+    return
+
+async def send_leave_room_request():
+    return
+
+# --------------------------------------------------------------------------------
+# Old Key functions
 
 # FastAPI logic for creating and joining a room with given room code
 def create_and_join_room_with_room_code(uri, roomCode):

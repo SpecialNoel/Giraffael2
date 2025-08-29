@@ -1,0 +1,12 @@
+# docker-compose.yml
+
+# Used to create a docker container that connects to Redis Server
+
+# docker compose -f v3src/server/docker-compose.yml up -d
+# docker compose -f v3src/server/docker-compose.yml down
+
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"

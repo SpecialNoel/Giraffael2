@@ -9,8 +9,9 @@ roomList = [] # local cache of list of rooms
 
 # FastAPI endpoint for handling a 'create room' request from a client
 @router.post('/room/create/{roomCode}')
-def create_room(roomCode: str):
+async def create_room(roomCode: str):
     # get client socket, then generate an uuid for this client
+    
 
     # create room and add the (uuid: clientSocket) pair to the client list
     createRoomSuccess = create_room_with_room_code(roomCode, roomList, uuid, clientSocket)
