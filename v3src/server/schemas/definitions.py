@@ -8,3 +8,7 @@ class EncryptedMsg(BaseModel):
     recipientID: str
     cipherText: str
     nonce: str
+    
+class RoomRequest(BaseModel):
+    room_code: str
+    username: str

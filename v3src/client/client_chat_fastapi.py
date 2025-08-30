@@ -24,22 +24,49 @@ def get_file_dir_path(filepath):
 # --------------------------------------------------------------------------------
 # New Key functions
 
+
+# For create-room and delete-room requests, client should use FastAPI endpoint (HTTP POST).
+async def send_create_room_request(base_http_uri, base_ws_uri, username, room_code, VALID_ACTIONS):
+    print('Sending the create room request to server.')
+    
+    room_creation_uri = base_http_uri + '/room/create'
+    data = {'room_code': room_code, 'username': username}
+    
+    response = requests.post(room_creation_uri, json=data)
+    print(f'Response status code: {response.status_code}')
+    print(f'Received status from server: {response.json()}')
+
+    # If received 'succeeded' status, send WebSocket request to server to be connected with server    
+    if response.json()['status'] == 'succeeded':
+        uuid = response.json()['uuid']
+        await send_connect_request(base_ws_uri, uuid, username, room_code, VALID_ACTIONS)
+    return
+
+async def send_disconnect_request():
+    return
+
+# For create-room and delete-room requests, client should use FastAPI endpoint (HTTP POST).
+async def send_delete_room_request():
+    return
+
+async def send_join_room_request():
+    return
+
+async def send_leave_room_request():
+    return
+
 # Used to test service side connection with Connection Manager + Redis
-async def connect_to_server():
-    base_uri = 'ws://10.0.0.33:5001/ws?'
-    username = 'dodo'
-    room_code = 'fWpO003k8z7'
+async def send_connect_request(base_ws_uri, uuid, username, room_code, VALID_ACTIONS):        
+    uri = base_ws_uri + f'room_code={room_code}&uuid={uuid}&username={username}'
+    print(f'uri: [{uri}].')
     
-    VALID_ACTIONS = {'create', 'join', 'leave', 'disconnect'}
-    
-    uri = base_uri + f'username={username}'
-    
+    # Client connects to server via WebSocket endpoint
     async with websockets.connect(uri) as websocket:
         msg = await websocket.recv()
         data = json.loads(msg)
         print(f'Response from server: {data}')
         
-        if data['status'] == 'success':
+        if data['status'] == 'succeeded':
             print('Successfully connected to server.')
             
             # Setup a loop to listen for client input until disconnect
@@ -54,37 +81,22 @@ async def connect_to_server():
                     if user_input not in VALID_ACTIONS:
                         print(f'Action invalid. Please type in any action in the following list: [{VALID_ACTIONS}].')
                     else:
+                        # Handle user input
                         if user_input == 'disconnect':
                             await send_disconnect_request()
                             print('Disconnected from server. Exited')
                             break
-                        elif user_input == 'create':
-                            await send_create_room_request(base_uri, username, room_code, websocket)
-                            print(f'Created room [{room_code}].')
+                        elif user_input == 'delete':
+                            await send_delete_room_request()
+                            print(f'Deleted room [{room_code}].')
                         elif user_input == 'join':
                             await send_join_room_request()
                             print(f'Joined room [{room_code}].')
                         elif user_input == 'leave':
                             await send_leave_room_request()
-                            print(f'Leaved room [{room_code}].')
+                            print(f'Left room [{room_code}].')
         else: 
             print('Failed to connect to server. Exited.')
-    return
-
-async def send_disconnect_request():
-    return
-
-async def send_create_room_request(base_uri, username, room_code, websocket):
-    print('Now sending the create room request.')
-    
-    room_creation_uri = base_uri + f'room_code={room_code}' + f'$username={username}'
-
-    return
-
-async def send_join_room_request():
-    return
-
-async def send_leave_room_request():
     return
 
 # --------------------------------------------------------------------------------
@@ -92,14 +104,14 @@ async def send_leave_room_request():
 
 # FastAPI logic for creating and joining a room with given room code
 def create_and_join_room_with_room_code(uri, roomCode):
-    # Client connects to the server via websocket
+    # Client connects to the server via WebSocket
     response = requests.post(uri+'ws/')
     
     # Client then proceeds to room creation 
     response = requests.post(uri+'room/create/'+roomCode)
     print(f'Response status code: {response.status_code}')
     print(f'Received status from server: {response.json()}')
-    if response.json().get('status') == 'success':
+    if response.json().get('status') == 'succeeded':
         print(f'Created and joined room [{roomCode}].\n')
     else:
         print(f'Failed to create room [{roomCode}.]\n')
@@ -110,7 +122,7 @@ def join_room_with_room_code(uri, roomCode):
     response = requests.post(uri+'room/join/'+roomCode)
     print(f'Response status code: {response.status_code}')
     print(f'Received status from server: {response.json()}')
-    if response.json().get('status') == 'success':
+    if response.json().get('status') == 'succeeded':
         print(f'Joined room [{roomCode}].\n')
     else:
         print(f'Failed to join room [{roomCode}.]\n')
@@ -136,7 +148,7 @@ def send(uri, senderID, recipientID, key, plainText):
     payload = get_payload(senderID, recipientID, key, plainText)
     response = requests.post(uri+'send', json=payload)
     print(f'Received status from server: {response.json()}')
-    if response.json().get('status') == 'success':
+    if response.json().get('status') == 'succeeded':
         print(f'Sent message [{plainText.decode()}] to [{recipientID}].')
     return
 
@@ -230,22 +242,11 @@ if __name__=='__main__':
     roomCode = 'fWpO003k8z6'
     filename = 'cc.jpeg'
     
-    asyncio.run(connect_to_server())
     
-    '''
-    choice = sys.argv[1]
-    
-    create_and_join_room_with_room_code(uri, roomCode)
-    
-    if choice == 'send':
-        send(uri, senderID, recipientID, key, plainText)
-    elif choice == 'recv':
-        recv(uri, recipientID, key)
-    elif choice == 'upload':
-        upload(uri, roomCode, filename)
-    elif choice == 'download':
-        download(uri, roomCode, filename, CHUNK_SIZE)
-    else:
-        print('Invalid argument passed when executing client_chat_fastapi.py')
-    '''
+    VALID_ACTIONS = {'create', 'delete', 'join', 'leave', 'disconnect'}
+    base_http_uri = 'http://10.0.0.33:5001/'
+    base_ws_uri = 'ws://10.0.0.33:5001/ws/'
+    username = 'dodo'
+    room_code = 'fWpO003k8b2'
+    asyncio.run(send_create_room_request(base_http_uri, base_ws_uri, username, room_code, VALID_ACTIONS))
     

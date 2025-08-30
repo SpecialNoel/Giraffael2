@@ -4,12 +4,12 @@ import json
 import asyncio
 import redis.asyncio as redis
 from fastapi import WebSocket, WebSocketDisconnect
-from v3src.server.schemas.client_obj import Client_Obj
+from v3src.server.mongo_db.client_ops.check_op import check_client_existence_in_db
 
 class ConnectionManager:
     def __init__(self, redisURL='redis://localhost:6379'):
-        # uuid -> username, socket
-        self.active: dict[str, (str, WebSocket)] = {}
+        # uuid -> username, socket, room_code
+        self.active: dict[str, (str, WebSocket, str)] = {}
         self.redisURL = redisURL
         self.redis = None
         self.pubsub_task = None
@@ -22,10 +22,10 @@ class ConnectionManager:
             async for msg in pubsub.listen():
                 if msg["type"] == "message":
                     payload = json.loads(msg["data"])
-                    user_id = payload["user_id"]
+                    uuid = payload["uuid"]
                     message = payload["message"]
 
-                    ws = self.active.get(user_id)
+                    ws = self.active.get(uuid)
                     if ws:
                         await ws.send_text(json.dumps(message))
         
@@ -58,43 +58,47 @@ class ConnectionManager:
             
             # Get room code and username inputted by the client
             room_code = websocket.query_params.get('room_code')
+            uuid = websocket.query_params.get('uuid')
             username = websocket.query_params.get('username')
-                    
-            # Get client host address
-            clientHost, clientPort = websocket.client
             
-            # Generate client obj and the uuid for this client
-            clientObj = Client_Obj(socket=websocket,
-                                   address=clientHost, 
-                                   username=username)
-            uuid: str = clientObj.get_uuid()
+            # Check if received room code, uuid and username match in MongoDB
+            if not check_client_existence_in_db(room_code, uuid, username):
+                data = {
+                    'message': f'Failed to connect to server. Client [{uuid}] does not exist in DB.',
+                    'status': 'failed',
+                   }
+                await websocket.send_text(json.dumps(data))
+                return
             
-            # Add this client to the client list
-            self.active[uuid] = (username, websocket)
+            # Add this client to the client list (local cache)
+            self.active[uuid] = (username, websocket, room_code)
             
-            # Server sends a success status to the client
-            payload = {
-                'status': 'success'
-            }
-            await websocket.send_text(json.dumps(payload))
+            # Server sends a succeeded status to the client
+            data = {
+                    'message': f'Successfully connected to server.',
+                    'status': 'succeeded',
+                   }
+            await websocket.send_text(json.dumps(data))
             print(f'Client [{uuid}] connected.')
             
             # Keep receiving client input until client disconnects
             try:
                 while True:
+                    # These two lines does nothing, as things like join/leave room should
+                    #   be already handled by FastAPI endpoints (HTTP).
                     data = await websocket.receive_text()
                     print(f'Received from client [{uuid}]: {data}')
             except WebSocketDisconnect: 
                 print(f'Client [{uuid}] disconnected.')
                 self.disconnect(uuid)
-            
         except Exception as e:
-            print(f'Error in connection with [{clientHost}]: {e}.')
+            print(f'Error in connection with [{uuid}]: {e}.')
             # Server sends a failed status to the client
-            payload = {
+            data = {
+                'message': f'Client encountered error when connecting to server.',
                 'status': 'failed'
             }
-            await websocket.send_text(json.dumps(payload))
+            await websocket.send_text(json.dumps(data))
         return
  
     def disconnect(self, uuid: str):

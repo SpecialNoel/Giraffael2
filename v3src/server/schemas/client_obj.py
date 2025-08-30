@@ -3,20 +3,12 @@
 import uuid
 
 class Client_Obj:
-    def __init__(self, socket, address, username):
+    def __init__(self, username):
         self.__uuid = uuid.uuid4() # unmodifiable, unique
-        self.__socket = socket     # unmodifiable, unique
-        self.__address = address   # unmodifiable, unique
         self.__username = username # duplicate-able
 
     def get_uuid(self):
         return str(self.__uuid)
-        
-    def get_socket(self): 
-        return self.__socket
-    
-    def get_address(self):
-        return self.__address
     
     def get_username(self):
         return self.__username
@@ -29,6 +21,5 @@ class Client_Obj:
         # Need to wrap uuid with str() to make it compatible with bson (database related)
         return {
             'uuid': str(self.__uuid),
-            'address': self.__address,
             'username': self.__username,
         }

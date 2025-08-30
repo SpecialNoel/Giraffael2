@@ -2,25 +2,42 @@
 
 from fastapi import APIRouter
 from v3src.server.schemas.client_obj import Client_Obj
-from v3src.server.services.room_service import create_room_with_room_code, join_room_with_room_code
+from v3src.server.schemas.definitions import RoomRequest
+from v3src.server.services.room_service import create_room_with_room_code, join_room_with_room_code, check_room_existence
 
 router = APIRouter()
-roomList = [] # local cache of list of rooms
 
 # FastAPI endpoint for handling a 'create room' request from a client
-@router.post('/room/create/{roomCode}')
-async def create_room(roomCode: str):
-    # get client socket, then generate an uuid for this client
+@router.post('/room/create')
+async def create_room(request: RoomRequest):
+    # Retrieve room code and username
+    room_code = request.room_code
+    username = request.username
     
-
-    # create room and add the (uuid: clientSocket) pair to the client list
-    createRoomSuccess = create_room_with_room_code(roomCode, roomList, uuid, clientSocket)
-    if createRoomSuccess['status'] == 'failed':
-        print(f'Error in create_room(). Failed to create room [{roomCode}].')
+    # Check MongoDB for room existence
+    if check_room_existence(room_code):
+        data = {'message': f'Failed to create room. Room {room_code} already exists.',
+                'status': 'failed'}
+        return data    
     
-    return join_room_with_room_code(roomCode, roomList)
+    # Generate ClientObj and uuid for this client
+    client_obj = Client_Obj(username)
+    uuid = client_obj.get_uuid()
+    
+    # Create room in MongoDB
+    if create_room_with_room_code(room_code, uuid, username):
+        data = {'message': f'Successfully created room {room_code}.',
+                'status': 'succeeded',
+                'uuid': uuid}
+        return data
+    else:
+        data = {'message': f'Failed to create room. Room {room_code} already exists.',
+                'status': 'failed'}
+        return data
 
 # FastAPI endpoint for handling a 'join room' request from a client
-@router.post('/room/join/{roomCode}')
-def join_room(roomCode: str):
-    return join_room_with_room_code(roomCode, roomList)
+@router.post('/room/join')
+def join_room(request: RoomRequest):
+    room_code = request.room_code
+    
+    return join_room_with_room_code(room_code)

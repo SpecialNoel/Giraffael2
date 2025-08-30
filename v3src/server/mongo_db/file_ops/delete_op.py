@@ -2,8 +2,8 @@
 
 from bson import ObjectId
 from bson.errors import InvalidId
-from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
-from v3src.server.database.mongodb_initiator import rooms_collection, gfs
+from v3src.server.mongo_db.msg_ops.general_op import room_code_exists_in_collection
+from v3src.server.mongo_db.mongodb_initiator import rooms_collection, gfs
 
 # Delete a file in a room
 def delete_file(fileID, roomCode):

@@ -1,8 +1,8 @@
 # add_op.py
 
 from bson import ObjectId
-from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
-from v3src.server.database.mongodb_initiator import rooms_collection
+from v3src.server.mongo_db.msg_ops.general_op import room_code_exists_in_collection
+from v3src.server.mongo_db.mongodb_initiator import rooms_collection
 
 # Add msg to the msg history in a room
 def add_msg_to_history(roomCode, senderID, senderName, msg):

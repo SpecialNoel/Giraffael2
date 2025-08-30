@@ -1,8 +1,8 @@
 # add_op.py
 
 import datetime
-from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
-from v3src.server.database.mongodb_initiator import rooms_collection, user_statuses_collection
+from v3src.server.mongo_db.msg_ops.general_op import room_code_exists_in_collection
+from v3src.server.mongo_db.mongodb_initiator import rooms_collection, user_statuses_collection
 
 def add_client_to_list(clientObj, roomCode):
     clientInfo = clientObj.to_dict()

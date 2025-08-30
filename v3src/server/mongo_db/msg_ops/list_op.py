@@ -1,7 +1,7 @@
 # list_op.py
 
-from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
-from v3src.server.database.mongodb_initiator import rooms_collection
+from v3src.server.mongo_db.msg_ops.general_op import room_code_exists_in_collection
+from v3src.server.mongo_db.mongodb_initiator import rooms_collection
 
 # List out all messages sent over this room
 def list_msg_history(roomCode):

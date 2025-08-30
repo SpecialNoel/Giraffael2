@@ -2,41 +2,14 @@
 
 import uuid
 from fastapi import WebSocket
-from v3src.server.database.room_ops.create_op import create_room
-from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
+from v3src.server.mongo_db.room_ops.create_op import create_room_in_db
+from v3src.server.mongo_db.room_ops.check_op import check_room_existence
 from v3src.server.schemas.room import Room
 
-def create_room_with_room_code(roomCode: str, roomList: list):
-    try:
-        create_room(roomCode)    # create room in database
-        newRoom = Room(roomCode) # create the local cache of this room
-        roomList.append(newRoom) 
-        return {'status': 'success'} 
-    except:
-        return {'status': 'failed'}
+def create_room_with_room_code(room_code: str, uuid: str, username: str):
+    # Create a room in MongoDB with given room code
+    return create_room_in_db(room_code, uuid, username)
 
-def join_room_with_room_code(roomCode: str, roomList: list, uuid: uuid, clientSocket: WebSocket): 
-    # Check if the given room code is in local cache room list first
-    if roomCode not in roomList:
-        print(f'Client tried to join a non-existing room [{roomCode}].')
-        return {'status': 'failed'}
+def join_room_with_room_code(roomCode: str): 
     
-    # Check if the given room code corresponds to a room in database
-    if not room_code_exists_in_collection(roomCode):
-        print(f'Error in join_room(). Room [{roomCode}] does not exist in database.')
-        return {'status': 'failed'}
-    
-    # Find the exist room from room list
-    room = None
-    for tempRoom in roomList:
-        if tempRoom.get_room_code() == roomCode:
-            room = tempRoom
-            break
-    
-    if room is None:
-        print(f'Error in join_room(). Room [{roomCode}] does not exist in room list.')
-        return {'status': 'failed'}
-    
-    # Add the client to the target room
-    room.add_client_to_client_list(clientSocket)
-    return {'status': 'success'}
+    return 

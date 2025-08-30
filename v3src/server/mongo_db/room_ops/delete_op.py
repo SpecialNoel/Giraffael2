@@ -1,8 +1,8 @@
 # delete_op.py
 
-from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
-from v3src.server.database.file_ops.delete_op import delete_all_files
-from v3src.server.database.mongodb_initiator import rooms_collection
+from v3src.server.mongo_db.msg_ops.general_op import room_code_exists_in_collection
+from v3src.server.mongo_db.file_ops.delete_op import delete_all_files
+from v3src.server.mongo_db.mongodb_initiator import rooms_collection
 
 # Delete a room in the DB (based on ObjectID of the room)
 def delete_room(roomCode):

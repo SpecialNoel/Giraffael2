@@ -3,9 +3,9 @@
 import os
 from bson import ObjectId
 from bson.errors import InvalidId
-from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
-from v3src.server.database.file_ops.general_op import check_file_existence_in_room
-from v3src.server.database.mongodb_initiator import rooms_collection, gfs
+from v3src.server.mongo_db.msg_ops.general_op import room_code_exists_in_collection
+from v3src.server.mongo_db.file_ops.general_op import check_file_existence_in_room
+from v3src.server.mongo_db.mongodb_initiator import rooms_collection, gfs
 
 # Upload file to a room
 def upload_file(filepath, roomCode):    

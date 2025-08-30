@@ -9,7 +9,7 @@ def send_msg(msg: EncryptedMsg, msgList: dict):
 
         msgList[msg.recipientID].append(msg.model_dump())
         print(f'Stored for {msg.recipientID}: {msgList[msg.recipientID]}')
-        return {'status': 'success'}
+        return {'status': 'succeeded'}
     except:
         print(f'Failed to store for {msg.recipientID}: {msgList[msg.recipientID]}')
         return {'status': 'failed'}

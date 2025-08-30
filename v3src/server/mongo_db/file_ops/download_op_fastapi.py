@@ -5,8 +5,8 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi.responses import StreamingResponse
 from gridfs.errors import NoFile
-from v3src.server.database.msg_ops.general_op import room_code_exists_in_collection
-from v3src.server.database.mongodb_initiator import rooms_collection, gfs
+from v3src.server.mongo_db.msg_ops.general_op import room_code_exists_in_collection
+from v3src.server.mongo_db.mongodb_initiator import rooms_collection, gfs
 
 # Download file from a room
 # Note: the only intended way to use download_file() is to query target file from database 
