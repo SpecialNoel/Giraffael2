@@ -57,7 +57,7 @@ async def send_leave_room_request():
 
 # Used to test service side connection with Connection Manager + Redis
 async def send_connect_request(base_ws_uri, uuid, username, room_code, VALID_ACTIONS):        
-    uri = base_ws_uri + f'room_code={room_code}&uuid={uuid}&username={username}'
+    uri = base_ws_uri + f'?room_code={room_code}&uuid={uuid}&username={username}'
     print(f'uri: [{uri}].')
     
     # Client connects to server via WebSocket endpoint
@@ -245,7 +245,7 @@ if __name__=='__main__':
     
     VALID_ACTIONS = {'create', 'delete', 'join', 'leave', 'disconnect'}
     base_http_uri = 'http://10.0.0.33:5001/'
-    base_ws_uri = 'ws://10.0.0.33:5001/ws/'
+    base_ws_uri = 'ws://10.0.0.33:5001/ws'
     username = 'dodo'
     room_code = 'fWpO003k8b2'
     asyncio.run(send_create_room_request(base_http_uri, base_ws_uri, username, room_code, VALID_ACTIONS))

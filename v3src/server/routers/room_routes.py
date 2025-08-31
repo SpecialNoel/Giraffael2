@@ -3,7 +3,8 @@
 from fastapi import APIRouter
 from v3src.server.schemas.client_obj import Client_Obj
 from v3src.server.schemas.definitions import RoomRequest
-from v3src.server.services.room_service import create_room_with_room_code, join_room_with_room_code, check_room_existence
+from v3src.server.mongo_db.room_ops.check_op import check_room_existence
+from v3src.server.services.room_service import create_room_with_room_code, join_room_with_room_code
 
 router = APIRouter()
 
@@ -14,11 +15,13 @@ async def create_room(request: RoomRequest):
     room_code = request.room_code
     username = request.username
     
+    '''
     # Check MongoDB for room existence
     if check_room_existence(room_code):
         data = {'message': f'Failed to create room. Room {room_code} already exists.',
                 'status': 'failed'}
         return data    
+    '''
     
     # Generate ClientObj and uuid for this client
     client_obj = Client_Obj(username)
