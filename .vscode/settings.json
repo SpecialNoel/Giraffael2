@@ -1,7 +1,6 @@
 {
     "cSpell.words": [
         "AESGCM",
-        "aioredis",
         "boto",
         "bson",
         "DGRAM",
@@ -29,10 +28,13 @@
         "pymongo",
         "qdrfy",
         "reportlab",
+        "sadd",
         "savedir",
         "savepath",
         "signedpk",
         "signingk",
+        "smembers",
+        "srem",
         "Unso",
         "uppered",
         "urandom",

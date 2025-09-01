@@ -42,7 +42,8 @@ async def send_create_room_request(base_http_uri, base_ws_uri, username, room_co
         await send_connect_request(base_ws_uri, uuid, username, room_code, VALID_ACTIONS)
     return
 
-async def send_disconnect_request():
+async def send_disconnect_request(websocket):
+    await websocket.close()
     return
 
 # For create-room and delete-room requests, client should use FastAPI endpoint (HTTP POST).
@@ -83,7 +84,7 @@ async def send_connect_request(base_ws_uri, uuid, username, room_code, VALID_ACT
                     else:
                         # Handle user input
                         if user_input == 'disconnect':
-                            await send_disconnect_request()
+                            await send_disconnect_request(websocket)
                             print('Disconnected from server. Exited')
                             break
                         elif user_input == 'delete':
