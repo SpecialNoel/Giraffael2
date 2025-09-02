@@ -92,6 +92,12 @@ class ConnectionManager:
                    }
                 await websocket.send_text(json.dumps(data))
                 return
+            
+        async def safe_task(task):
+            try:
+                await task
+            except Exception as e:
+                print(f'Task failed: {e}.')
         
         try: 
             # Accept the connection established by client
@@ -128,15 +134,23 @@ class ConnectionManager:
             await websocket.send_text(json.dumps(data))
             print(f'Client [{uuid}] connected.')
             
-            # Start heartbeat to this client in the background
-            asyncio.create_task(self.heartbeat(websocket, uuid, room_code))
-            
             # Keep connection alive and forward incoming messages to other functions
-            async for msg in websocket.iter_text():
-                asyncio.create_task(handle_incoming_message(uuid, room_code, msg))
+            while True:
+                try:
+                    raw_msg = await asyncio.wait_for(websocket.receive_text(), timeout=self.TIME_THRESHOLD)
+                    msg = json.loads(raw_msg)
+                    
+                    if msg.get('type') == 'pong':
+                        # In Redis, set 'presence' of this uuid to 'online', which times out after self.TIME_THRESHOLD*2 seconds
+                        await self.redis.setex(f'presence:{room_code}:{uuid}', self.TIME_THRESHOLD*2, 'online')
+                    else: 
+                        asyncio.create_task(safe_task(handle_incoming_message(uuid, room_code, raw_msg)))
+                except asyncio.TimeoutError:
+                    # Heartbeat: if no message received within self.TIME_THRESHOLD, send a ping to client
+                    await websocket.send_json({'type': 'ping'})
+                    print(f'Sent ping to [{uuid}] in room [{room_code}].')
         except WebSocketDisconnect:
             print(f'Client [{uuid}] disconnects from server.')
-            await self.disconnect(uuid, room_code)
         except:
             print(f'Error in connection with [{uuid}].')
             # Server sends a failed status to the client
@@ -145,42 +159,35 @@ class ConnectionManager:
                 'status': 'failed'
             }
             await websocket.send_text(json.dumps(data))
-            # Try disconnecting the client nonetheless
+        finally:
+            # Clean up client
             await self.disconnect(uuid, room_code)
         return
-    
-    # Send a ping to client every few seconds to keep the TCP connection alive
-    async def heartbeat(self, websocket, uuid: str, room_code: str):
-        try:
-            while True:
-                # Throw error if server cannot send json to client
-                await websocket.send_json({'type': 'ping'})
-                print(f'Sent ping to uuid [{uuid}] in room [{room_code}].')
-                
-                # Wait for time_threshold (in second) until next ping
-                await asyncio.sleep(self.TIME_THRESHOLD)
-        except (WebSocketDisconnect, RuntimeError):
-            # Stop sending heartbeat to client if it disconnected
-            print(f'Heartbeat stopped to client [{uuid}] in room [{room_code}].')
-            await self.disconnect(uuid, room_code)
-        except Exception as e:
-            print(f'Unexpected error in heartbeat(): {e}.')
-            await self.disconnect(uuid, room_code)
-        return        
+
+    # Get the online status of clients in Redis
+    async def get_online_status_of_clients_in_room(self, room_code):
+        # Get all uuids from the given room in Redis
+        uuids = await self.redis.smembers(f'room_code:{room_code}:client_list')
+        result = {}
+        for uuid in uuids:
+            presence = await self.redis.get(f'presence:{room_code}:{uuid}')
+            result[uuid] = 'online' if presence else 'offline'
+        return result
 
     async def disconnect(self, uuid: str, room_code: str):
         # Remove client from active client list (local cache)
         if room_code in self.active and uuid in self.active[room_code]:
             websocket = self.active[room_code][uuid]['websocket']
             
+            # Close the client socket if it is not yet closed by client side
             if websocket.client_state != WebSocketState.DISCONNECTED:
                 try:
                     await websocket.close()
                 except:
                     pass
-            
             del self.active[room_code][uuid]
             print('Removed client from local active client list.')
+            
             # Remove the room from the active client list if the room becomes empty
             if not self.active[room_code]:
                 del self.active[room_code]
@@ -188,6 +195,7 @@ class ConnectionManager:
         
         # Remove client from Redis
         await self.redis.srem(f'room_code:{room_code}:client_list', uuid)
+        await self.redis.delete(f'presence:{room_code}:{uuid}')
         print(f'Client [{uuid}] removed from connection manager.')
         return
     

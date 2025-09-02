@@ -14,5 +14,4 @@ def download_file_service(roomCode: str, filename: str):
     if fileID == None:
         print(f'Error in download_file(): {fileID} is invalid.')
         return None
-
     return download_file_with_fastapi(roomCode, fileID)

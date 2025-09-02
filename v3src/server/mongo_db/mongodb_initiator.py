@@ -21,7 +21,7 @@ Database:
     - room_code
     - room_name
     - client_list
-        - each entry is an uuid
+        - each entry is a dict containing a uuid and an username
     - msg_list
         - each entry is a dict containing the metadata of the msg, 
             i.e. senderID (uuid), senderName (username), and the message.

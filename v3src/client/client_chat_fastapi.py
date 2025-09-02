@@ -62,42 +62,79 @@ async def send_connect_request(base_ws_uri, uuid, username, room_code, VALID_ACT
     print(f'uri: [{uri}].')
     
     # Client connects to server via WebSocket endpoint
-    async with websockets.connect(uri) as websocket:
+    async with websockets.connect(uri) as websocket:        
         msg = await websocket.recv()
         data = json.loads(msg)
         print(f'Response from server: {data}')
         
-        if data['status'] == 'succeeded':
-            print('Successfully connected to server.')
+        if data['status'] != 'succeeded':
+            print('Failed to connect to server.')
+            return
+        print('Successfully connected to server.')
+        
+        # Start receiving heartbeat in the background
+        receiver_thread = asyncio.create_task(receive_msg(websocket))
+        sender_thread = asyncio.create_task(user_input_loop(websocket, room_code, VALID_ACTIONS))
+        
+        # Wait until either finishes (either disconnects or error occurs)
+        done, pending = await asyncio.wait(
+            [receiver_thread, sender_thread],
+            return_when=asyncio.FIRST_COMPLETED
+        )
+        
+        # Cancel the unfinished one before stopping the client loop
+        for task in pending:
+            task.cancel()
+        print('')
+    return
+
+async def receive_msg(websocket):
+    try:
+        async for raw_msg in websocket:
+            msg = json.loads(raw_msg)
             
-            # Setup a loop to listen for client input until disconnect
-            user_input = ''
-            while True:
+            if msg.get('type') == 'ping':
+                # Handle ping signal by sending back a pong to server 
+                await websocket.send(json.dumps({'type': 'pong'}))
+                print('Sent pong to server')
+            else:
+                # Handle other messages
+                await handle_incoming_message(msg)
+    except websockets.ConnectionClosed:
+        print('Connection closed by server.')
+    except Exception as e:
+        print(f'Unexpected error in recv_heartbeat(): {e}.')
+        
+async def user_input_loop(websocket, room_code, VALID_ACTIONS):
+    try: 
+        while True:
+            # Run input() in a separate thread
+            user_input = await asyncio.to_thread(input, '> ')
+            user_input = user_input.strip()
+            
+            if user_input not in VALID_ACTIONS:
+                print(f'Invalid action. Please choose from: {VALID_ACTIONS}.')
+            else:
+                # Handle valid user input
                 if user_input == 'disconnect':
+                    await send_disconnect_request(websocket)
+                    print('Disconnected from server. Exited')
                     break
-                
-                print('Type in your action: ')
-                while True:
-                    user_input = input('> ').strip()
-                    if user_input not in VALID_ACTIONS:
-                        print(f'Action invalid. Please type in any action in the following list: [{VALID_ACTIONS}].')
-                    else:
-                        # Handle user input
-                        if user_input == 'disconnect':
-                            await send_disconnect_request(websocket)
-                            print('Disconnected from server. Exited')
-                            break
-                        elif user_input == 'delete':
-                            await send_delete_room_request()
-                            print(f'Deleted room [{room_code}].')
-                        elif user_input == 'join':
-                            await send_join_room_request()
-                            print(f'Joined room [{room_code}].')
-                        elif user_input == 'leave':
-                            await send_leave_room_request()
-                            print(f'Left room [{room_code}].')
-        else: 
-            print('Failed to connect to server. Exited.')
+                elif user_input == 'delete':
+                    await send_delete_room_request()
+                    print(f'Deleted room [{room_code}].')
+                elif user_input == 'join':
+                    await send_join_room_request()
+                    print(f'Joined room [{room_code}].')
+                elif user_input == 'leave':
+                    await send_leave_room_request()
+                    print(f'Left room [{room_code}].')
+    except Exception as e:
+        print(f'Error in user_input_loop(): {e}.')
+
+async def handle_incoming_message(msg):
+    print('In handle_incoming_message().')
+    print(f'Received unexpected msg in recv_heartbeat(): [{msg}]')
     return
 
 # --------------------------------------------------------------------------------
