@@ -44,16 +44,31 @@ async def send_create_room_request(base_http_uri, base_ws_uri, username, room_co
 
 async def send_disconnect_request(websocket):
     await websocket.close()
+    print('Disconnected from server. Exited')
     return
 
 # For create-room and delete-room requests, client should use FastAPI endpoint (HTTP POST).
-async def send_delete_room_request():
+async def send_delete_room_request(room_code):
+    print(f'Deleted room [{room_code}].')
     return
 
-async def send_join_room_request():
+async def send_join_room_request(room_code):
+    print(f'Joined room [{room_code}].')
     return
 
-async def send_leave_room_request():
+async def send_leave_room_request(room_code):
+    print(f'Left room [{room_code}].')
+    return
+
+async def send_chat_message(room_code, uuid, user_input, websocket):
+    msg = {
+        'type': 'chat',
+        'room_code': room_code,
+        'uuid': uuid,
+        'payload': user_input,
+    }
+    await websocket.send(json.dumps(msg))
+    print('Sent message to server. ')
     return
 
 # Used to test service side connection with Connection Manager + Redis
@@ -74,7 +89,7 @@ async def send_connect_request(base_ws_uri, uuid, username, room_code, VALID_ACT
         
         # Start receiving heartbeat in the background
         receiver_thread = asyncio.create_task(receive_msg(websocket))
-        sender_thread = asyncio.create_task(user_input_loop(websocket, room_code, VALID_ACTIONS))
+        sender_thread = asyncio.create_task(user_input_loop(websocket, room_code, uuid, VALID_ACTIONS))
         
         # Wait until either finishes (either disconnects or error occurs)
         done, pending = await asyncio.wait(
@@ -82,10 +97,10 @@ async def send_connect_request(base_ws_uri, uuid, username, room_code, VALID_ACT
             return_when=asyncio.FIRST_COMPLETED
         )
         
-        # Cancel the unfinished one before stopping the client loop
+        # Cancel the unfinished tasks before stopping the client loop
         for task in pending:
             task.cancel()
-        print('')
+        print('Client loop ended.')
     return
 
 async def receive_msg(websocket):
@@ -105,30 +120,29 @@ async def receive_msg(websocket):
     except Exception as e:
         print(f'Unexpected error in recv_heartbeat(): {e}.')
         
-async def user_input_loop(websocket, room_code, VALID_ACTIONS):
+async def user_input_loop(websocket, room_code, uuid, VALID_ACTIONS):
     try: 
+        print(f'Please choose from the available actions, or start typing message to the room.')
+        print(f'Available actions: {VALID_ACTIONS}.')
+        
         while True:
-            # Run input() in a separate thread
+            # Run input() in a separate thread to get user input
             user_input = await asyncio.to_thread(input, '> ')
             user_input = user_input.strip()
             
-            if user_input not in VALID_ACTIONS:
-                print(f'Invalid action. Please choose from: {VALID_ACTIONS}.')
+            # Handle user input
+            if user_input == 'disconnect':
+                await send_disconnect_request(websocket)
+                break
+            elif user_input == 'delete':
+                await send_delete_room_request(room_code)
+            elif user_input == 'join':
+                await send_join_room_request(room_code)
+            elif user_input == 'leave':
+                await send_leave_room_request(room_code)
             else:
-                # Handle valid user input
-                if user_input == 'disconnect':
-                    await send_disconnect_request(websocket)
-                    print('Disconnected from server. Exited')
-                    break
-                elif user_input == 'delete':
-                    await send_delete_room_request()
-                    print(f'Deleted room [{room_code}].')
-                elif user_input == 'join':
-                    await send_join_room_request()
-                    print(f'Joined room [{room_code}].')
-                elif user_input == 'leave':
-                    await send_leave_room_request()
-                    print(f'Left room [{room_code}].')
+                await send_chat_message(room_code, uuid, user_input, websocket)
+                
     except Exception as e:
         print(f'Error in user_input_loop(): {e}.')
 

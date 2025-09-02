@@ -28,12 +28,11 @@ class ConnectionManager:
         return
 
     # Stop Pub/Sub listener and close Redis connection    
-    async def stop(self):
-        test_room_code = 'fWpO003k8b2'
-        
+    async def stop(self):        
         if self.redis:
-            await self.disconnect_all_clients_from_a_room(test_room_code)
-            await self.delete_room(test_room_code)
+            for room_code in self.active:
+                await self.disconnect_all_clients_from_a_room(room_code)
+                await self.delete_room(room_code)
             await self.redis.close()
             print('Server disconnected from Redis.')
     
@@ -160,7 +159,7 @@ class ConnectionManager:
             }
             await websocket.send_text(json.dumps(data))
         finally:
-            # Clean up client
+            # Clean up client when it disconnects in any mean
             await self.disconnect(uuid, room_code)
         return
 
