@@ -1,7 +1,6 @@
-# client_chat_fastapi.py
+# client_chat.py
 
-# Note: Add one of the options to the command below: [send, recv, upload, download]
-# python -m v3src.client.client_chat_fastapi
+# python -m v3src.client.client_chat
 
 import base64
 import os
@@ -13,7 +12,9 @@ import tkinter as tk
 from tkinter import filedialog
 from v3src.client.encryption import encrypt, decrypt
 
+# --------------------------------------------------------------------------------
 # Helper functions
+
 def get_file_extension(filename):
     # Returns the extension of a file, including dot.
     # Example: .txt, .pdf, .png, etc..
@@ -23,7 +24,6 @@ def get_file_dir_path(filepath):
 
 # --------------------------------------------------------------------------------
 # New Key functions
-
 
 # For create-room and delete-room requests, client should use FastAPI endpoint (HTTP POST).
 async def send_create_room_request(base_http_uri, base_ws_uri, username, room_code, VALID_ACTIONS):
@@ -111,7 +111,7 @@ async def receive_msg(websocket):
             if msg.get('type') == 'ping':
                 # Handle ping signal by sending back a pong to server 
                 await websocket.send(json.dumps({'type': 'pong'}))
-                print('Sent pong to server')
+                print('\nSent pong to server')
             else:
                 # Handle other messages
                 await handle_incoming_message(msg)
@@ -152,79 +152,7 @@ async def handle_incoming_message(msg):
     return
 
 # --------------------------------------------------------------------------------
-# Old Key functions
-
-# FastAPI logic for creating and joining a room with given room code
-def create_and_join_room_with_room_code(uri, roomCode):
-    # Client connects to the server via WebSocket
-    response = requests.post(uri+'ws/')
-    
-    # Client then proceeds to room creation 
-    response = requests.post(uri+'room/create/'+roomCode)
-    print(f'Response status code: {response.status_code}')
-    print(f'Received status from server: {response.json()}')
-    if response.json().get('status') == 'succeeded':
-        print(f'Created and joined room [{roomCode}].\n')
-    else:
-        print(f'Failed to create room [{roomCode}.]\n')
-    return
-
-# FastAPI logic for joining a room with given room code
-def join_room_with_room_code(uri, roomCode):
-    response = requests.post(uri+'room/join/'+roomCode)
-    print(f'Response status code: {response.status_code}')
-    print(f'Received status from server: {response.json()}')
-    if response.json().get('status') == 'succeeded':
-        print(f'Joined room [{roomCode}].\n')
-    else:
-        print(f'Failed to join room [{roomCode}.]\n')
-    return
-
-# FastAPI logic for sending a message to a target client
-def send(uri, senderID, recipientID, key, plainText):
-    def get_payload(senderID, recipientID, key, plainText):
-        encryptedText = encrypt(key, plainText)
-        # base64.b64encode() turns binary bytes into base64 bytes, and
-        # decoding base64 bytes gives us an UTF-8 string, the supported format in JSON.
-        cipherTextStr = base64.b64encode(encryptedText['cipherText']).decode()
-        nonceStr = base64.b64encode(encryptedText['nonce']).decode()
-        payload = {
-            'typeOfMsg': 'message',
-            'senderID': senderID,
-            'recipientID': recipientID,
-            'cipherText': cipherTextStr,
-            'nonce': nonceStr
-        }
-        return payload
-    
-    payload = get_payload(senderID, recipientID, key, plainText)
-    response = requests.post(uri+'send', json=payload)
-    print(f'Received status from server: {response.json()}')
-    if response.json().get('status') == 'succeeded':
-        print(f'Sent message [{plainText.decode()}] to [{recipientID}].')
-    return
-
-# FastAPI logic for fetching a message as a receiver client
-def recv(uri, recipientID, key):
-    response = requests.get(uri+'fetch/'+recipientID)
-    print(f'Response status code: {response.status_code}')
-    try:
-        data = response.json()
-        messages = data.get('messages', [])
-        if messages == []: 
-            print('No new message fetched.')
-        else:
-            print('Fetched the following new messages:')
-    except ValueError:
-        print(f'Invalid JSON: {response.text}')
-        messages = []
-    for message in messages:
-        senderID = message['senderID']
-        cipherText = base64.b64decode(message['cipherText'])
-        nonce = base64.b64decode(message['nonce'])
-        plainText = decrypt(key, cipherText, nonce).decode()
-        print(f'From [{senderID}]: {plainText}')
-    return
+# Old FastAPi Key functions
 
 # FastAPI logic for uploading a file with given file content and room code
 def upload(uri, roomCode, filename):
@@ -284,6 +212,53 @@ def download(uri, roomCode, filename, chunkSize):
         print(f'Failed reason: {e}.')
     return
 
+
+# --------------------------------------------------------------------------------
+# Websocket functions of sending/receiving, with encryption/decryption
+
+# WebSocket logic for sending a message to a target client
+async def chat_send_with_encryption(wsUri, senderID, recipientID, key, plainText):
+    encryptedText = encrypt(key, plainText)    
+    cipherTextStr = base64.b64encode(encryptedText['cipherText']).decode()
+    nonceStr = base64.b64encode(encryptedText['nonce']).decode()
+    
+    wsUriWithSenderID = wsUri + senderID
+    async with websockets.connect(wsUriWithSenderID) as websocket:
+        msg = {
+            'typeOfMsg': 'message',
+            'senderID': senderID, 
+            'recipientID': recipientID,
+            'cipherText': cipherTextStr,
+            'nonce': nonceStr
+        }
+        await websocket.send(json.dumps(msg))
+
+        # After sending a message to the target client, start receiving messages
+        # while True:
+        #     response = await websocket.recv()
+        #     print('Received response:', response)
+    return
+            
+# WebSocket logic for continuously receiving messages as a receiver client
+async def chat_recv_with_decryption(wsUri, recipientID, key):
+    wsUriWithRecipientID = wsUri + recipientID
+    async with websockets.connect(wsUriWithRecipientID) as websocket:
+        while True:
+            response = await websocket.recv()
+            # print('Received response:', response)
+
+            # response.get() returns a string. Must parse it into a JSON object
+            #  before accessing its fields
+            message = json.loads(response)
+            senderID = message['senderID']
+            cipherText = base64.b64decode(message['cipherText'])
+            nonce = base64.b64decode(message['nonce'])
+            plainText = decrypt(key, cipherText, nonce).decode()
+            print(f'Received from {senderID}: {plainText}')
+    return
+
+# --------------------------------------------------------------------------------
+
 if __name__=='__main__':
     CHUNK_SIZE = 1024
     uri = 'http://10.0.0.33:5001/'
@@ -294,10 +269,11 @@ if __name__=='__main__':
     roomCode = 'fWpO003k8z6'
     filename = 'cc.jpeg'
     
-    
+    # server_ip = '10.0.0.33'
+    server_ip = '10.0.0.99'
     VALID_ACTIONS = {'create', 'delete', 'join', 'leave', 'disconnect'}
-    base_http_uri = 'http://10.0.0.33:5001/'
-    base_ws_uri = 'ws://10.0.0.33:5001/ws'
+    base_http_uri = f'http://{server_ip}:5001/'
+    base_ws_uri = f'ws://{server_ip}:5001/ws'
     username = 'dodo'
     room_code = 'fWpO003k8b2'
     asyncio.run(send_create_room_request(base_http_uri, base_ws_uri, username, room_code, VALID_ACTIONS))

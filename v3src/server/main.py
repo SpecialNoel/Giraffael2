@@ -25,4 +25,6 @@ app.include_router(room_routes.router)
 
 if __name__=='__main__':
     # Run a uvicorn web server
-    uvicorn.run(app, host='10.0.0.33', port=5001)
+    # server_ip = '10.0.0.33'
+    server_ip = '10.0.0.99'
+    uvicorn.run(app, host=server_ip, port=5001)

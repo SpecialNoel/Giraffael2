@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 from v3src.server.schemas.client_obj import Client_Obj
 from v3src.server.schemas.definitions import RoomRequest
-from v3src.server.mongo_db.room_ops.check_op import check_room_existence
+from v3src.server.mongo_db.room_ops.check_op import check_room_existence_in_db
 from v3src.server.services.room_service import create_room_with_room_code, join_room_with_room_code
 
 router = APIRouter()
@@ -17,7 +17,7 @@ async def create_room(request: RoomRequest):
     
     '''
     # Check MongoDB for room existence
-    if check_room_existence(room_code):
+    if check_room_existence_in_db(room_code):
         data = {'message': f'Failed to create room. Room {room_code} already exists.',
                 'status': 'failed'}
         return data    
@@ -28,10 +28,15 @@ async def create_room(request: RoomRequest):
     uuid = client_obj.get_uuid()
     
     # Create room in MongoDB
-    if create_room_with_room_code(room_code, uuid, username):
-        data = {'message': f'Successfully created room {room_code}.',
-                'status': 'succeeded',
-                'uuid': uuid}
+    if create_room_with_room_code(room_code):
+        if join_room_with_room_code(room_code, client_obj):
+            data = {'message': f'Successfully created and joined to room {room_code}.',
+                    'status': 'succeeded',
+                    'uuid': uuid}
+            return data
+        else:
+            data = {'message': f'Successfully created room {room_code} but failed to join the room.',
+                    'status': 'failed'}
         return data
     else:
         data = {'message': f'Failed to create room. Room {room_code} already exists.',

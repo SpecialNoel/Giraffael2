@@ -3,7 +3,8 @@
 import datetime
 from v3src.server.mongo_db.mongodb_initiator import rooms_collection
 
-def create_room_in_db(room_code, uuid, username, roomName='NewRoom'):
+# Create a room in MongoDB
+def create_room_in_db(room_code, roomName='NewRoom'):
     try: 
         current_time = datetime.datetime.now(tz=datetime.timezone.utc)
         
@@ -16,12 +17,7 @@ def create_room_in_db(room_code, uuid, username, roomName='NewRoom'):
             'fileList': [],
             'creationDate': current_time
         }
-        
-        # Add the 'room creator' to the room
-        room_creator_data = {'uuid': uuid, 
-                             'username': username}
-        room_data['clientList'].append(room_creator_data)
-        
+
         # Add room to the room collection
         rooms_collection.insert_one(room_data)
         print(f'Created room in DB with room code [{room_code}]. ')
