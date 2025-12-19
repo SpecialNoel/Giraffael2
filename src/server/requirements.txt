@@ -1,0 +1,9 @@
+# requirements.txt
+
+# To run this script: pip install --no-cache-dir -r src/server/requirements.txt
+
+fastapi==0.100.0           # for server front-end operations
+uvicorn[standard]==0.23.0  # for hosting server with given IP and port number
+websockets==11.0.3         # for client utilizing WebSocket
+python-multipart==0.0.6    # for client-side prompt of uploading file
+redis==5.3.1               # for redis pub/sub service

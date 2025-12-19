@@ -1,0 +1,38 @@
+# docker-compose.yml
+
+# Used to create a Docker container (a running instance of Docker Image) that connects to the Redis Server
+
+# docker compose -f src/server/docker-compose.yml up -d
+# docker compose -f src/server/docker-compose.yml down
+
+version: "3.9" # set the compose file to follow the v3.9 schema
+
+services:
+  redis:
+    image: redis:latest # pulls the image and creates container from it
+    container_name: giraffael_redis
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"] # Redis will start using this config instead of the default one
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    expose:
+      - "6379" # Redis is accessible only inside Docker (private), not from this machine or the Internet
+    restart: unless-stopped
+    networks:
+      - giraffael_net
+
+  api:
+    build: . # builds a FastAPI image
+    container_name: giraffael_api
+    depends_on: # Redis starts first, before API
+      - redis
+    ports:
+      - "5001:5001" # API is accessible from this machine, EC2 public IP, and the domain name (public)
+    environment: # exporting the host and port variables to be accessible by os.getenv()
+      REDIS_HOST: redis # connect to the Redis container via Docker DNS
+      REDIS_PORT: 6379
+    restart: unless-stopped
+    networks:
+      - giraffael_net
+
+networks:
+  giraffael_net: # creates a Docker network, used for managing the Redis and API only

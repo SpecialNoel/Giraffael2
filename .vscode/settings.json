@@ -1,4 +1,8 @@
 {
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    },
     "cSpell.words": [
         "AESGCM",
         "boto",
@@ -42,3 +46,4 @@
         "uvicorn"
     ]
 }
+
