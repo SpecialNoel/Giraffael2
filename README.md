@@ -1,7 +1,5 @@
-# :giraffe: Giraffael2 :giraffe:
+# :giraffe: Giraffael :giraffe:
 
-Version 2.0 of Project Giraffael.
+**Note:** This repository is officially deprecated. Please check out new Giraffael repo here: https://github.com/SpecialNoel/Giraffael.
 
-Checkout Giraffael2 on [this repository](https://github.com/SpecialNoel/Giraffael2).
-
-Checkout Giraffael2 on [this Notion page](https://www.notion.so/Project-Giraffael-15fa829a7ea780a7a2cdf502792b7805).
+Checkout Giraffael on [this Notion page](https://www.notion.so/Project-Giraffael-15fa829a7ea780a7a2cdf502792b7805).
