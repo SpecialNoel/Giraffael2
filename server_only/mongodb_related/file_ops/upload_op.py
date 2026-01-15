@@ -1,19 +1,11 @@
 # upload_op.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1] # parent level
-sys.path.append(str(src_folder))
-from mongodb_initiator import rooms_collection, gfs
-src_folder = Path(__file__).resolve().parents[3] # grand-grandparent level
-sys.path.append(str(src_folder))
-from general.file_transmission import check_if_file_exists
-from file_ops.general_op import check_file_existence_in_room, roomCode_to_roomID
-
 import os
+from server_only.mongodb_related.mongodb_initiator import rooms_collection, gfs
+from general.file_transmission import check_if_file_exists
+from server_only.mongodb_related.file_ops.general_op import check_file_existence_in_room, roomCode_to_roomID
 from bson import ObjectId
 from bson.errors import InvalidId
-
 
 # Upload file to a room
 def upload_file(filepath, roomCode):    

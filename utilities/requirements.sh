@@ -1,6 +1,6 @@
 # requirements.sh
 
-# To run this script: ./utilities/requirements.sh 
+# ./utilities/requirements.sh 
 
 pip install openai           # for message suggestion generation with OpenAI
 pip install python-dotenv    # for OpenAI API key

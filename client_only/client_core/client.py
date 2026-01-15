@@ -1,11 +1,6 @@
 # client.py
 
-'''
-To run this script: python3 client.py
-Note: must be executed when the server is alive.
-
-Note: 'client' is essentially only a socket in client.py
-'''
+# python3 client_only.client_core.client
 
 import socket
 from client_only.others.get_server_elastic_ip import get_server_elastic_ip

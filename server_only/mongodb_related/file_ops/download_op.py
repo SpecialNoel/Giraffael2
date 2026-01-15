@@ -1,20 +1,12 @@
 # download_op.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1] # parent level
-sys.path.append(str(src_folder))
-from mongodb_initiator import rooms_collection, gfs
-from general_op import roomCode_to_roomID
-src_folder = Path(__file__).resolve().parents[3] # grandparent level
-sys.path.append(str(src_folder))
-from general.file_transmission import get_filepath_without_duplication
-
 import os
+from server_only.mongodb_related.msg_ops.general_op import roomCode_to_roomID
+from server_only.mongodb_related.mongodb_initiator import rooms_collection, gfs
+from general.file_transmission import get_filepath_without_duplication
 from bson import ObjectId
 from bson.errors import InvalidId
 from gridfs.errors import NoFile
-
 
 # Download file from a room
 def download_file(fileID, roomCode, savedir):

@@ -1,10 +1,6 @@
 # server.py
 
-'''
-To run this script: python3 server.py
-
-Note: Every 'client' instance references to a socket in server.py
-'''
+# python3 -m server_only.server_core.server
 
 import socket
 import string

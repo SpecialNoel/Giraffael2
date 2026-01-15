@@ -1,15 +1,9 @@
 # list_op.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1] # parent level
-sys.path.append(str(src_folder))
-from mongodb_initiator import gfs
-from general_op import roomCode_to_roomID
-
+from server_only.mongodb_related.mongodb_initiator import gfs
+from server_only.mongodb_related.msg_ops.general_op import roomCode_to_roomID
 from bson import ObjectId
 from bson.errors import InvalidId
-
 
 # List all files in a room
 def list_files(roomCode):

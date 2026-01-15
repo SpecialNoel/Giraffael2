@@ -1,14 +1,8 @@
 # list_op.py
 
-import sys
-from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1] # parent level
-sys.path.append(str(src_folder))
-from msg_ops.general_op import roomCode_to_roomID
-from mongodb_initiator import rooms_collection
-
+from server_only.mongodb_related.msg_ops.general_op import roomCode_to_roomID
+from server_only.mongodb_related.mongodb_initiator import rooms_collection
 from bson import ObjectId
-
 
 # List out all messages sent over this room
 def list_msg_history(roomCode):

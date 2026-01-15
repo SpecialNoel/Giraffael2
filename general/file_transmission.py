@@ -3,16 +3,8 @@
 import hashlib
 import json
 import os
-import sys
 from pathlib import Path
-src_folder = Path(__file__).resolve().parents[1]
-sys.path.append(str(src_folder))
 from general.message import add_prefix, rstrip_message
-
-'''
-Functions here are used by clients or server to transfer 
-  different kinds of files (.jpg, .pdf, .txt, .csv, etc.).
-'''
 
 CHUNK_SIZE = 1025 
 MAX_FILE_SIZE = 104857600 # in bytes; which is equivalent to 100MB
