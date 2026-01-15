@@ -1,6 +1,6 @@
 # client.py
 
-# python3 client_only.client_core.client
+# python3 -m client_only.client_core.client
 
 import socket
 from client_only.others.get_server_elastic_ip import get_server_elastic_ip
@@ -37,7 +37,7 @@ class Client:
     
     def get_server_ip_based_on_mode(self):        
         if self.serverIsLocal:
-            return '10.0.0.99' # for local machine
+            return '192.168.1.215' # for local machine
         elif self.serverIsRemote:
             return get_server_elastic_ip() # for remote server 
         else:
