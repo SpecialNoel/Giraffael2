@@ -12,7 +12,5 @@ def check_server_capacity(client, chunkSize):
     
     if msg == '-1':
         print('Connection refused by server: max client count reached.')
-    else:
-        print('Connected to server successfully!')
     
     return msg != '-1'

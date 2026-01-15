@@ -4,6 +4,7 @@
 
 import socket
 from client_only.others.get_server_elastic_ip import get_server_elastic_ip
+from client_only.others.get_self_ip import get_local_ip
 from client_only.client_core.check_server_capacity import check_server_capacity
 from client_only.client_core.handle_room_decision import handle_room_decision
 from client_only.client_core.handle_username import handle_username
@@ -37,7 +38,7 @@ class Client:
     
     def get_server_ip_based_on_mode(self):        
         if self.serverIsLocal:
-            return '192.168.1.215' # for local machine
+            return get_local_ip() # for local machine
         elif self.serverIsRemote:
             return get_server_elastic_ip() # for remote server 
         else:
@@ -73,6 +74,8 @@ class Client:
         if not check_server_capacity(self.client, self.CHUNK_SIZE):
             print('Connection failed: server reached max client capacity.')
             exit()
+
+        print('Connected to server successfully!')
             
         handle_room_decision(self.client, self.CHUNK_SIZE)
         handle_username(self.client, self.CHUNK_SIZE)
