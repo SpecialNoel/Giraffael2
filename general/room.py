@@ -59,8 +59,8 @@ class Room:
         pathToParent = os.path.abspath('.')
         print(f'pathToParent: ', pathToParent)
         parentFolderName = Path(pathToParent).resolve().name
-        if parentFolderName != 'src':
-            pathToRooms = os.path.join(pathToParent, 'src' + os.sep + 'rooms')
+        if parentFolderName != 'upload':
+            pathToRooms = os.path.join(pathToParent, 'upload' + os.sep + 'rooms')
         else:
             pathToRooms = os.path.join(pathToParent, 'rooms')
         print(f'pathToRooms: ', pathToRooms)

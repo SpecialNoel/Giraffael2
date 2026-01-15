@@ -173,5 +173,5 @@ cython_debug/
 # SSL
 *.pem
 
-# Temporary rooms on local server
-rooms/
+# Temporary rooms used for storing uploaded files on local server
+upload/
