@@ -16,10 +16,7 @@ def handle_recv_file_request(client):
     filename = get_client_filename()
     if filename == None:
         return
-    filename = validate_client_filename(filename)
-    if filename == None:
-        return
-    print(f'Filename [{filename}] is valid.')
+    print(f'Received filename [{filename}].')
     
     # Step3: start receiving metadata and file chunks if file exists on server
     # Inform server that this client wants to receive a file
@@ -40,7 +37,7 @@ def get_client_directory():
     return directory
     
 def validate_client_directory(directory):
-    while not check_if_directory_exists(directory):
+    while not check_directory_existence(directory):
         print('Type in directory where you want to store the file.')
         print('OR, type <exit> to stop receiving file.\n')
         
@@ -62,17 +59,4 @@ def get_client_filename():
         print('Stopped receiving file.')
         display_rule()
         return None
-    return filename
-
-def validate_client_filename(filename):
-    while not check_if_filename_is_valid(filename):
-        print('Type in name of the file you want to receive.')
-        print('OR, type <exit> to stop receiving file.\n')
-        
-        filename = rstrip_message(input())
-        # Client does not want to receive the file anymore
-        if filename.lower() == 'exit':
-            print('Stopped receiving file.')
-            display_rule()
-            return None
     return filename

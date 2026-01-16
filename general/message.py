@@ -20,7 +20,7 @@ def rstrip_message(msg):
     '''
     return msg.rstrip()
 
-def add_prefix(msg, typePrefix=0):
+def add_prefix(msg, type_prefix=0):
     '''
     Used to add a type prefix to the message to indicate its usage.
     Note that this only applies when the client is already inside a room.
@@ -35,24 +35,24 @@ def add_prefix(msg, typePrefix=0):
     6: OpenAI suggestions 
 
     @param msg: a bytes-object
-    @param typePrefix: an integer
-    @return: message with typePrefix appended to the front
+    @param type_prefix: an integer
+    @return: message with type_prefix appended to the front
     '''
-    return (typePrefix.to_bytes(1, byteorder='big')) + msg
+    return (type_prefix.to_bytes(1, byteorder='big')) + msg
 
 def get_prefix_and_content(msg):
     '''
     Used to obtain type prefix and message content of the message.
 
     @param msg: a bytes-object
-    @return: typePrefix, messageContent
+    @return: type_prefix, messageContent
     '''
-    typePrefix = msg[:1] # first char
-    msgContent = msg[1:] # the rest chars, starting from the 2nd
-    return typePrefix, msgContent
+    type_prefix = msg[:1] # first char
+    msg_content = msg[1:] # the rest chars, starting from the 2nd
+    return type_prefix, msg_content
 
-def recv_decoded_content(client, chunkSize):
-    msg = client.recv(chunkSize)
+def recv_decoded_content(client, chunk_size):
+    msg = client.recv(chunk_size)
     prefix, content = get_prefix_and_content(msg)
     return rstrip_message(content).decode()
     

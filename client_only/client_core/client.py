@@ -4,7 +4,7 @@
 
 import socket
 from client_only.others.get_server_elastic_ip import get_server_elastic_ip
-from client_only.others.get_self_ip import get_local_ip
+from client_only.others.get_self_ip import get_local_machine_ip
 from client_only.client_core.check_server_capacity import check_server_capacity
 from client_only.client_core.handle_room_decision import handle_room_decision
 from client_only.client_core.handle_username import handle_username
@@ -12,17 +12,17 @@ from client_only.client_core.recv_from_server import recv_msg_from_server
 from client_only.client_core.send_to_server import send_msg_to_server
 from client_only.others.tls_management import setup_tls_context
 from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
-from server_only.others.settings import serverIsLocal, usingTLS
+from server_only.others.settings import server_is_local, using_tls
 from threading import Event, Thread
 
 class Client:
     def __init__(self):
         # Run Local or Remote server
-        self.serverIsLocal = serverIsLocal
-        self.serverIsRemote = not self.serverIsLocal
+        self.server_is_local = server_is_local
+        self.server_is_remote = not self.server_is_local
         # TLS
-        self.usingTLS = usingTLS
-        self.context = setup_tls_context() if self.usingTLS else None
+        self.using_tls = using_tls
+        self.context = setup_tls_context() if self.using_tls else None
 
         # Parameters of client
         self.SERVER_IP = self.get_server_ip_based_on_mode()
@@ -30,16 +30,16 @@ class Client:
         self.client = self.init_client_socket() # client socket
         
         # Threads
-        self.shutdownEvent = Event() # threading.Event()
+        self.shutdown_event = Event() # threading.Event()
         
         self.CHUNK_SIZE = CHUNK_SIZE
         self.MAX_FILE_SIZE = MAX_FILE_SIZE
         self.EXT_LIST = EXT_LIST
     
     def get_server_ip_based_on_mode(self):        
-        if self.serverIsLocal:
-            return get_local_ip() # for local machine
-        elif self.serverIsRemote:
+        if self.server_is_local:
+            return get_local_machine_ip() # for local machine
+        elif self.server_is_remote:
             return get_server_elastic_ip() # for remote server 
         else:
             # host for testing in this same machine
@@ -53,7 +53,7 @@ class Client:
             self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Connect to the server socket with [IP, Port number] combination
             self.client.connect((self.SERVER_IP, self.SERVER_PORT)) 
-            if self.usingTLS and self.context != None:
+            if self.using_tls and self.context != None:
                 tls_client = self.context.wrap_socket(self.client, server_hostname=self.SERVER_IP)
                 print(f'Connected securely to {self.SERVER_IP} with protocol:',
                       f'{tls_client.version()}.')
@@ -82,13 +82,13 @@ class Client:
             
         # Use thread t1 to receive message from server
         t1 = Thread(target=recv_msg_from_server, 
-                    args=(self.client, self.shutdownEvent, 
+                    args=(self.client, self.shutdown_event, 
                           self.CHUNK_SIZE, self.MAX_FILE_SIZE, self.EXT_LIST))
         t1.daemon = True
         t1.start()
         # Use thread t2 to send message to server
         t2 = Thread(target=send_msg_to_server, 
-                    args=(self.client, self.shutdownEvent, 
+                    args=(self.client, self.shutdown_event, 
                           self.CHUNK_SIZE, self.MAX_FILE_SIZE, self.EXT_LIST))
         t2.daemon = True
         t2.start()

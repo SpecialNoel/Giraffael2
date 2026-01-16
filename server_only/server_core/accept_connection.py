@@ -13,10 +13,10 @@ from server_only.server_core.room_code_operations import generate_and_send_room_
 from server_only.server_core.room_operations import (create_room_locally, enter_room, 
                                          print_info_when_client_enter_room)
                                           
-def test_reach_max_client_count(conn, address, clients, maxClientCount):
+def test_reach_max_client_count(conn, address, clients, max_client_count):
     # Disconnect from the connection if reached max client count already
-    if len(clients) >= maxClientCount:
-        print(f'Max client count [{maxClientCount}] reached.',
+    if len(clients) >= max_client_count:
+        print(f'Max client count [{max_client_count}] reached.',
               f'Refused connection from [{address}].\n')
         send_msg_with_prefix(conn, '-1', 0)
         conn.close()
@@ -26,55 +26,55 @@ def test_reach_max_client_count(conn, address, clients, maxClientCount):
     send_msg_with_prefix(conn, str((len(clients)+1)), 0)
     return False
 
-def accept_a_connection(conn, address, clients, rooms, roomCodes,
-                        charPools, shutdownEvent, chunkSize, roomCodeLength,
-                        maxUsernameLength, maxClientCount, maxFileSize, 
-                        extList, usingOpenAI):
+def accept_a_connection(conn, address, clients, rooms, room_codes,
+                        char_pools, shutdown_event, chunk_size, room_code_length,
+                        max_username_length, max_client_count, max_file_size, 
+                        ext_list, using_open_ai):
     # If reached max client count before this client: 
     #   disconnect, then acknowledge the client about the disconnection
     # Otherwise, acknowledge the client about the successful connection
-    if test_reach_max_client_count(conn, address, clients, maxClientCount):
+    if test_reach_max_client_count(conn, address, clients, max_client_count):
         return
     
     # Wait for client to either create or enter room
-    wantCreateRoom = recv_response_on_creating_room(conn, chunkSize)
+    want_to_create_room = recv_response_on_creating_room(conn, chunk_size)
     
-    if wantCreateRoom:
+    if want_to_create_room:
         # Client chooses to create a new room
-        roomCode = generate_and_send_room_code(conn, address, charPools, 
-                                               roomCodes, roomCodeLength)
+        room_code = generate_and_send_room_code(conn, address, char_pools, 
+                                               room_codes, room_code_length)
     else:
         # Client chooses to enter an existing room
         # Wait for client to send valid room code
-        createInstead, roomCode = handle_room_code_message(
-                                                conn, address, roomCodes,
-                                                chunkSize, charPools, 
-                                                roomCodeLength)
-        if createInstead: 
-            wantCreateRoom = True
+        want_to_create_instead, room_code = handle_room_code_message(
+                                                conn, address, room_codes,
+                                                chunk_size, char_pools, 
+                                                room_code_length)
+        if want_to_create_instead: 
+            want_to_create_room = True
 
     # Wait for client to send valid username
-    username = handle_username_message(conn, charPools, chunkSize,
-                                              maxUsernameLength)
+    username = handle_username_message(conn, char_pools, chunk_size,
+                                              max_username_length)
     
     # Create the room if the client has chosen to do so
-    if wantCreateRoom:
-        room = create_room_locally(roomCode, rooms)
-        create_room(roomCode) # Create a room with roomCode in database
+    if want_to_create_room:
+        room = create_room_locally(room_code, rooms)
+        create_room(room_code) # Create a room with room_code in database
         
     # Create a client obj for this client
-    clientObj = Client_Obj(conn, address, username, roomCode)
-    add_client_to_list(clientObj, roomCode) # Add the clientObj to the room with roomCode in database
+    client_obj = Client_Obj(conn, address, username, room_code)
+    add_client_to_list(client_obj, room_code) # Add the client_obj to the room with room_code in database
     
-    clients.append(clientObj)
+    clients.append(client_obj)
 
     # Make the client enter the room
-    room = enter_room(clientObj, roomCode, rooms)
-    print_info_when_client_enter_room(address, username, clients, roomCode,
-                                      rooms, maxClientCount)
+    room = enter_room(client_obj, room_code, rooms)
+    print_info_when_client_enter_room(address, username, clients, room_code,
+                                      rooms, max_client_count)
 
     # Start handling this client
-    handle_one_client(shutdownEvent, clientObj, clients, chunkSize, room,
-                      rooms, roomCodes, maxClientCount, maxFileSize, extList,
-                      usingOpenAI)
+    handle_one_client(shutdown_event, client_obj, clients, chunk_size, room,
+                      rooms, room_codes, max_client_count, max_file_size, ext_list,
+                      using_open_ai)
     return

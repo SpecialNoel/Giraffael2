@@ -10,13 +10,13 @@ def get_server_elastic_ip():
         try:
             response = requests.get(api_url)
             response.raise_for_status()
-            outerResponse = response.json()
-            body = outerResponse.get('body')  # Get the 'body' string
+            outer_response = response.json()
+            body = outer_response.get('body')  # Get the 'body' string
             if body:
-                bodyContent = json.loads(body) # Parse the 'body' string into a dictionary
-                elasticIp = bodyContent.get('ElasticIp')
-                print(f'Server Elastic IP Address: {elasticIp}')
-                return elasticIp
+                body_content = json.loads(body) # Parse the 'body' string into a dictionary
+                elastic_ip_address = body_content.get('ElasticIp')
+                print(f'Server Elastic IP Address: {elastic_ip_address}')
+                return elastic_ip_address
             else:
                 print('Body not found in the response.')
                 return None
@@ -25,5 +25,5 @@ def get_server_elastic_ip():
             return None
 
     # Fetch the backend IP
-    elasticIp = fetch_backend_ip()
-    return elasticIp
+    elastic_ip_address = fetch_backend_ip()
+    return elastic_ip_address

@@ -8,21 +8,21 @@ from general.file_transmission import CHUNK_SIZE, MAX_FILE_SIZE, EXT_LIST
 from server_only.server_core.accept_connection import accept_a_connection
 from server_only.others.retrieve_secret_from_aws import setup_tls_context_remote
 from server_only.others.tls_management import setup_tls_context_locally
-from server_only.others.settings import serverIsLocal, usingOpenAI, usingTLS
+from server_only.others.settings import server_is_local, using_open_ai, using_tls
 from threading import Thread, Event
 
 class Server:
     def __init__(self):
         # Run Local or Remote server
-        self.usingLocalServer = serverIsLocal
-        self.usingRemoteServer = not self.usingLocalServer
+        self.using_local_server = server_is_local
+        self.using_remote_server = not self.using_local_server
         # OpenAI
-        self.usingOpenAI = usingOpenAI
+        self.using_open_ai = using_open_ai
         # TLS
-        self.usingTLS = usingTLS
+        self.using_tls = using_tls
         self.context = None
-        if self.usingTLS:
-            self.context = setup_tls_context_locally() if self.usingLocalServer else setup_tls_context_remote()
+        if self.using_tls:
+            self.context = setup_tls_context_locally() if self.using_local_server else setup_tls_context_remote()
         
         # Parameters of server
         self.SERVER_IP = self.get_server_ip_based_on_mode()
@@ -33,10 +33,10 @@ class Server:
         self.MAX_USERNAME_LENGTH = 16
         self.clients = [] # a list of 'Client_Obj's
         self.rooms = [] # a dictionary of 'Room's
-        self.roomCodes = set() # a set of room codes
+        self.room_codes = set() # a set of room codes
         
         # Threads
-        self.shutdownEvent = Event() # threading.Event()
+        self.shutdown_event = Event() # threading.Event()
         self.threads = [] # all threads that handle each client
         
         # Char pools: contains all Digits, Upper and Lower-case letters
@@ -61,10 +61,10 @@ class Server:
                 # Use localhost as server ip if getting error
                 return '127.0.0.1'
     
-        if self.usingLocalServer:
+        if self.using_local_server:
             # host with private ip for testing locally
             return get_server_private_ip()
-        elif self.usingRemoteServer:
+        elif self.using_remote_server:
             # host remote server on aws ec2
             return '0.0.0.0'
         else:
@@ -97,13 +97,13 @@ class Server:
         
         # Use a separate thread to accept and handle this client
         t = Thread(target=accept_a_connection, 
-                args=(conn, address, self.clients, self.rooms,
-                      self.roomCodes, self.CHAR_POOLS,
-                      self.shutdownEvent, self.CHUNK_SIZE,
-                      self.ROOM_CODE_LENGTH,
-                      self.MAX_USERNAME_LENGTH,
-                      self.MAX_CLIENT_COUNT,
-                      self.MAX_FILE_SIZE, self.EXT_LIST, self.usingOpenAI))
+                   args=(conn, address, self.clients, self.rooms,
+                        self.room_codes, self.CHAR_POOLS,
+                        self.shutdown_event, self.CHUNK_SIZE,
+                        self.ROOM_CODE_LENGTH,
+                        self.MAX_USERNAME_LENGTH,
+                        self.MAX_CLIENT_COUNT,
+                        self.MAX_FILE_SIZE, self.EXT_LIST, self.using_open_ai))
         t.daemon = False # thread ends when the main thread ends
         self.threads.append(t)
         t.start()
@@ -112,9 +112,9 @@ class Server:
     def run_server(self): 
         def print_server_parameters():
             print('Server parameters:\n',
-                  f'- Server is hosted locally: {self.usingLocalServer}\n',
-                  f'- Server is using OpenAI:   {self.usingOpenAI}\n',
-                  f'- Server is using TLS:      {self.usingTLS}\n')
+                  f'- Server is hosted locally: {self.using_local_server}\n',
+                  f'- Server is using OpenAI:   {self.using_open_ai}\n',
+                  f'- Server is using TLS:      {self.using_tls}\n')
             return 
         
         def run_server_loop(server):
@@ -129,11 +129,11 @@ class Server:
 
         def handle_keyboard_interrupt(e):
             print(f'Error: [{e}]. Disconnected with all clients and exiting now.')
-            self.shutdownEvent.set()
+            self.shutdown_event.set()
             
             # Close connections with all clients
-            for clientObj in self.clients:
-                socket = clientObj.get_socket()
+            for client_obj in self.clients:
+                socket = client_obj.get_socket()
                 # Send an empty string to the client as an indicator
                 socket.send(b'')
                 socket.close()
@@ -156,7 +156,7 @@ class Server:
         # Start listening for connection from clients
         self.start_listening()
         # Run server with or without TLS
-        if self.usingTLS and self.context != None:
+        if self.using_tls and self.context != None:
             with self.context.wrap_socket(self.server, server_side=True) as tls_server:
                 run_server_loop(tls_server)
         else:

@@ -1,9 +1,9 @@
 # handle_download_request.py
 
 import time
-from general.file_transmission import (check_if_filesize_is_valid,
+from general.file_transmission import (check_if_file_size_is_valid,
                                       create_metadata,
-                                      find_file_in_directory, 
+                                      get_file_path, 
                                       get_directory_and_filename,
                                       send_file, send_metadata,
                                       get_extension_from_filename,
@@ -12,29 +12,29 @@ from general.message import send_msg_with_prefix
 from server_only.mongodb_related.file_ops.list_op import list_files
 from server_only.mongodb_related.file_ops.download_op import download_file
 
-def handle_download_request(client, address, room, roomCode, msgContent, 
-                            chunkSize, maxFileSize, extList):
+def handle_download_request(client, address, room, room_code, msg_content, 
+                            chunk_size, max_file_size, ext_list):
     # Received file-download request
     print(f'client [{address}] is downloading a file.\n')
 
-    clientDir, filename = get_directory_and_filename(msgContent)
-    print(f'clientFilepath: [{clientDir}]')
+    client_dir, filename = get_directory_and_filename(msg_content)
+    print(f'client file path: [{client_dir}]')
     print(f'filename: [{filename}]')
 
     # Inform the client to get ready to receive server response
-    send_msg_with_prefix(client, clientDir, 2)
-    print('Sent clientFilepath to client.')
+    send_msg_with_prefix(client, client_dir, 2)
+    print('Sent client file path to client.')
 
     # Try finding the requested file on server
-    directory = room.get_fullpath()
+    directory = room.get_full_path()
     print(f'Searching requested file in directory: [{directory}].')
-    filepath = find_file_in_directory(filename, roomCode, directory)
+    file_path = get_file_path(filename, room_code, directory)
     
     # list files to check (database op)
     
     
 
-    if filepath == None:
+    if file_path == None:
         # Filename does not exist in directory
         print(f'File not found in [{directory}].') 
         # Inform client about this
@@ -50,40 +50,40 @@ def handle_download_request(client, address, room, roomCode, msgContent,
         # Wait for 1 second before sending the metadata of the file
         # This is needed to solve problem where client receives both 
         #   the response on finding the requested file and the metadata 
-        #   from only one recv(chunkSize)
+        #   from only one recv(chunk_size)
         time.sleep(1)
         
         # Send file to client
-        send_file_to_client(client, address, filepath, chunkSize, maxFileSize, extList)
+        send_file_to_client(client, address, file_path, chunk_size, max_file_size, ext_list)
     return
 
-def send_file_to_client(client, address, filepath, chunkSize, maxFileSize, extList):
+def send_file_to_client(client, address, file_path, chunk_size, max_file_size, ext_list):
     # Create and send metadata to client
-    filename, filesize, hashedFileContent = create_metadata(filepath)
+    filename, file_size, hashed_file_content = create_metadata(file_path)
     
-    send_metadata(client, filename, filesize, hashedFileContent)
+    send_metadata(client, filename, file_size, hashed_file_content)
     print('Sent metadata of the requested file to client.')
     
-    # Stop sending file if filesize is greater than MAX_FILE_SIZE
-    if not check_if_filesize_is_valid(filesize, maxFileSize):
+    # Stop sending file if file_size is greater than MAX_FILE_SIZE
+    if not check_if_file_size_is_valid(file_size, max_file_size):
         print('Stopped sending file.\n')
         return
     print('Filesize is valid.')
     
-    # Stop sending file if file extension is not in extList
+    # Stop sending file if file extension is not in ext_list
     extension = get_extension_from_filename(filename)
-    if not check_if_filename_has_valid_extension(extension, extList):
+    if not check_if_filename_has_valid_extension(extension, ext_list):
         print('Stopped sending file.')
         return
     print('File extension is valid.')
     
     # Wait for 1 second before sending the whole file
     # This is needed to solve problem where client receives both 
-    #   the metadata and the file itself from only one recv(chunkSize)
+    #   the metadata and the file itself from only one recv(chunk_size)
     time.sleep(1)
        
     # Send the whole file to client
-    send_file(filepath, filename, client, chunkSize, address)
+    send_file(file_path, filename, client, chunk_size, address)
     
     # download file (database op)
     return

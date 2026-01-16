@@ -5,9 +5,9 @@ from server_only.mongodb_related.client_ops.delete_op import delete_client_to_li
 
 def remove_client_from_clients(address, clients):    
     # Remove client from clients based on address
-    for clientObj in clients:
-        if clientObj.get_address() == address:
-            clients.remove(clientObj)
+    for client_obj in clients:
+        if client_obj.get_address() == address:
+            clients.remove(client_obj)
             break
     return
 
@@ -18,24 +18,24 @@ def remove_client_from_room(clientAddress, room):
     return room
 
 def handle_disconnect_request(client, address, clients, rooms, 
-                              roomCode, roomCodes, maxClientCount):
+                              room_code, room_codes, max_client_count):
     print(f'Client on [{address}] disconnected.')
     
     # Remove client from client list
     remove_client_from_clients(address, clients)
     client.close()
     print(f'All connected clients: ',
-          f'[{len(clients)}/{maxClientCount}]')
+          f'[{len(clients)}/{max_client_count}]')
     
     # Remove client from the room it was in
-    room = [r for r in rooms if r.get_room_code() == roomCode][0]
+    room = [r for r in rooms if r.get_room_code() == room_code][0]
     room = remove_client_from_room(address, room)
     print_room_status(room)
     
-    # Remove room code from roomCodes if its corresponding room is empty
+    # Remove room code from room_codes if its corresponding room is empty
     if len(room.get_client_list()) == 0:
-        roomCodes.remove(roomCode)
-        print(f'Room [{roomCode}] is empty, removed from room codes.\n')
+        room_codes.remove(room_code)
+        print(f'Room [{room_code}] is empty, removed from room codes.\n')
         # Remove the file-storing folder for that room as well
         room.delete_file_storing_folder()
     return

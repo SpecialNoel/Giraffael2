@@ -14,16 +14,16 @@
 # If set to False: server will be hosted with the local machine's private IP.
 # If set to True:  server will be hosted remotely on AWS ec2 instance, with
 #                  the elastic IP assigned to that instance.
-serverIsLocal = True
+server_is_local = True
 
 # If set to False: server will not be using OpenAI to generate message 
 #                  suggestion.
 # If set to True:  server will be using OpenAI for generating message 
 #                  suggestion, upon client request.
-usingOpenAI = True
+using_openai = True
 
 # If set to False: both server and client will not be using TLS on the socket 
 #                  to provide encryption of transmitted data.  
 # If set to True:  both server and client will be using TLS on the socket to 
 #                  provide encryption of transmitted data.
-usingTLS = True
+using_tls = True

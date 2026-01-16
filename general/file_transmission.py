@@ -3,7 +3,6 @@
 import hashlib
 import json
 import os
-from pathlib import Path
 from general.message import add_prefix, rstrip_message
 
 CHUNK_SIZE = 1025 
@@ -26,7 +25,7 @@ def display_rule():
           '\nPress [Enter/Return] key to disconnect.\n')
     return
 
-def find_file_in_directory(filename, target_dir, start_dir='.'):
+def get_file_path(filename, target_dir, start_dir='.'):
     '''
     Used by server to check if it has the file in target_dir,
       for which client wanted to download to their local machine
@@ -36,7 +35,7 @@ def find_file_in_directory(filename, target_dir, start_dir='.'):
             return os.path.join(root, filename)
     return None
 
-def check_if_directory_exists(directory):
+def check_directory_existence(directory):
     if not directory:
         directory = '.'
     if not os.path.exists(directory):
@@ -47,105 +46,96 @@ def check_if_directory_exists(directory):
         return False
     print(f'Directory [{directory}] exists.')
     return True
-
-def check_if_filename_is_valid(filename):
-    try:
-        # Attempt to create a Path object
-        Path(filename)
-        return True
-    except Exception as e:
-        print(f'Invalid filename: [{e}].')
-        return False
     
-def check_if_filepath_exists(filepath):
-    print(f'Filepath [{filepath}] exists: [{os.path.isfile(filepath)}].')
-    return os.path.isfile(filepath)
+def check_if_file_path_exists(file_path):
+    print(f'File path [{file_path}] exists: [{os.path.isfile(file_path)}].')
+    return os.path.isfile(file_path)
     
-def check_if_file_exists(filepath):
+def check_if_file_exists(file_path):
     '''
     Used by the sender to check if the file exists or not.
 
-    @param filepath: the filepath of the file
-    @return: True if the filepath is a file; False otherwise 
+    @param file_path: the file path of the file
+    @return: True if the file path is a file; False otherwise 
     '''
     try:
-        if not check_if_directory_exists(filepath):
+        if not check_directory_existence(file_path):
             return False
-        if not os.path.basename(filepath):
-            print('Invalid filepath: filename is missing.')
+        if not os.path.basename(file_path):
+            print('Invalid file path: filename is missing.')
             return False
     except Exception as e:
-        print(f'Error validating filepath: {e}')
-    return check_if_filepath_exists(filepath)
+        print(f'Error validating file path: {e}')
+    return check_if_file_path_exists(file_path)
 
-def get_valid_filepath(filepath):    
-    while not check_if_file_exists(filepath):
-        print('\nType in filepath of the file you want to send:')
+def get_valid_file_path(file_path):    
+    while not check_if_file_exists(file_path):
+        print('\nType in file path of the file you want to send:')
         print('OR, type <exit> to stop sending file.\n')
-        filepath = rstrip_message(input())
+        file_path = rstrip_message(input())
         # Client does not want to send the file anymore
-        if filepath.lower() == 'exit':
+        if file_path.lower() == 'exit':
             return None        
-    return filepath
+    return file_path
 
 def get_extension_from_filename(filename):
     # Returns the extension of a file, including dot.
     # Example: .txt, .pdf, .png, etc..
     return os.path.splitext(filename)[1]
 
-def check_if_filesize_is_valid(filesize, maxFileSize):
-    def check_valid_filesize(filesize, maxFileSize):
-        return filesize <= maxFileSize
+def check_if_file_size_is_valid(file_size, max_file_size):
+    def check_valid_file_size(file_size, max_file_size):
+        return file_size <= max_file_size
     
-    # If filesize is exceeded MAX_FILE_SIZE, stop sending/receiving the file
-    if not check_valid_filesize(filesize, maxFileSize):
-        print(f'Invalid filesize: File has a size of [{filesize}],',
-              f'which is larger than Maximum File Size: [{maxFileSize}].')
-        return False # filesize > MAX_FILE_SIZE
-    return True      # filesize <= MAX_FILE_SIZE
+    # If file_size is exceeded MAX_FILE_SIZE, stop sending/receiving the file
+    if not check_valid_file_size(file_size, max_file_size):
+        print(f'Invalid file_size: File has a size of [{file_size}],',
+              f'which is larger than Maximum File Size: [{max_file_size}].')
+        return False # file_size > MAX_FILE_SIZE
+    return True      # file_size <= MAX_FILE_SIZE
 
-def check_if_filename_has_valid_extension(extension, extList):
-    def check_valid_extension(extension, extList):
-        return extension in extList
+def check_if_filename_has_valid_extension(extension, ext_list):
+    def check_valid_extension(extension, ext_list):
+        return extension in ext_list
     
-    # If extension is not in extList, stop sending/receiving the file
-    if not check_valid_extension(extension, extList):
+    # If extension is not in ext_list, stop sending/receiving the file
+    if not check_valid_extension(extension, ext_list):
         print(f'Invalid file extension: File ends with [{extension}].',
-              f'Valid extensions: {extList}.')
-        return False # extension not in extList
-    return True      # extension in extList
+              f'Valid extensions: {ext_list}.')
+        return False # extension not in ext_list
+    return True      # extension in ext_list
 
 def compute_hash(data):
     return hashlib.sha256(data).hexdigest()
 
-def read_all_from_file(filepath):
-    fileContent = b''
-    with open(filepath, 'rb') as file:
-        fileContent = file.read()
-    return fileContent
+def read_all_from_file(file_path):
+    file_content = b''
+    with open(file_path, 'rb') as file:
+        file_content = file.read()
+    return file_content
 
-def create_metadata(filepath):
+def create_metadata(file_path):
     '''
     Used by the sender to create the associate metadata of the file.
     The metadata will be sent to the recipient before receiving 
     the original file.
 
-    @param filepath: the filepath of the file
-    @return: filename, filesize, hashedFileContent
+    @param file_path: the file path of the file
+    @return: filename, file_size, hashed_file_content
     '''
-    filename = os.path.basename(filepath)
-    filesize = os.path.getsize(filepath)
-    fileContent = read_all_from_file(filepath)
-    hashedFileContent = compute_hash(fileContent)
-    print(f'Filename: [{filename}], filesize: [{filesize}],',
-          f'hashedFileContent: [{hashedFileContent}].\n')
-    return filename, filesize, hashedFileContent
+    filename = os.path.basename(file_path)
+    file_size = os.path.getsize(file_path)
+    file_content = read_all_from_file(file_path)
+    hashed_file_content = compute_hash(file_content)
+    print(f'Filename: [{filename}], file_size: [{file_size}],',
+          f'hashed_file_content: [{hashed_file_content}].\n')
+    return filename, file_size, hashed_file_content
 
-def send_metadata(socket, filename, filesize, hashedFileContent):
+def send_metadata(socket, filename, file_size, hashed_file_content):
     metadata = {
         'filename': filename,
-        'filesize': filesize,
-        'hashedFileContent': hashedFileContent
+        'file_size': file_size,
+        'hashed_file_content': hashed_file_content
     }
     metadata_json = json.dumps(metadata)
     metadata_bytes = metadata_json.encode()
@@ -153,64 +143,64 @@ def send_metadata(socket, filename, filesize, hashedFileContent):
     return
 
 def send_directory_and_filename(socket, directory, filename):
-    dirAndName = {
+    dir_and_name = {
         'directory': directory,
         'filename': filename
     }
-    dirAndName_json = json.dumps(dirAndName)
-    dirAndName_bytes = dirAndName_json.encode()
-    socket.send(add_prefix(dirAndName_bytes, 3))
+    dir_and_name_json = json.dumps(dir_and_name)
+    dir_and_name_bytes = dir_and_name_json.encode()
+    socket.send(add_prefix(dir_and_name_bytes, 3))
     return
 
-def get_directory_and_filename(dirAndNameEncoded):
-    dirAndName_json = dirAndNameEncoded.decode()
-    dirAndName = json.loads(dirAndName_json)
-    directory = dirAndName['directory']
-    filename = dirAndName['filename']
+def get_directory_and_filename(dir_and_name_encoded):
+    dir_and_name_json = dir_and_name_encoded.decode()
+    dir_and_name = json.loads(dir_and_name_json)
+    directory = dir_and_name['directory']
+    filename = dir_and_name['filename']
     print(f'Directory: [{directory}], filename: [{filename}].')
     return directory, filename
 
 def check_metadata_format(metadata):
     if (len(metadata) == 3 and 
         metadata['filename'] and 
-        metadata['filesize'] and 
-        metadata['hashedFileContent']):
+        metadata['file_size'] and 
+        metadata['hashed_file_content']):
         print('Metadata format is valid.')
         return True
     print('Invalid metadata format.')
     return False
 
-def split_metadata(metadataBytes):
-    metadata_json = metadataBytes.decode()
+def split_metadata(metadata_bytes):
+    metadata_json = metadata_bytes.decode()
     metadata = json.loads(metadata_json)
     filename = metadata['filename']
-    filesize = int(metadata['filesize'])
-    hashedFileContent = metadata['hashedFileContent']
-    print(f'Filename: [{filename}], filesize: [{filesize}],',
-          f'hashedFileContent: [{hashedFileContent}].\n')
-    return filename, filesize, hashedFileContent
+    file_size = int(metadata['file_size'])
+    hashed_file_content = metadata['hashed_file_content']
+    print(f'Filename: [{filename}], file_size: [{file_size}],',
+          f'hashed_file_content: [{hashed_file_content}].\n')
+    return filename, file_size, hashed_file_content
 
-def get_filepath_without_duplication(filepath):
+def get_file_path_without_duplication(file_path):
     counter = 1
-    filenameWithExt = os.path.basename(filepath)
-    filename, extension = os.path.splitext(filenameWithExt)
-    base, extension = os.path.splitext(filepath)
-    directory = os.path.dirname(filepath)
-    while check_if_filepath_exists(filepath):
-        # Filepath exists -> filename is duplicated on recipient's end
+    filename_with_ext = os.path.basename(file_path)
+    filename, extension = os.path.splitext(filename_with_ext)
+    base, extension = os.path.splitext(file_path)
+    directory = os.path.dirname(file_path)
+    while check_if_file_path_exists(file_path):
+        # File path exists -> filename is duplicated on recipient's end
         # Need to append a counter to the end of filename, 
         #   but before extension, to solve duplication
-        newFilename = f'{filename}_{counter}{extension}'
-        filepath = os.path.join(directory, newFilename)
-        print(f'New filepath: {filepath}')
+        new_filename = f'{filename}_{counter}{extension}'
+        file_path = os.path.join(directory, new_filename)
+        print(f'New file path: {file_path}')
         counter += 1
-    return filepath
+    return file_path
 
-def send_file(filepath, filename, socket, chunk_size, recipient):
+def send_file(file_path, filename, socket, chunk_size, recipient):
     '''
     Used by the sender to send the file to the recipient.
     
-    @param filepath: the filepath of the file
+    @param file_path: the file path of the file
     @param socket: the socket used to send the file; the sender socket
     @param chunk_size: number of bytes to send to the recipient each time
     @param recipient: either 'server' or address of a client; 
@@ -218,63 +208,63 @@ def send_file(filepath, filename, socket, chunk_size, recipient):
     @return: None
     '''
     try:
-        with open(filepath, 'rb') as file:
+        with open(file_path, 'rb') as file:
             while chunk := file.read(chunk_size):
                 socket.send(chunk)
         print(f'Successfully sent file [{filename}] to [{recipient}].')
     except FileNotFoundError:
-        print(f'File with path [{filepath}] not found.')
+        print(f'File with path [{file_path}] not found.')
     except Exception as e:
         print(f'Error occurred in send_file(): [{e}].')
     return
 
-def recv_file(filename, filepath, filesize, hashedFileContent, 
-             socket, chunkSize, sender):
+def recv_file(filename, file_path, file_size, hashed_file_content, 
+             socket, chunk_size, sender):
     '''
     Used by the recipient to receive the file from the sender.
     Received content will be stored in the 'received_files' folder
       with the same filename as the received filename.
     
     @param filename: the string name of the file
-    @param filesize: the size of the file
+    @param file_size: the size of the file
     @param socket: the socket used to receive the file; the receiver socket
-    @param chunkSize: number of bytes to receive from the sender each time
+    @param chunk_size: number of bytes to receive from the sender each time
     @param sender: either 'server' or address of a client; 
                    indicates the sender side
     @return: None
     '''
     try:
-        filepath = os.path.join(filepath, filename)
-        filepath = get_filepath_without_duplication(filepath)
+        file_path = os.path.join(file_path, filename)
+        file_path = get_file_path_without_duplication(file_path)
         
         # Receive all file content from sender
-        dataBuffer = b''
+        data_buffer = b''
         received_len = 0
-        while received_len < filesize:
-            data = socket.recv(chunkSize)
+        while received_len < file_size:
+            data = socket.recv(chunk_size)
             if not data:
                 break
-            dataBuffer += data
+            data_buffer += data
             received_len += len(data)
             
         # Compute hash of the received content
-        recipientHashedFileContent = compute_hash(dataBuffer)
-        print(f'Recipient computed hash: [{recipientHashedFileContent}].')
-        print(f'Sender computer hash:    [{hashedFileContent}].')
+        recipient_hashed_file_content = compute_hash(data_buffer)
+        print(f'Recipient computed hash: [{recipient_hashed_file_content}].')
+        print(f'Sender computer hash:    [{hashed_file_content}].')
         
         # Compare the computed result to the one calculated by sender
-        if not recipientHashedFileContent == hashedFileContent:
+        if not recipient_hashed_file_content == hashed_file_content:
             print('Error: Recipient hash does not equal to sender hash.')
             print('Stopped receiving file.')
             return False
         
         # Save the file
-        with open(filepath, 'wb') as file:
-            file.write(dataBuffer)
+        with open(file_path, 'wb') as file:
+            file.write(data_buffer)
 
         print('Recipient hash equals to sender hash.')
         print(f'Successfully received file [{filename}] from [{sender}].\n')
-        print(f'The file is Stored in filepath: [{filepath}].')
+        print(f'The file is Stored in file path: [{file_path}].')
         return True
     except Exception as e: 
         print(f'Error occurred in recv_file(): [{e}].')

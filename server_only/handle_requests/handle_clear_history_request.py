@@ -2,51 +2,22 @@
 
 from general.message import send_msg_with_prefix
 
-'''
-def handle_clear_history_request_with_match(client, address, msgContent, room):
-    historyToClear = msgContent.decode().lower()
+def handle_clear_history_request(client, address, msg_content, room):
+    history_to_clear = msg_content.decode().lower()
     
-    match historyToClear:
-        case 'msg':
-            room.clearMsgHistory()
-            msg = f'Cleared msg history of room [{room.get_room_code()}].'
-            send_msg_with_prefix(client, msg, 5)
-            print(msg + '\n')
-        case 'file':
-            room.clearFileHistory()
-            msg = f'Deleted files stored in room [{room.get_room_code()}].'
-            send_msg_with_prefix(client, msg, 5)
-            print(msg + '\n')
-        case 'all':
-            room.clearMsgHistory()
-            room.clearFileHistory()
-            msg = (f'Cleared msg history, and deleted files stored in room'
-                +f'[{room.get_room_code()}].')
-            send_msg_with_prefix(client, msg, 5)
-            print(msg + '\n')
-        case _:
-            send_msg_with_prefix(client, 'INVALID', 5)
-            print(f'Received invalid clear history request from',
-                f'Client [{address}].')
-    return
-'''
-
-def handle_clear_history_request(client, address, msgContent, room):
-    historyToClear = msgContent.decode().lower()
-    
-    if historyToClear == 'msg':
-        room.clearMsgHistory()
+    if history_to_clear == 'msg':
+        room.clear_msg_history()
         msg = f'Cleared msg history of room [{room.get_room_code()}].'
         send_msg_with_prefix(client, msg, 5)
         print(msg + '\n')
-    elif historyToClear == 'file':
-        room.clearFileHistory()
+    elif history_to_clear == 'file':
+        room.clear_file_history()
         msg = f'Deleted files stored in room [{room.get_room_code()}].'
         send_msg_with_prefix(client, msg, 5)
         print(msg + '\n')
-    elif historyToClear == 'all':
-        room.clearMsgHistory()
-        room.clearFileHistory()
+    elif history_to_clear == 'all':
+        room.clear_msg_history()
+        room.clear_file_history()
         msg = (f'Cleared msg history, and deleted files stored in room'
             +f'[{room.get_room_code()}].')
         send_msg_with_prefix(client, msg, 5)

@@ -1,5 +1,5 @@
 # openai_model_settings.py
 
-maxTokensPerSuggestion = 50
-numOfSuggestions = 3
+max_tokens_per_suggestion = 50
+num_of_suggestions = 3
 temp = 0.8

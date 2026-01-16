@@ -12,8 +12,8 @@ database_password = os.getenv('DATABASE_PASSWORD')
 uri = (f'mongodb+srv://jianminglin2893:{database_password}' + 
        '@cluster0.wu2ivo7.mongodb.net/GiraffaelDB' + 
        '?retryWrites=true&w=majority&tls=true')
-mongoClient = MongoClient(uri, serverSelectionTimeoutMS=3000)
-db = mongoClient['GiraffaelDB']
+mongo_client = MongoClient(uri, serverSelectionTimeoutMS=3000)
+db = mongo_client['GiraffaelDB']
 users_collection = db['Users']
 rooms_collection = db['Rooms']
 gfs = gridfs.GridFS(db)

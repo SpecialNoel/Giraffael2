@@ -5,14 +5,14 @@ from server_only.mongodb_related.msg_ops.clear_op import clear_msg_history
 from server_only.mongodb_related.msg_ops.list_op import list_msg_history
 
 if __name__=='__main__':  
-    roomCode = 'f9wa8rq9fqvg0qj'
-    roomID = '681e8b495302d5101936aed0'
+    room_code = 'f9wa8rq9fqvg0qj'
+    room_id = '681e8b495302d5101936aed0'
     
-    senderID = 'abc123'
-    senderName = 'ARK'
+    sender_id = 'abc123'
+    sender_name = 'ARK'
     msg = 'Hello, world.'
     
-    #add_msg_to_history(roomCode, senderID, senderName, msg)
-    #list_msg_history(roomCode)
-    #clear_msg_history(roomCode)
+    #add_msg_to_history(room_code, sender_id, sender_name, msg)
+    #list_msg_history(room_code)
+    #clear_msg_history(room_code)
     

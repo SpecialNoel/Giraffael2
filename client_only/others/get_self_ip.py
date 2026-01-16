@@ -2,7 +2,7 @@
 
 import socket
 
-def get_local_ip():
+def get_local_machine_ip():
     s = None
     try:
         # Create a temporary socket to connect to a known external address

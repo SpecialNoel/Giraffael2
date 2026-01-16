@@ -4,7 +4,7 @@ import boto3
 import json
 import ssl
 import tempfile
-from server_only.others.settings import serverIsLocal
+from server_only.others.settings import server_is_local
 
 def get_secret():
     secret_name = 'Secret-for-Giraffael-2'
@@ -22,11 +22,11 @@ def get_cert_and_key():
     return secret['cert.pem'], secret['key.pem']
     
 def setup_tls_context_remote():
-    if serverIsLocal:
+    if server_is_local:
         return None
     
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) # TLS
-    certificate, privateKey = get_cert_and_key()
+    certificate, private_key = get_cert_and_key()
     
     with (tempfile.NamedTemporaryFile(delete=True) as cert_file, 
           tempfile.NamedTemporaryFile(delete=True) as key_file):
@@ -36,9 +36,9 @@ def setup_tls_context_remote():
         cert_file.write(certificate.encode())
         cert_file.flush()
         
-        privateKey = privateKey.replace('-----BEGIN PRIVATE KEY----- ', '-----BEGIN PRIVATE KEY----- \n')
-        privateKey = privateKey.replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----')
-        key_file.write(privateKey.encode())
+        private_key = private_key.replace('-----BEGIN PRIVATE KEY----- ', '-----BEGIN PRIVATE KEY----- \n')
+        private_key = private_key.replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----')
+        key_file.write(private_key.encode())
         key_file.flush()
 
         # Create an TLS context
